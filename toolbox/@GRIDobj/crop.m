@@ -36,9 +36,9 @@ function [DEMc,MASK] = crop(DEM,varargin)
 %     imagesc(DEMc)
 %
 %
-% See also: IND2SUB, GRIDobj/pad, GRIDobj/resample
+% See also: IND2SUB, GRIDobj/pad, GRIDobj/resample, FLOWobj/crop
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 13. May, 2024
 
 
@@ -149,7 +149,7 @@ elseif nargin >= 2
             
     else
 
-        [X,Y] = refmat2XY(DEM.refmat,DEM.size);
+        [X,Y] = wf2XY(DEM.wf,DEM.size);
         x = varargin{1};
         y = varargin{2};
         
@@ -166,10 +166,10 @@ end
 
 
 if nargout == 2
-    MASK = DEM;
+    MASK   = DEM;
     MASK.Z = false(DEM.size);
     MASK.Z(IX) = true;
-    MASK.name = 'mask for cropping';
+    MASK.name  = 'mask for cropping';
     MASK.zunit = '';
 end
 
@@ -198,7 +198,7 @@ DEMc      = DEM;
 DEMc.Z    = reshape(subsref(DEM.Z,S),sizout);
 DEMc.size = sizout;
 [x,y]     = sub2coord(DEM,S.subs{1}(1),S.subs{2}(1));
-DEMc.refmat(3,:) = [x y] - DEMc.cellsize*[1 -1];
+DEMc.wf(:,3) = [x;y];
 
 DEMc.name   = [DEM.name ' (cropped)'];
 DEMc.zunit  = DEM.zunit;
@@ -206,13 +206,8 @@ DEMc.xyunit = DEM.xyunit;
 
 if ~isempty(DEM.georef)
     % Copy all referencing information
-    DEMc.georef = DEM.georef;
-    %if ~isgeographic(DEMc)
-        DEMc.georef.SpatialRef = refmatToMapRasterReference(DEMc.refmat, DEMc.size);
-    %else
-    %    DEMc.georef.SpatialRef = refmatToGeoRasterReference(DEMc.refmat,DEMc.size);
-    %end
-    
+    RB = cropToBlock(DEM.georef,S.subs{1}([1 end]),S.subs{2}([1 end]));
+    DEMc.georef = RB;
 end
     
     

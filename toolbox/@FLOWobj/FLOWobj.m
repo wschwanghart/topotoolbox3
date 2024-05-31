@@ -72,7 +72,7 @@ classdef FLOWobj
 %     'size' --  (1x2 array, e.g. size(dem))
 %            the size of the DEM of which the flow direction matrix was 
 %            derived from. 
-%     'refmat' -- referencing matrix as derived from GRIDobj property refmat
+%     'wf' -- referencing matrix as derived from GRIDobj property wf
 %     'algorithm' -- {'dmperm'} or 'tsort' or 'toposort'
 %            determines the algorithm to perform a topological sorting
 %            of the vertices of the directed graph in matrix M (this option
@@ -133,7 +133,7 @@ properties(GetAccess = 'public', SetAccess = 'public')
     ixc       % [edge attribute] topologically sorted nodes (receivers)
     fraction  % [edge attribute] fraction transfered between nodes
     cellsize  % cellsize of the grid (scalar)
-    refmat    % 3-by-2 affine transformation matrix (see makerefmat)
+    wf        % 2-by-3 affine transformation matrix (see worldFileMatrix)
     georef    % additional information on spatial referencing
     
 end
@@ -158,21 +158,21 @@ methods
 
             addRequired(p,'DEM',@(x) issparse(x) || isa(x,'GRIDobj'));
             
-            addParamValue(p,'size',[],@(x) isempty(x) || numel(x)==2);
-            addParamValue(p,'cellsize',1,@(x) isscalar(x));
-            addParamValue(p,'refmat',[]);
-            addParamValue(p,'preprocess','carve',@(x) ischar(validatestring(x,expectedPreProcess)));
-            addParamValue(p,'tweight',2,@(x) isscalar(x));
-            addParamValue(p,'cweight',1,@isnumeric);
-            addParamValue(p,'sinks',[],@(x) isa(x,'GRIDobj'));
-            addParamValue(p,'verbose',false,@(x) isscalar(x) && islogical(x));
-            addParamValue(p,'streams',1);
-            addParamValue(p,'weights',[]);
-            addParamValue(p,'internaldrainage',false,@(x) isscalar(x) && islogical(x));
-            addParamValue(p,'mex',false,@(x) isscalar(x) && islogical(x));
-            addParamValue(p,'algorithm','dmperm',@(x) ischar(validatestring(x,expectedAlgorithms)));
+            addParameter(p,'size',[],@(x) isempty(x) || numel(x)==2);
+            addParameter(p,'cellsize',1,@(x) isscalar(x));
+            addParameter(p,'wf',[]);
+            addParameter(p,'preprocess','carve',@(x) ischar(validatestring(x,expectedPreProcess)));
+            addParameter(p,'tweight',2,@(x) isscalar(x));
+            addParameter(p,'cweight',1,@isnumeric);
+            addParameter(p,'sinks',[],@(x) isa(x,'GRIDobj'));
+            addParameter(p,'verbose',false,@(x) isscalar(x) && islogical(x));
+            addParameter(p,'streams',1);
+            addParameter(p,'weights',[]);
+            addParameter(p,'internaldrainage',false,@(x) isscalar(x) && islogical(x));
+            addParameter(p,'mex',false,@(x) isscalar(x) && islogical(x));
+            addParameter(p,'algorithm','dmperm',@(x) ischar(validatestring(x,expectedAlgorithms)));
             
-            addParamValue(p,'type','single');
+            addParameter(p,'type','single');
 
             parse(p,DEM,varargin{:});
 
@@ -208,7 +208,7 @@ methods
                 % construct flow direction object from M
                 M = DEM;
                 FD.cellsize = p.Results.cellsize;
-                FD.refmat   = p.Results.refmat;
+                FD.wf   = p.Results.wf;
                 
                 if ~isempty(siz)
                     FD.size = siz;
@@ -279,7 +279,7 @@ methods
                 
                 % transfer object properties from DEM to FD
                 FD.cellsize = DEM.cellsize;
-                FD.refmat   = DEM.refmat;
+                FD.wf   = DEM.wf;
                 FD.georef   = DEM.georef;
                 FD.size     = DEM.size;
                 FD.type     = 'single';
@@ -294,7 +294,7 @@ methods
                         % later stage, FLOWobj will find a route along the 
                         % centerline of flat areas.
                         if verbose
-                            disp([datestr(clock) ' -- Sink filling'])
+                            disp([char(datetime("now"))  ' -- Sink filling'])
                         end
                         
                         if isempty(sinks)
@@ -308,7 +308,7 @@ methods
                         % depressions to derive the most realistic flow
                         % paths.
                         if verbose
-                            disp([datestr(clock) ' -- Sink filling'])
+                            disp([char(datetime("now"))  ' -- Sink filling'])
                         end
                         if isempty(sinks)
                             DEMF = fillsinks(DEM);
@@ -381,7 +381,7 @@ methods
                 end
 
                 if verbose
-                    disp([datestr(clock) ' -- Flat sections identified'])
+                    disp([char(datetime("now")) ' -- Flat sections identified'])
                 end
 
                 % Some more preprocessing required. If the option carve is
@@ -457,7 +457,7 @@ methods
 
                 end
                 if verbose
-                    disp([datestr(clock) ' -- Weights for graydist calculated'])
+                    disp([char(datetime("now"))  ' -- Weights for graydist calculated'])
                 end
 
                 % Here we calculate the auxiliary topography. That is, the
@@ -468,7 +468,7 @@ methods
                 D(I) = -inf;
 
                 if verbose
-                    disp([datestr(clock) ' -- Auxiliary topography in flats calculated'])
+                    disp([char(datetime("now")) ' -- Auxiliary topography in flats calculated'])
                 end
                 
                 
@@ -485,7 +485,7 @@ methods
                     % call to steepest neighbor. 
                     SE = steepestneighbor_mex(dem,D,FD.cellsize);
                     if verbose
-                       disp([datestr(clock) ' -- Steepest neighbor identified'])
+                       disp([char(datetime("now"))  ' -- Steepest neighbor identified'])
                     end
                     clear D
                     I  = isnan(dem);
@@ -507,7 +507,7 @@ methods
                     clear D
 
                     if verbose
-                        disp([datestr(clock) ' -- Pixels sorted (1)'])
+                        disp([char(datetime("now"))  ' -- Pixels sorted (1)'])
                     end
 
                     ndx = (uint32(1):uint32(nrc))';
@@ -517,7 +517,7 @@ methods
                     [~,FD.ix] = sort(dem(ndx),'descend');
 
                     if verbose
-                        disp([datestr(clock) ' -- Pixels sorted (2)'])
+                        disp([char(datetime("now"))  ' -- Pixels sorted (2)'])
                     end
 
                     FD.ix = uint32(FD.ix);
@@ -563,7 +563,7 @@ methods
                 end
 
                 if verbose
-                    disp([datestr(clock) ' -- Ordered topology established'])
+                    disp([char(datetime("now"))  ' -- Ordered topology established'])
                 end
                 
                         
@@ -572,11 +572,11 @@ methods
         else
             %% Multiple flow direction
             FD.cellsize = DEM.cellsize;
-            FD.refmat   = DEM.refmat;
+            FD.wf   = DEM.wf;
             FD.georef   = DEM.georef;
             FD.size     = DEM.size;
             
-            switch lower(varargin{1});
+            switch lower(varargin{1})
                 case 'multi'           
                     M = flowdir(DEM,'type','multi');                  
                     FD.type = 'multi';
@@ -621,7 +621,7 @@ methods
         validateattributes(val,{'numeric','logical'},{'scalar'})
         
         if val
-            if ~strcmp(FD.type,'single');
+            if ~strcmp(FD.type,'single')
                 error('TopoToolbox:fastindexing','Fast indexing is only possible for single flow directions');
             end
             FD.fastindexing = true;

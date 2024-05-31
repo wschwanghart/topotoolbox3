@@ -22,14 +22,14 @@ function [x,y] = ind2coord(DEM,ix)
 %
 % See also: GRIDobj/coord2ind, GRIDobj/getcoordinates
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 30. January, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 30. May, 2024
 
 
 % Get intrinsic coordinates
 [r,c] = ind2sub(DEM.size,ix(:));
 % Calculate map coordinates
-xy    = DEM.wf*double([r-1 c-1 ones(numel(ix),1)]);
+xy    = (DEM.wf*double([c-1 r-1 ones(numel(ix),1)]'))';
 % Split coordinates in x and y vector
 x = xy(:,1);
 y = xy(:,2);

@@ -46,20 +46,22 @@ function DEM = readopentopo(varargin)
 %     'west'           western boundary
 %     'east'           eastern boundary
 %     'demtype'        The global raster dataset *
-%                      {'SRTMGL3'}:  SRTM GL3 (90m) (default)
-%                      'SRTMGL1':    SRTM GL1 (30m)  
-%                      'SRTMGL1_E':  SRTM GL1 (Ellipsoidal)  
-%                      'AW3D30':     ALOS World 3D 30m  
-%                      'AW3D30_E':   ALOS World 3D (Ellipsoidal)
-%                      'SRTM15Plus': Global Bathymetry SRTM15+ V2.1 (only 
-%                                    mediterranean area so far)
-%                      'NASADEM':    NASADEM Global DEM 
-%                      'COP30':      Copernicus Global DSM 30m 
-%                      'COP90':      Copernicus Global DSM 90m 
-%                      'EU_DTM:      Continental Europe Digital Terrain 
-%                                    Model 
-%                      'GEDI_L3':    Global Ecosystem Dynamics 
-%                                    Investigation 1x1 km DTM
+%                      {'SRTMGL3'}:       SRTM GL3 (90m) (default)
+%                      'SRTMGL1':         SRTM GL1 (30m)  
+%                      'SRTMGL1_E':       SRTM GL1 (Ellipsoidal)  
+%                      'AW3D30':          ALOS World 3D 30m  
+%                      'AW3D30_E':        ALOS World 3D (Ellipsoidal)
+%                      'SRTM15Plus':      Global Bathymetry SRTM15+ V2.1  
+%                                         (only mediterranean area so far)
+%                      'NASADEM':         NASADEM Global DEM 
+%                      'COP30':           Copernicus Global DSM 30m 
+%                      'COP90':           Copernicus Global DSM 90m 
+%                      'EU_DTM:           Continental Europe Digital 
+%                                         Terrain Model 
+%                      'GEDI_L3':         Global Ecosystem Dynamics 
+%                                         Investigation 1x1 km DTM
+%                      'GEBCOIceTopo':    Global Bathymetry (500 m)
+%                      'GEBCOSubIceTopo': Global Bathymetry (500 m)
 %                        
 %                      * requires API Key (see option 'apikey').
 %
@@ -104,7 +106,7 @@ function DEM = readopentopo(varargin)
 
 p = inputParser;
 addParameter(p,'filename',[tempname '.tif']);
-addParameter(p,'interactive',true);
+addParameter(p,'interactive',false);
 addParameter(p,'extent',[]);
 addParameter(p,'addmargin',0.01);
 addParameter(p,'north',37.091337);
@@ -121,19 +123,22 @@ parse(p,varargin{:});
 validdems = {'SRTMGL3','SRTMGL1','SRTMGL1_E',...
      'AW3D30','AW3D30_E','SRTM15Plus',...
      'NASADEM','COP30','COP90',...
-     'EU_DTM','GEDI_L3'};
+     'EU_DTM','GEDI_L3','GEBCOSubIceTopo','GEBCOIceTopo'};
 
 demtype = validatestring(p.Results.demtype,...
     validdems,'readopentopo');
 
 % Access global topographic datasets including SRTM GL3 (Global 90m), 
 % GL1 (Global 30m), ALOS World 3D and SRTM15+ V2.1 (Global Bathymetry 500m). 
-% Note: Requests are limited to 125,000,000 km2 for SRTM15+ V2.1, 
-% 4,050,000 km2 for SRTM GL3, COP90 and 450,000 km2 for all other data.
+% Note: Requests are limited to 
+% 125,000,000 km2 for SRTM15+ V2.1,'GEBCOSubIceTopo','GEBCOIceTopo', and 
+% 4,050,000 km2 for SRTM GL3, COP90 and 
+% 450,000 km2 for all other data.
 requestlimits = [4.05e6, 0.45e6, 0.45e6, ...
                  0.45e6, 0.45e6, 125e6,...
                  0.45e6, 0.45e6, 4.05e6, ...
-                 0.45e6 50e7]; % km^2
+                 0.45e6, 50e7, 125e6, ...
+                 125e6]; % km^2
 requestlimit  = requestlimits(strcmp(demtype,validdems));
 
 % API URL

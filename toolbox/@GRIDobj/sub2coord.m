@@ -18,14 +18,16 @@ function [x,y] = sub2coord(DEM,r,c)
 %
 % Output arguments
 %
-%     x,y     x- and y-coordinates  
+%     x,y     x- and y-coordinates (column vectors)
 %
 % See also: GRIDobj/coord2sub, GRIDobj/getcoordinates
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 30. January, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 30. May, 2024
 
+r = r(:);
+c = c(:);
 
-xy    = double([r c ones(numel(r),1)])*DEM.refmat;
+xy    = (DEM.wf*double([c-1 r-1 ones(numel(r),1)]'))';
 x = xy(:,1);
 y = xy(:,2);

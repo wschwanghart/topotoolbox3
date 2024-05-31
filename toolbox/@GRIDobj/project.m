@@ -49,62 +49,50 @@ function DEMr = project(SOURCE,TARGET,varargin)
 % See also: GRIDobj, reproject2utm, egm96heights
 %
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de) and Wolfgang
-%         Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 2. December, 2018
+%         Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. May, 2024
 
-
+% Check input arguments
 narginchk(2,inf)
 
-if isa(TARGET,'GRIDobj')
-    cs = TARGET.cellsize;
-    targetisGRIDobj = true;
-elseif isstruct(TARGET)
-    % target is a mapping structure
-    cs = [];
-    targetisGRIDobj = false;
-end
+[cs,prjtarget,targetisGRIDobj,targetisproj] = checktarget(TARGET);
 
 p = inputParser;
 p.FunctionName = 'GRIDobj/project';
-addParamValue(p,'res',  cs,@(x) isscalar(x));
-addParamValue(p,'align',true,@(x) isscalar(x));
-addParamValue(p,'method','bilinear',@(x) ischar(x));
-addParamValue(p,'fillvalue',nan,@(x) isscalar(x));
+addParameter(p,'res', cs,@(x) isscalar(x));
+addParameter(p,'align',true,@(x) isscalar(x));
+addParameter(p,'method','bilinear',@(x) ischar(x));
+addParameter(p,'fillvalue',nan,@(x) isscalar(x));
 parse(p,varargin{:});
 
-% Get mstruct of SOURCE
-try
-    mstruct_s = SOURCE.georef.mstruct;
-    if isempty(mstruct_s)
-        error('error')
-    end
-    %cstype_s = SOURCEDEM.georef.SpatialRef.CoordinateSystemType;
-    pr2pr     = true;
-catch
-    % there is either no mstruct available or the coordinate system is
-    % unknown. We assume that the source coordinate system is geographic
-    % (WGS84 Datum)
-    pr2pr     = false;
+[prjsource,sourceisproj] = checksource(SOURCE);
+
+% Determine transformation type
+pr2pr  = sourceisproj && targetisproj;
+pr2gcs = sourceisproj && ~targetisproj;
+gcs2pr = ~sourceisproj && targetisproj;
+gcs2gcs = ~sourceisproj && ~targetisproj;
+if gcs2gcs
+    error("Geographic-to-geographic coordinate projection is not supported.")
 end
-    
-% Get mstruct of TARGET
-if targetisGRIDobj
-    mstruct_t = TARGET.georef.mstruct;
-    cs = p.Results.res;
-else
-    mstruct_t = TARGET;
+% Make sure that only one option is chosen
+if nnz([pr2pr pr2gcs gcs2pr]) ~= 1
+    error('Something went wrong.')
+end
+
+% Check, if cellsize was supplied
+if ~targetisGRIDobj
     cs = p.Results.res;
     if isempty(cs)
-        error('Spatial resolution of the output GRIDobj must be set.');
+        error('Spatial resolution of the target GRIDobj must be set. See option "res".');
     end
 end
-    
-    
-    
-%cstype_t = TARGETDEM.georef.SpatialRef.CoordinateSystemType;
+        
 
+% First, we create the reference geometry of the target grid
 if ~p.Results.align || ~targetisGRIDobj 
-
+    % If we only know the target projection, then we need to find the
+    % boundaries of the source and project them to the target projection
     [x0,y0]   = getcoordinates(SOURCE);
     x0        = x0(:);
     y0        = y0(:);
@@ -114,29 +102,33 @@ if ~p.Results.align || ~targetisGRIDobj
     y         = [repmat(y0(1),numel(x0),1); repmat(y0(end),numel(x0),1); y0; y0]; 
     
     if pr2pr
-        [lat,lon] = minvtran(mstruct_s,x,y);
-        [x,y]     = mfwdtran(mstruct_t,lat,lon);
+        [lat,lon] = projinv(prjsource,x,y);
+        [x,y]     = projfwd(prjtarget,lat,lon);
+    elseif gcs2pr
+        [x,y]     = projfwd(prjtarget,y,x);
+    elseif pr2gcs
+        [y,x]     = projinv(prjsource,x,y);
     else
-        [x,y]     = mfwdtran(mstruct_t,y,x);
+        error("Something's wrong here...")
     end
     
-    tlims([1 2]) = [min(x),max(x)];
-    tlims([3 4]) = [min(y),max(y)];
-    
-    res       = p.Results.res;
+    % We should actually use imref2d directly. Since we need to set the
+    % cell extents precisely, we use maprefcells as an intermediate step
+    if ~pr2gcs
+        R = maprefcells([min(x),max(x)],[min(y),max(y)],cs,cs);
+        Rtarget = imref2d(R.RasterSize,R.XWorldLimits,R.YWorldLimits);
+    else
+        R = georefcells([min(y),max(y)],[min(x),max(x)],cs,cs);
+        Rtarget = imref2d(R.RasterSize,R.LongitudeLimits,R.LatitudeLimits);
+    end
+
 else
-    
-    [x0,y0]   = getcoordinates(SOURCE);
-    [x,y]     = getcoordinates(TARGET);
-    tlims([1 2]) = [min(x), max(x)];
-    tlims([3 4]) = [min(y),max(y)];
-    res       = TARGET.cellsize;
-    
+    % If we have a target grid, then it is easy
+    Rtarget = GRIDobj2imref2d(TARGET,pr2pr || gcs2pr); 
 end
 
 % Limits of source grid
-slims([1 2])  = [min(x0) max(x0)];
-slims([3 4])  = [min(y0) max(y0)];
+[Rsource,Zsource] = GRIDobj2imref2d(SOURCE,pr2pr || pr2gcs); 
 
 % get fillvalue
 fillval = p.Results.fillvalue;
@@ -150,22 +142,30 @@ end
 fillval = double(fillval);
     
 % check method
-meth = validatestring(p.Results.method,{'bilinear','linear','nearest','bicubic'});
+% meth = validatestring(p.Results.method,{'linear','nearest','cubic'});
+meth = validatestring(p.Results.method,{'bilinear','nearest','bicubic'});
 
 % Prepare tform for the image transform
 if pr2pr
+    % T = geometricTransform2d(@FWDTRANSpr2pr, @INVTRANSpr2pr);
     T = maketform('custom', 2, 2, @FWDTRANSpr2pr, @INVTRANSpr2pr, []);
-else
+elseif gcs2pr
+    % T = geometricTransform2d(@FWDTRANSgcs2pr, @INVTRANSgcs2pr);
     T = maketform('custom', 2, 2, @FWDTRANSgcs2pr, @INVTRANSgcs2pr, []);
+else % pr2gcs
+    % T = geometricTransform2d(@INVTRANSpr2gcs, @FWDTRANSpr2gcs);
+    T = maketform('custom', 2, 2, @FWDTRANSpr2gcs, @INVTRANSpr2gcs, []);
 end
 
-% Calculate image transform
-[Znew,xdata,ydata] = imtransform(flipud(SOURCE.Z),T,meth,...
-     'Xdata',tlims([1 2]),'Ydata',tlims([3 4]),...
-     'Udata',slims([1 2]),'Vdata',slims([3 4]),...
-     'XYScale',[res res],'Fillvalues',fillval);
+% Calculate image transform 
+% Unfortunately it is not possible to use imwarp
+Znew = imtransform(Zsource,T,meth,...
+     'Xdata',Rtarget.XWorldLimits,'Ydata',Rtarget.YWorldLimits,...
+     'Udata',Rsource.XWorldLimits,'Vdata',Rsource.YWorldLimits,...
+     'XYScale',[Rtarget.PixelExtentInWorldX Rtarget.PixelExtentInWorldX],...
+     'Fillvalues',fillval); % ,xdata,ydata
  
-Znew = flipud(Znew); 
+% Znew = flipud(Znew); 
 
 if p.Results.align && targetisGRIDobj
     % If aligned, this is easy. The transformed GRIDobj will be perfectly
@@ -175,55 +175,167 @@ if p.Results.align && targetisGRIDobj
 else
     % We have calculated the imtransform with 'ColumnsStartFrom' south. 
     % GRIDobjs use 'ColumnsStartFrom' north
-
-    xnew = cumsum([xdata(1) repmat(res,1,size(Znew,2)-1)]);
-    ynew = flipud(cumsum([ydata(1) repmat(res,1,size(Znew,1)-1)])');
-
-    % Construct GRIDobj
-    DEMr = GRIDobj(xnew,ynew,Znew);
-    % figure, subplot(1,2,1), imagesc(DEMr), subplot(1,2,2), imagesc(TARGETDEM)
-
-    % Include geospatial and other information
-    R = refmatToMapRasterReference(DEMr.refmat,DEMr.size);
-    DEMr.georef.SpatialRef = R;
-    DEMr.georef.mstruct = mstruct_t;
-    if targetisGRIDobj
-        DEMr.georef.GeoKeyDirectoryTag = TARGET.georef.GeoKeyDirectoryTag;
+    DEMr = GRIDobj([]);
+    DEMr.Z = Znew;
+    DEMr.cellsize   = cs;
+    DEMr.size = size(Znew);
+    DEMr.georef = R;
+    DEMr.wf  = worldFileMatrix(R);
+    if pr2pr || gcs2pr
+        DEMr.georef.ProjectedCRS = prjtarget;
     else
-        DEMr.georef.GeoKeyDirectoryTag = [];
-        warning('Could not set GeoKeyDirectoryTag in output GRIDobj')
+        DEMr.georef.GeographicCRS = prjtarget;
     end
-    DEMr.zunit = SOURCE.zunit;
-    DEMr.xyunit = SOURCE.xyunit;
 end
 
 DEMr.name = [SOURCE.name ' (projected)'];
+% function ends here
 
-
+%% -----------------------------------------------------------------------
 % Transformation functions for imtransform (projected --> projected)
     function x = FWDTRANSpr2pr(u,~)
-        [tlat,tlon] = minvtran(mstruct_s,u(:,1),u(:,2));
-        [tx,ty] = mfwdtran(mstruct_t,tlat,tlon);
+        [tlat,tlon] = projinv(prjsource,u(:,1),u(:,2));
+        [tx,ty] = projfwd(prjtarget,tlat,tlon);
         x = [tx ty];        
     end
 
  
     function u = INVTRANSpr2pr(x,~)
-        [tlat,tlon] = minvtran(mstruct_t,x(:,1),x(:,2));
-        [tx,ty] = mfwdtran(mstruct_s,tlat,tlon);
+        [tlat,tlon] = projinv(prjtarget,x(:,1),x(:,2));
+        [tx,ty] = projfwd(prjsource,tlat,tlon);
         u = [tx ty];
     end
 
 % Transformation functions for imtransform (gcs --> projected)
     function x = FWDTRANSgcs2pr(u,~)
-        [tx,ty] = mfwdtran(mstruct_t,u(:,2),u(:,1));
+        [tx,ty] = projfwd(prjtarget,u(:,2),u(:,1));
         x = [tx ty];        
     end
 
  
     function u = INVTRANSgcs2pr(x,~)
-        [tlat,tlon] = minvtran(mstruct_t,x(:,1),x(:,2));
+        [tlat,tlon] = projinv(prjtarget,x(:,1),x(:,2));
         u = [tlon tlat];
     end
 
+% Transformation functions for imtransform (projected --> gcs)
+    function x = FWDTRANSpr2gcs(u,~)
+        [tlat,tlon] = projinv(prjsource,u(:,1),u(:,2));
+        x = [tlon tlat];        
+    end
+
+    function u = INVTRANSpr2gcs(x,~)
+        [tx,ty] = projfwd(prjsource,x(:,2),x(:,1));
+        u = [tx ty];
+    end
+
 end
+
+
+%% -----------------------------------------------------------------------
+function [cs,prj,targetisGRIDobj,targetisproj] = checktarget(TARGET)
+% Check source
+if isa(TARGET,'GRIDobj')
+    % target is a GRIDobj. If yes, there's a cellsize.
+    cs = TARGET.cellsize;
+    targetisGRIDobj = true;
+
+    % The target grid should have a projcrs object. If not, then we assume
+    % that the target grid is in geographic coordinates and we will do an
+    % inverse projection.
+    try
+        prj = TARGET.georef.ProjectedCRS;
+        targetisproj    = true;
+        
+    catch
+        try
+            prj = TARGET.georef.GeographicCRS;
+            targetisproj    = false;
+        catch
+            prj = [];
+            targetisproj    = false;
+        end
+        
+    end
+elseif isa(TARGET,"geocrs")
+    % target is a geocrs object
+    cs = [];
+    targetisGRIDobj = false;
+    targetisproj    = false;
+    prj = TARGET;
+
+elseif isa(TARGET,"projcrs")
+    % target is a projcrs object
+    cs = [];
+    targetisGRIDobj = false;
+    targetisproj    = true;
+    prj = TARGET;
+
+else
+    % target is some epsg-number or some string that either projcrs or
+    % geocrs can handle.
+    cs = [];
+    targetisGRIDobj = false;
+    try
+        prj = projcrs(TARGET);
+        targetisproj = true;
+
+    catch
+        prj = geocrs(TARGET);
+        targetisproj = false;
+    end
+end
+end
+
+%% -----------------------------------------------------------------------
+function [prj,sourceisproj] = checksource(SOURCE)
+
+% Get mstruct of SOURCE
+if isempty(SOURCE.georef)
+    sourceisproj = false;
+    prj = [];
+else
+    try 
+        prj = SOURCE.georef.ProjectedCRS;
+        sourceisproj = true;
+    catch
+        try
+            prj = SOURCE.georef.GeographicCRS;
+            sourceisproj = false;
+        catch
+            prj = [];
+            sourceisproj = false;
+
+        end
+    end
+end
+end
+
+%% ----------------------------------------------------------------------
+% functions to create imref2d objects
+function [R,Z] = GRIDobj2imref2d(DEM,isproj)
+if isproj
+    R = imref2d(DEM.georef.RasterSize,DEM.georef.XWorldLimits,DEM.georef.YWorldLimits);
+    columnsStartNorth = strcmp(DEM.georef.ColumnsStartFrom,'north');
+else
+    if ~isempty(DEM.georef)
+        R = imref2d(DEM.georef.RasterSize,DEM.georef.LongitudeLimits,DEM.georef.LatitudeLimits);
+        columnsStartNorth = strcmp(DEM.georef.ColumnsStartFrom,'north');
+    else
+        [x,y] = getcoordinates(DEM);
+        if y(1) > y(end)
+            columnsStartNorth = true;
+        end
+        R = imref2d(DEM.size,[x(1) x(end)],[min(y) max(y)]);
+    end
+end
+
+if nargout == 2
+Z = DEM.Z;
+if columnsStartNorth 
+    Z = flipud(Z);
+end
+end
+end
+
+
