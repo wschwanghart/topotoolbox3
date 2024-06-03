@@ -1,13 +1,13 @@
-function C = aggregate(DEMlowres,DEMhighres,aggfun)
+function C = aggregate(DEMlowres,DEMhighres,options)
 
-%AGGREGATE resampling a GRIDobj using aggregation
+%AGGREGATE Resampling a GRIDobj using aggregation/binning
 %
 % Syntax
 %
 %     C = aggregate(B,A)
 %     C = aggregate(B,xy)
 %     C = aggregate(B,xyz)
-%     C = aggregate(...,aggfun)
+%     C = aggregate(...,pn,pv,...)
 %
 % Description
 %
@@ -19,20 +19,28 @@ function C = aggregate(DEMlowres,DEMhighres,aggfun)
 %
 %     Values to be aggregated can also be supplied as list of coordinates
 %     (and attributes). This is particularly useful if point density for
-%     each pixel is greater than one. 
+%     each pixel is greater than one. This binning technique may not be 
+%     appropriate if the point density is low, because this will produce a
+%     grid which is only sparsely populated with values.  
 %
 % Input arguments
 %
 %     B         low resolution GRIDobj. A and B must have the same 
 %               coordinate system
 %     A         high resolution GRIDobj
-%     xy        two column matrix with coordinates. aggfun is @numel.
+%     xy        two column matrix with coordinates. In this case, 
+%               aggfun = @numel and fillval = 0.
 %     xyz       three column matrix with coordinates and third column being
 %               some attribute (e.g. elevation, ...)
+%
+%     Parameter name/value pairs
+% 
 %     aggfun    anonymous function that aggregate values. The function must
 %               take a vector and return a scalar. The default is @mean.
 %               Other possible functions are @numel to obtain counts,
 %               @median, @std, ...
+%
+%     fillval   pixel values in the output grid with no overlapping values 
 %
 % Output arguments
 %
@@ -42,12 +50,20 @@ function C = aggregate(DEMlowres,DEMhighres,aggfun)
 %
 % See also: GRIDobj/resample, GRIDobj/reclabel, accumarray
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 10. March, 2023
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. June, 2024
 
-if nargin == 2
-    aggfun = @mean;
+arguments
+    DEMlowres GRIDobj
+    DEMhighres 
+    options.aggfun = @mean
+    options.fillval = nan
+    options.class   = underlyingType(DEMhighres)
 end
+
+aggfun  = options.aggfun;
+fillval = options.fillval; 
+outclass   = options.class;
 
 if isa(DEMhighres,'GRIDobj')
     % A is a high res GRIDobj
@@ -79,17 +95,19 @@ else
     else
         Z = true; %true(size(IX));
         aggfun = @numel;
+        fillval = 0;
     end
 end
     
 if isempty(Z)
-    C = GRIDobj(DEMlowres);
+    C = GRIDobj(DEMlowres,outclass);
+    C.Z(:,:) = cast(fillval,outclass);
     return
 end
 
-z = accumarray(IX,Z,[prod(DEMlowres.size) 1],aggfun);
+z = accumarray(IX,Z,[prod(DEMlowres.size) 1],...
+    @(x) cast(aggfun(x),outclass),cast(fillval,outclass));
 C = DEMlowres;
 C.Z = reshape(z,DEMlowres.size);
-C.Z(C.Z == 0) = nan;
 
 

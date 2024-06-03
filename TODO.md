@@ -12,7 +12,7 @@ Changed refmat to wf (worldfile). Referencing matrices are no longer supported b
 - [ ] GRIDOBJ2POLYGON      : Conversion from drainage basin grid to polygon or polyline
 - [ ] GRIDOBJ2RGB          : Convert GRIDobj to RGB image
 - [x] ACV                  : Anisotropic coefficient of variation (ACV) 
-- [ ] AGGREGATE            : resampling a GRIDobj using aggregation
+- [x] AGGREGATE            : resampling a GRIDobj using aggregation
 - [ ] ARCSLOPE             : mean gradient from a digital elevation model sensu ArcGIS
 - [ ] ASPECT               : angle of exposition from a digital elevation model (GRIDobj)
 - [x] CASTSHADOW           : cast shadow
