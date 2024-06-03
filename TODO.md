@@ -55,7 +55,7 @@ Changed refmat to wf (worldfile). Referencing matrices are no longer supported b
 - [ ] IND2COORD            : convert linear index to x and y coordinates
 - [ ] INFO                 : detailed information on GRIDobj instance
 - [ ] INPAINTNANS          : Interpolate or fill missing values in a grid (GRIDobj)
-- [ ] INTERP               : interpolate to query locations
+- [x] INTERP               : Interpolate to query locations
 - [ ] INTERP2GRIDOBJ       : Interpolate scattered data to GRIDobj
 - [ ] INTERPWITHBARRIERS   : Laplace interplation with barriers
 - [ ] ISNAN                : returns array elements that are NaNs as logical grid
@@ -63,7 +63,8 @@ Changed refmat to wf (worldfile). Referencing matrices are no longer supported b
 - [ ] LARGESTINSCRIBEDGRID : Find and crop the largest grid with no nans
 - [ ] LINE2GRIDOBJ         : convert line to a grid
 - [ ] LOCALTOPOGRAPHY      : Local topography
-- [ ] MEASURE              : take interactive measurements along a polyline
+- [x] MEASURE              : take interactive measurements along a polyline
+Additional work to be done is to replace impoly with drawpolygon.
 - [x] MINMAXNORM           : min-max normalization with optional percent clipping
 - [ ] MPOWER               : overloaded power for GRIDobj
 - [ ] MRDIVIDE             : overloaded right division for GRIDobj

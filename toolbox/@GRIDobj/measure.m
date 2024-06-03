@@ -1,6 +1,6 @@
 function measure(DEM,varargin)
 
-%MEASURE take interactive measurements along a polyline
+%MEASURE Take interactive measurements along a polyline
 %
 % Syntax
 %
@@ -67,16 +67,16 @@ end
 
 p = inputParser;
 
-p.FunctionName = 'STREAMobj';
-addParamValue(p,'xyprecision','%6.0f',@(x) ischar(x));
-addParamValue(p,'slopeunit','degree',@(x) ischar(validatestring(x,{'tan','degree','percent'})));
-addParamValue(p,'reset',false);
-addParamValue(p,'colormap',cmap);
-addParamValue(p,'showhelp',true,@(x) isscalar(x));
-addParamValue(p,'position',defpos,@(x) numel(x) >= 4 && size(x,2) == 2 && ...
+p.FunctionName = 'measure';
+addParameter(p,'xyprecision','%6.0f',@(x) ischar(x));
+addParameter(p,'slopeunit','degree',@(x) ischar(validatestring(x,{'tan','degree','percent'})));
+addParameter(p,'reset',false);
+addParameter(p,'colormap',cmap);
+addParameter(p,'showhelp',true,@(x) isscalar(x));
+addParameter(p,'position',defpos,@(x) numel(x) >= 4 && size(x,2) == 2 && ...
     (max(x(:,1)) <= xmax && min(x(:,1)) >= xmin && ...
      max(x(:,2)) <= ymax && min(x(:,2)) >= ymin));
-addParamValue(p,'water',[]);
+addParameter(p,'water',[]);
 
 parse(p,varargin{:});
 
@@ -149,7 +149,7 @@ end
         
         nrpos   = size(pos,1);
         
-        if nrpos == 1;
+        if nrpos == 1
             delete(h);
             if ~isempty(htext)
                 delete(htext)
@@ -353,11 +353,11 @@ end
             xlims = [minpos(1) maxpos(1)] + [-.1 .1].*ranpos(1); 
             ywidth = (xlims(2)-xlims(1))/ratio;
             ylims = (maxpos(2)+minpos(2))/2 + [-ywidth/2 +ywidth/2];
-            if ylims(2) > ymax;
+            if ylims(2) > ymax
                 ylims(2) = ymax;
                 ylims(1) = ylims(2)-ywidth;
             end
-            if ylims(1) < ymin;
+            if ylims(1) < ymin
                 ylims(1) = ymin;
                 ylims(2) = ylims(1)+ywidth;
             end
@@ -367,11 +367,11 @@ end
             ylims = [minpos(2) maxpos(2)] + [-.1 .1].*ranpos(2); 
             xwidth = (ylims(2)-ylims(1))*ratio;
             xlims = (maxpos(1)+minpos(1))/2 + [-xwidth/2 +xwidth/2]; 
-            if xlims(2) > xmax;
+            if xlims(2) > xmax
                 xlims(2) = xmax;
                 xlims(1) = xlims(2)-xwidth;
             end
-            if xlims(1) < xmin;
+            if xlims(1) < xmin
                 xlims(1) = xmin;
                 xlims(2) = xlims(1)+xwidth;
             end

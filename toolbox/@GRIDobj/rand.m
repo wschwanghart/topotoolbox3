@@ -46,8 +46,6 @@ function Z = rand(DEM,dist,params)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 3. May, 2024
 
-
-
 if nargin == 1
     Z = GRIDobj(DEM);
     Z.Z = rand(DEM.size);

@@ -1,6 +1,6 @@
 function zi = interp(DEM,xi,yi,method)
 
-%INTERP interpolate to query locations
+%INTERP Interpolate to query locations
 %
 % Syntax
 %
@@ -36,40 +36,37 @@ function zi = interp(DEM,xi,yi,method)
 %     xy(:,2) = xy(:,2)*(max(y)-min(y)) + min(y);
 %     z = interp(DEM,xy(:,1),xy(:,2));
 %
+% See also: griddedInterpolant
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. June, 2024
 
-
-narginchk(3,4)
-
-if nargin == 3
-    method = 'linear';
-else
-    method = validatestring(method,...
-        {'linear','nearest','spline','pchip','cubic'},'interp','method',4);
+arguments
+    DEM   GRIDobj
+    xi
+    yi
+    method = 'linear'
 end
+
+method = validatestring(method,...
+        {'linear','nearest','spline','pchip','cubic'},'GRIDobj/interp','method',4);
 
 % created griddedInterpolant class
 [x,y] = getcoordinates(DEM);
 % flip y to get monotonic increasing grid vectors
 y     = y(end:-1:1);
 
-if isinteger(DEM.Z)
+if isUnderlyingInteger(DEM) || isUnderlyingType(DEM,'logical')
     cla   = class(DEM.Z);
     DEM.Z = single(DEM.Z);
-    convoutput = true;
-elseif islogical(DEM.Z)
-    cla   = class(DEM.Z);
-    DEM.Z = single(DEM.Z);
-    if nargin == 3;
+    if nargin == 3
         method = 'nearest';
     end
+    % convert output
     convoutput = true;
 else
     convoutput = false;
 end
-
 
 F     = griddedInterpolant({x,y},flipud(DEM.Z)',method); 
 

@@ -37,7 +37,7 @@ X = X(:);
 Y = Y(:);
 
 % check input
-np = numel(x)
+np = numel(x);
 if np ~= numel(y)
     error('TopoToolbox:wronginput',...
         'x and y must have the same number of elements.');
