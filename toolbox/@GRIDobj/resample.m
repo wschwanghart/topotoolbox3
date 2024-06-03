@@ -1,4 +1,4 @@
-function DEMr = resample(DEM,target,method,swapzone)
+function DEMr = resample(DEM,target,options)
 
 %RESAMPLE change spatial resolution of a GRIDobj
 %
@@ -42,129 +42,115 @@ function DEMr = resample(DEM,target,method,swapzone)
 %
 % See also: griddedInterpolant, imtransform
 %        
-% Author:  Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 8. August, 2015 
+% Author:  Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 1. June, 2024 
 
-% check input arguments
-narginchk(2,4)
-validateattributes(target,{'double' 'GRIDobj'},{'scalar'})
-if nargin == 2;
-    method = 'bilinear';
-    swapzone = false;
-elseif nargin == 3;
-    method = validatestring(method,{'bicubic', 'bilinear', 'nearest' });
-    swapzone = false;
-else
-    method = validatestring(method,{'bicubic', 'bilinear', 'nearest' });
+% check also mapresize, georesize
+
+arguments
+    DEM   GRIDobj
+    target  {mustBeGRIDobjOrPositiveScalar}
+    options.method   = "linear"
+    options.swapzone = false
+    options.crop     = true
 end
 
-% check underlying class
-if islogical(DEM.Z)
+method = validatestring(options.method,{'cubic', 'linear', 'nearest' },...
+    'GRIDobj/resample','method',3);
+
+% Fillvalues and 
+if isUnderlyingType(DEM,'logical') || isUnderlyingInteger(DEM)
+    fillval = 0;
     method = 'nearest';
-end
-
-if swapzone && isa(target,'GRIDobj');
-    if ~isequal(DEM.georef.GeoKeyDirectoryTag.ProjectedCSTypeGeoKey,...
-            target.georef.GeoKeyDirectoryTag.ProjectedCSTypeGeoKey)
-        warning('UTM zones differ. Will attempt to match.');
-        swapzone = true;
-    else
-        swapzone = false;
-    end
-end
-
-% get coordinate vectors
-[u,v] = getcoordinates(DEM);
-
-% tform
-T = maketform('affine',[1 0 0; 0 1 0; 0 0 1]);
-
-% Fillvalues
-if isinteger(DEM.Z)
-    fillval = 0;
-elseif islogical(DEM.Z)
-    fillval = 0;
 else
     fillval = nan;
 end
 
+% get coordinate vectors
+[Rsource,Zsource] = GRIDobj2imref2d(DEM,true);
+
+% tform
+% T = maketform('affine',);
+T = affinetform2d([1 0 0; 0 1 0; 0 0 1]);
 
 if isa(target,'GRIDobj')
     % the target is another GRIDobj
-    
-    % check whether both grids have the same projection
-    if swapzone
-        mstructsource = DEM.georef.mstruct;
-        mstructtarget = target.georef.mstruct;
-        T = maketform('custom', 2, 2, ...
-                @FWDTRANS, ...
-                @INVTRANS, ...
-                []);
-    end
-     
-    
     DEMr    = target;
-    [xn,yn] = getcoordinates(DEMr);
+    % xlimitsn = DEMr.georef.XWorldLimits;
+    % ylimitsn = DEMr.georef.YWorldLimits;
+    % csxnew    = DEMr.georef.CellExtentInWorldX;
+    % csynew    = DEMr.georef.CellExtentInWorldY;
+    sizenew = DEMr.georef.RasterSize;
+    Rtarget = GRIDobj2imref2d(DEMr,true);
+
+    DEMr   = imwarp(Zsource,Rsource,T,method,...
+        "FillValues",fillval,"OutputView",Rtarget);
     
-    DEMr.Z = imtransform(DEM.Z,T,method,...
-        'Udata',[u(1) u(end)],'Vdata',[v(1) v(end)],...
-        'Xdata',[xn(1) xn(end)],'Ydata',[yn(1) yn(end)],...
-        'Size',DEMr.size,...
-        'FillValues',fillval);
+    % DEMr.Z = imtransform(Zsource,T,method,...
+    %     'Udata',[u(1) u(end)],'Vdata',[v(1) v(end)],...
+    %     'Xdata',xlimitsn,'Ydata',ylimitsn,...
+    %     'XYscale',[csxnew csynew],...
+    %     'FillValues',fillval);
+    if isequal(size(DEMr.Z),sizenew)
+        error('Size after transformation inconsistent.')
+    end
     DEMr.name = [DEM.name ' (resampled)'];
         
 else
     csnew   = target;
-    DEMr    = GRIDobj([]);
-    [DEMr.Z,xn,yn] = imtransform(DEM.Z,T,method,...
+    Rnew    = maprefcells(DEM.georef.XWorldLimits,DEM.georef.YWorldLimits,csnew,csnew);
+    xlimitsn = Rnew.XWorldLimits;
+    ylimitsn = Rnew.YWorldLimits;
+
+    Z = imtransform(DEM.Z,T,method,...
         'Udata',[u(1) u(end)],'Vdata',[v(1) v(end)],...
-        'Xdata',[u(1) u(end)],'Ydata',[v(1) v(end)],...
+        'Xdata',xlimitsn,'Ydata',ylimitsn,...
         'XYscale',[csnew csnew],...
         'FillValues',fillval);
 
+    DEMr = GRIDobj(Z,Rnew);
+    DEMr.georef.ProjectedCRS = DEM.georef.ProjectedCRS;
 
-    % new referencing matrix
-    DEMr.refmat = [0 -csnew;...
-                   csnew 0; ...
-                   xn(1)-csnew ...
-                   yn(1)+csnew];
-    % size of the resampled grid           
-    DEMr.size    = size(DEMr.Z);
-    DEMr.cellsize = csnew;
-    DEMr.georef = DEM.georef;
 end
 
 DEMr.name    = [DEM.name ' (resampled)'];
 
-if ~isempty(DEMr.georef) && ~isa(target,'GRIDobj');
-    DEMr.georef.RefMatrix = DEMr.refmat;
-    DEMr.georef.Height = DEMr.size(1);
-    DEMr.georef.Width  = DEMr.size(2);
-    
-    DEMr.georef.SpatialRef = refmatToMapRasterReference(DEMr.refmat, DEMr.size);
-    
+end
+%% ----------------------------------------------------------------------
+function mustBeGRIDobjOrPositiveScalar(x)
+
+tf = isa(x,'GRIDobj') || (isscalar(x) && x > 0);
+if ~tf 
+    error("TopoToolbox:validation","Input must be GRIDobj or a positive scalar.")
+end
 end
 
-
-%%
-
-    function x = FWDTRANS(u,~)
-        % invtrans first
-        [lati,long] = minvtran(mstructsource,u(:,1),u(:,2));
-        [x,y] = mfwdtran(mstructtarget,lati,long);
-        x = [x y];        
-    end
-
-    function u = INVTRANS(x,~)
-        [lati,long] = minvtran(mstructtarget,x(:,1),x(:,2));
-        [x,y] = mfwdtran(mstructsource,lati,long);
-        u = [x y];   
-        
+%% ----------------------------------------------------------------------
+% functions to create imref2d objects
+function [R,Z] = GRIDobj2imref2d(DEM,isproj)
+if isproj
+    R = imref2d(DEM.georef.RasterSize,DEM.georef.XWorldLimits,DEM.georef.YWorldLimits);
+    columnsStartNorth = strcmp(DEM.georef.ColumnsStartFrom,'north');
+else
+    if ~isempty(DEM.georef)
+        R = imref2d(DEM.georef.RasterSize,DEM.georef.LongitudeLimits,DEM.georef.LatitudeLimits);
+        columnsStartNorth = strcmp(DEM.georef.ColumnsStartFrom,'north');
+    else
+        [x,y] = getcoordinates(DEM);
+        if y(1) > y(end)
+            columnsStartNorth = true;
+        end
+        R = imref2d(DEM.size,[x(1) x(end)],[min(y) max(y)]);
     end
 end
 
-
-
+if nargout == 2
+Z = DEM.Z;
+if columnsStartNorth 
+    Z = flipud(Z);
+end
+end
+end
 
 
 

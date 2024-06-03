@@ -16,12 +16,18 @@ end
 
 
 % Create coordinate vectors if matrices are supplied
-if ismatrix(X)
+if isequal(size(X),size(Z))
     X = X(1,:);
+else
+    % force row vector
+    X = X(:)';
 end
 
-if ismatrix(Y)
+if isequal(size(Y),size(Z))
     Y = Y(:,1);
+else
+    % force column vector
+    Y = Y(:);
 end
 
 % The convention in a GRIDobj is that columns start from north, and rows

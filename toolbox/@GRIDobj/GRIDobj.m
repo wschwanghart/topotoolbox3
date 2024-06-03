@@ -17,14 +17,14 @@ classdef GRIDobj
 % Description
 %
 %     GRIDobj creates an instance of the grid class, which contains a
-%     numerical or logical matrix and information on georeferencing. When a
-%     GRIDobj is created from a file, the number format of the data in
-%     GRIDobj is either single or double. Unsigned and signed integers are
-%     converted to single. For unsigned integers, missing values are
-%     assumed to be denoted as intmax(class(input)). For signed integers,
-%     missing values are assumed to be intmin(class(input)). Please check,
-%     that missing values in your data have been identified correctly
-%     before further analysis.
+%     numerical, integer or logical matrix and information on
+%     georeferencing. When a GRIDobj is created from a file, the number
+%     format of the data in GRIDobj is either single or double. Unsigned
+%     and signed integers are converted to single. For unsigned integers,
+%     missing values are assumed to be denoted as intmax(class(input)). For
+%     signed integers, missing values are assumed to be
+%     intmin(class(input)). Please check, that missing values in your data
+%     have been identified correctly before further analysis.
 %
 %     Note that while throughout this help text GRIDobj is associated with
 %     gridded digital elevation models, instances of GRIDobj can contain
@@ -32,19 +32,23 @@ classdef GRIDobj
 %     gradient grids etc.
 %
 %     DEM = GRIDobj(Z) creates a GRIDobj from the elevations stored in the 
-%     matrix Z. The spatial resolution is 1. 
+%     matrix Z. The spatial resolution is 1 and the grid will be cell
+%     referenced.
 %
 %     DEM = GRIDobj(Z,cs) creates a GRIDobj from the elevations stored in 
 %     the matrix Z. cs is a positive scalar and is the spatial resolution. 
 %
-%     DEM = GRIDobj(X,Y,Z) creates a DEM object from the coordinate
-%     matrices or vectors X and Y and the matrix Z. The elements of Z
-%     refer to the elevation of each pixel. 
+%     DEM = GRIDobj(X,Y,Z) creates a GRIDobj from the coordinate matrices
+%     or vectors X and Y and the matrix Z. The elements of Z refer to the
+%     elevation of each pixel.
 %
-%     DEM = GRIDobj('ESRIasciiGrid.txt') creates a DEM object from an ESRI 
+%     DEM = GRIDobj('ESRIasciiGrid.txt') creates a GRIDobj from an ESRI 
 %     Ascii grid exported from other GI systems. 
 %
-%     DEM = GRIDobj('GeoTiff.tif') creates a DEM object from a Geotiff.
+%     DEM = GRIDobj('GeoTiff.tif') creates a GRIDobj from a Geotiff.
+%
+%     DEM = GRIDobj(filename) tries to create a GRIDobj from other formats
+%     supported by the Mapping Toolbox function readgeoraster.
 %
 %     DEM = GRIDobj() opens a dialog box to read either an ESRI Ascii Grid
 %     or a Geotiff.
@@ -64,10 +68,10 @@ classdef GRIDobj
 %     % Display DEM
 %     imageschs(DEM)
 %
-% See also: FLOWobj, STREAMobj, GRIDobj/info
+% See also: FLOWobj, STREAMobj, GRIDobj/info, readgeoraster.
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 6. April, 2024
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 1. June, 2024
 
     
     properties
@@ -199,6 +203,12 @@ classdef GRIDobj
                         Z = varargin{1};
                         R = varargin{2};
                         wf = worldFileMatrix(R);
+
+                        % check whether size of Z is same as in referencing
+                        % object
+                        tf = isequal(size(Z),R.RasterSize);
+                        assert(tf,"Array size of first argument and referencing matrix differs.")
+
                     end
 
                 else
@@ -258,57 +268,167 @@ classdef GRIDobj
             DEM.georef   = R;
 
         end
+
+        % ................................................................
+        % A number of basic functions follow that are used to test, access  
+        % or change the properties of a GRIDobj
+
+        function typename = underlyingType(A)
+            %UNDERLYINGTYPE Determine the underlying data type of GRIDobj
+            %
+            % Syntax
+            %
+            %     typename = underlyingType(A)
+            %
+            typename = class(A.Z);
+        end
+
+        function tf = isUnderlyingType(A,typename)
+            %ISUNDERLYINGTYPE Determine whether input GRIDobj has specified underlying data type
+            %
+            % Syntax
+            %
+            %     tf = isUnderlyingType(A,typename)
+            %
+            tf = strcmp(underlyingType(A),typename);
+        end
+
+        function mustBeUnderlyingType(A,typename)
+            %MUSTBEUNDERLYINGTYPE Validate that GRIDobj has specified underlying data type
+            %
+            % Syntax
+            %
+            %     mustBeUnderlyingType(A,typename)
+            %
+            tf = isUnderlyingType(A,typename);
+            if ~tf
+                error("TopoToolbox:validation",...
+                    append("Underlying GRIDobj data type is ",...
+                    underlyingType(A), ...
+                    " but must be ", string(typename)))
+            end
+        end
+
+        function tf = isUnderlyingInteger(A)
+            %ISUNDERLYINGINTEGER Determine if GRIDobj has underlying integer data type
+            %
+            % Syntax
+            %
+            %     isUnderlyingInteger(A)
+            %
+            tf = isinteger(A.Z);
+
+        end
+
+        function mustBeUnderlyingInteger(A)
+            %MUSTBEUNDERLYINGINTEGER Validate that GRIDobj has underlying integer data type
+            %
+            % Syntax
+            %
+            %     mustBeUnderlyingInteger(A)
+            %
+            tf = isinteger(A.Z);
+            if ~tf
+                error("TopoToolbox:validation",...
+                    "Underlying GRIDobj data type must be integer.")
+            end
+        end
+
+        function tf = isUnderlyingNumeric(A)
+            %ISUNDERLYINGINTEGER Determine if GRIDobj has underlying numeric data type
+            %
+            % Syntax
+            %
+            %     isUnderlyingNumeric(A)
+            %
+            tf = isnumeric(A.Z);
+
+        end
+
+        function mustBeUnderlyingNumeric(A)
+            %MUSTBEUNDERLYINGNUMERIC Validate that GRIDobj has underlying numeric data type
+            %
+            % Syntax
+            %
+            %     mustBeUnderlyingNumeric(A)
+            %
+            tf = isnumeric(A.Z);
+            if ~tf
+                error("TopoToolbox:validation",...
+                    "Underlying GRIDobj data type must be numeric (double or single).")
+            end
+        end
+
+        function tf = isEqualGeoreference(A,B)
+            %ISEQUALGEOREFERENCE Determines whether two GRIDobjs have the same georeferencing
+            %
+            % Syntax
+            %
+            %     tf = isEqualGeoreference(A,B)
+            %
+            % If A and B have no referencing objects, their reference is
+            % assumed to be the same.
+
+            % Both GRIDobjs do not have referencing objects
+            if isempty(isGeographic(A)) && isempty(isGeographic(B))
+                tf = true;
+                return
+            end
+
+            % One of both GRIDobj does not have a referencing object
+            if xor(isempty(isGeographic(A)),isempty(isGeographic(B)))
+                tf = false;
+                return
+            end
+
+            % Both have different types of referencing objects
+            if xor(isGeographic(A),isGeographic(B))
+                tf = false;
+            end
+
+            % They have geographic referencing objects
+            if isGeographic(A)
+                tf = isequal(A.georef.GeographicCRS,...
+                             B.georef.GeographicCRS);
+                return
+            end
+
+            % They have projected referencing objects
+            if isProjected(A)
+                tf = isequal(A.georef.ProjectedCRS,...
+                             B.georef.ProjectedCRS);
+                return
+            end
+        end
+
+        function tf = isGeographic(A)
+            %ISGEOGRAPHIC Determines whether GRIDobj has a geographic coordinate system
+            % 
+            % Syntax
+            %
+            %     tf = isgeographic(A)
+            %
+            tf = isprop(A.georef,"GeographicCRS");
+        end
+
+        function tf = isProjected(A)
+            %ISPROJECTED Determines whether GRIDobj has a projected coordinate system
+            % 
+            % Syntax
+            %
+            %     tf = isProjected(A)
+            %
+            tf = isprop(A.georef,"ProjectedCRS");
+        end
+
+        %% Additional functions to add
+        % hasReference Determines whether GRIDobj has a map or geo
+        % reference
+        % hasMissingValues
+        % mustNotHaveMissingValues
+        %
+
+        
     end
 end
-
-% 
-% % Subfunction for ASCII GRID import
-% function [Z,refmat] = rasterread(file)
-% 
-% fid=fopen(file,'r');
-% % loop through header
-% 
-% header = struct('ncols',[],...
-%                 'nrows',[],...
-% 				'xllcorner',[],...
-% 				'yllcorner',[],...
-% 				'cellsize',[],...
-% 				'nodata',[]);
-% 
-% names   = fieldnames(header);
-% nrnames = numel(names);
-% 
-% try
-%     fseek(fid,0,'bof');
-%     for r = 1:nrnames 
-%         headertext = fgetl(fid);
-%         [headertext, headernum] = strtok(headertext,' ');
-%         I = cellfun(@(x,y) strcmpi(x(1:4),y(1:4)),names,repmat({headertext},nrnames,1));
-%         header.(names{I}) = str2double(headernum);
-%     end
-% catch ME1
-%     error('header can not be read')
-% end
-% 
-% 
-% % read raster data
-% Z = fscanf(fid,'%lg',[header.ncols header.nrows]);
-% fclose(fid);
-% Z(Z==header.nodata) = NaN;
-% Z = Z';
-% % create X and Y using meshgrid
-% refmat = [0 -header.cellsize;...
-%           header.cellsize 0;...
-%           header.xllcorner+(0.5*header.cellsize) - header.cellsize  ...
-%           (header.yllcorner+(0.5*header.cellsize))+((header.nrows)*header.cellsize)];
-% 
-% end
-% 
-% 
-% 
-% 
-% 
-    
-
-    
     

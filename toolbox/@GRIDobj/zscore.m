@@ -18,7 +18,7 @@ function X = zscore(X)
 %
 % Output arguments
 %
-%     Y     GRIDobj
+%     Z     GRIDobj
 % 
 % Example
 %
@@ -28,10 +28,8 @@ function X = zscore(X)
 % 
 % See also: GRIDobj, zscore
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 15. March, 2016
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. June, 2024
 
-
-
-I = ~isnan(X.Z);
-X.Z(I) = (X.Z(I(:)) - mean(X.Z(I(:))))./std(X.Z(I(:)));
+X.Z    = (X.Z-mean(X.Z,"all","omitmissing"))./...
+          std(X.Z,0,"all","omitmissing");

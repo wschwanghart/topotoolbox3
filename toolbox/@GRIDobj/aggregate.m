@@ -23,9 +23,9 @@ function C = aggregate(DEMlowres,DEMhighres,aggfun)
 %
 % Input arguments
 %
-%     A         high resolution GRIDobj
 %     B         low resolution GRIDobj. A and B must have the same 
 %               coordinate system
+%     A         high resolution GRIDobj
 %     xy        two column matrix with coordinates. aggfun is @numel.
 %     xyz       three column matrix with coordinates and third column being
 %               some attribute (e.g. elevation, ...)

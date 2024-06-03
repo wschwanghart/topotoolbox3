@@ -22,10 +22,10 @@ function tf = validatealignment(GRID1,GRID2)
 % 
 %     tf    true or false
 %
-% See also: GRIDobj
+% See also: GRIDobj, GRIDobj/isProjected, GRIDobj/isGeographic
 %   
-% Author:  Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 8. August, 2015 
+% Author:  Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. June, 2024 
 
 % check if geometric properties of a FLOWobj and GRIDobj instance are equal
 if isa(GRID2,'GRIDobj')
@@ -34,7 +34,7 @@ else
     TF = isequal(GRID1.size,size(GRID2));
 end
 
-if nargout == 1;
+if nargout == 1
     tf = TF;
 else
     if ~TF
@@ -43,7 +43,7 @@ else
                 ['The two GRIDobj instances do not align each other. Make sure that \n' ...
                 'both instances have the same spatial reference. Both variables \n' ...
                 'are deemed to have the same reference if their properties ''size'' \n' ...
-                'and ''refmat'' are both equal.']);
+                'and ''wf'' are both equal.']);
         else
             error('TopoToolbox:incorrectinput',...
                 ['GRIDobj and input matrix do not align each other. Make sure that \n' ...

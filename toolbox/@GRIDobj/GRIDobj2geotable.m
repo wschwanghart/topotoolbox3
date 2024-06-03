@@ -75,6 +75,7 @@ parfor (uv = 1:nuniqueval,poolsize)
     % fact, that's how polygon holes are recognized. --> ispolycw
 
     iscw = cellfun(@(xy) ispolycw(xy(:,1),xy(:,2)),B);
+	% iscw returns false only, so that all boundaries are returned in cc-direction
 
     if holes
         % This part of the code goes through all boundaries and assembles
@@ -118,7 +119,7 @@ parfor (uv = 1:nuniqueval,poolsize)
 
         end
     else
-        % All should be clockwise
+       
         REG = B;
         for k = 1:numel(REG)
             if ~iscw(k)

@@ -61,8 +61,9 @@ p = inputParser;
 p.FunctionName = 'GRIDobj/project';
 addParameter(p,'res', cs,@(x) isscalar(x));
 addParameter(p,'align',true,@(x) isscalar(x));
-addParameter(p,'method','bilinear',@(x) ischar(x));
+addParameter(p,'method','linear',@(x) ischar(x));
 addParameter(p,'fillvalue',nan,@(x) isscalar(x));
+addParameter(p,'imtransform',true)
 parse(p,varargin{:});
 
 [prjsource,sourceisproj] = checksource(SOURCE);
@@ -114,11 +115,15 @@ if ~p.Results.align || ~targetisGRIDobj
     
     % We should actually use imref2d directly. Since we need to set the
     % cell extents precisely, we use maprefcells as an intermediate step
+    
+    % We assume that the target grid is cell referenced
+    xextent = [min(x),max(x)];
+    yextent = [min(y),max(y)];
     if ~pr2gcs
-        R = maprefcells([min(x),max(x)],[min(y),max(y)],cs,cs);
+        R = maprefcells(xextent,yextent,cs,cs);
         Rtarget = imref2d(R.RasterSize,R.XWorldLimits,R.YWorldLimits);
     else
-        R = georefcells([min(y),max(y)],[min(x),max(x)],cs,cs);
+        R = georefcells(yextent,xextent,cs,cs);
         Rtarget = imref2d(R.RasterSize,R.LongitudeLimits,R.LatitudeLimits);
     end
 
@@ -142,28 +147,51 @@ end
 fillval = double(fillval);
     
 % check method
-% meth = validatestring(p.Results.method,{'linear','nearest','cubic'});
-meth = validatestring(p.Results.method,{'bilinear','nearest','bicubic'});
+if p.Results.imtransform
+    meth = p.Results.method;
+    switch meth
+        case {'linear','cubic'}
+            meth = ['bi' char(meth)];
+    end
+    meth = validatestring(meth,{'bilinear','nearest','bicubic'});
+else
+    % if imwarp is use
+    meth = validatestring(p.Results.method,{'linear','nearest','cubic'});
+end
 
 % Prepare tform for the image transform
 if pr2pr
-    % T = geometricTransform2d(@FWDTRANSpr2pr, @INVTRANSpr2pr);
-    T = maketform('custom', 2, 2, @FWDTRANSpr2pr, @INVTRANSpr2pr, []);
+    if ~p.Results.imtransform
+        T = geometricTransform2d(@FWDTRANSpr2pr, @INVTRANSpr2pr);
+    else
+        T = maketform('custom', 2, 2, @FWDTRANSpr2pr, @INVTRANSpr2pr, []);
+    end
 elseif gcs2pr
-    % T = geometricTransform2d(@FWDTRANSgcs2pr, @INVTRANSgcs2pr);
-    T = maketform('custom', 2, 2, @FWDTRANSgcs2pr, @INVTRANSgcs2pr, []);
+    if ~p.Results.imtransform
+        T = geometricTransform2d(@FWDTRANSgcs2pr, @INVTRANSgcs2pr);
+    else
+        T = maketform('custom', 2, 2, @FWDTRANSgcs2pr, @INVTRANSgcs2pr, []);
+    end
 else % pr2gcs
-    % T = geometricTransform2d(@INVTRANSpr2gcs, @FWDTRANSpr2gcs);
-    T = maketform('custom', 2, 2, @FWDTRANSpr2gcs, @INVTRANSpr2gcs, []);
+    if ~p.Results.imtransform
+        T = geometricTransform2d(@FWDTRANSpr2gcs, @INVTRANSpr2gcs);
+    else
+        T = maketform('custom', 2, 2, @FWDTRANSpr2gcs, @INVTRANSpr2gcs, []);
+    end
 end
 
 % Calculate image transform 
-% Unfortunately it is not possible to use imwarp
-Znew = imtransform(Zsource,T,meth,...
-     'Xdata',Rtarget.XWorldLimits,'Ydata',Rtarget.YWorldLimits,...
-     'Udata',Rsource.XWorldLimits,'Vdata',Rsource.YWorldLimits,...
-     'XYScale',[Rtarget.PixelExtentInWorldX Rtarget.PixelExtentInWorldX],...
-     'Fillvalues',fillval); % ,xdata,ydata
+if ~p.Results.imtransform
+    Znew = imwarp(Zsource,Rsource,T,meth,...
+        'OutputView',Rtarget,'FillValues',fillval);
+else
+
+    Znew = imtransform(Zsource,T,meth,...
+        'Xdata',Rtarget.XWorldLimits,'Ydata',Rtarget.YWorldLimits,...
+        'Udata',Rsource.XWorldLimits,'Vdata',Rsource.YWorldLimits,...
+        'XYScale',[Rtarget.PixelExtentInWorldX Rtarget.PixelExtentInWorldY],...
+        'Fillvalues',fillval,'size',Rtarget.ImageSize); % ,xdata,ydata
+end
  
 % Znew = flipud(Znew); 
 
@@ -189,6 +217,11 @@ else
 end
 
 DEMr.name = [SOURCE.name ' (projected)'];
+
+% test output for equal sizes
+if ~isequal(DEMr.size,DEMr.georef.RasterSize)
+    error("Inconsistent raster size of georef and grid")
+end
 % function ends here
 
 %% -----------------------------------------------------------------------
@@ -290,7 +323,7 @@ end
 %% -----------------------------------------------------------------------
 function [prj,sourceisproj] = checksource(SOURCE)
 
-% Get mstruct of SOURCE
+% Get georef of SOURCE
 if isempty(SOURCE.georef)
     sourceisproj = false;
     prj = [];
@@ -315,11 +348,13 @@ end
 % functions to create imref2d objects
 function [R,Z] = GRIDobj2imref2d(DEM,isproj)
 if isproj
-    R = imref2d(DEM.georef.RasterSize,DEM.georef.XWorldLimits,DEM.georef.YWorldLimits);
+    R = imref2d(DEM.georef.RasterSize,...
+        DEM.georef.XWorldLimits,DEM.georef.YWorldLimits);
     columnsStartNorth = strcmp(DEM.georef.ColumnsStartFrom,'north');
 else
     if ~isempty(DEM.georef)
-        R = imref2d(DEM.georef.RasterSize,DEM.georef.LongitudeLimits,DEM.georef.LatitudeLimits);
+        R = imref2d(DEM.georef.RasterSize,...
+            DEM.georef.LongitudeLimits,DEM.georef.LatitudeLimits);
         columnsStartNorth = strcmp(DEM.georef.ColumnsStartFrom,'north');
     else
         [x,y] = getcoordinates(DEM);
@@ -329,7 +364,6 @@ else
         R = imref2d(DEM.size,[x(1) x(end)],[min(y) max(y)]);
     end
 end
-
 if nargout == 2
 Z = DEM.Z;
 if columnsStartNorth 

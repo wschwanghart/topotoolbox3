@@ -39,10 +39,10 @@ function [lims,A] = prcclip(A,prc,symmetric)
 %     imageschs(DEM,C,'colormap',clr,'caxis',lims);
 %     
 %
-% See also: GRIDobj/minmaxnorm
+% See also: GRIDobj/minmaxnorm, GRIDobj/zscore
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 14. June, 2018
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 14. June, 2024
 
 if nargin == 1
     prc = 2;

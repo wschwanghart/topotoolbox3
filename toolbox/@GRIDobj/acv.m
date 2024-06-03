@@ -34,8 +34,8 @@ function DEM = acv(DEM)
 % 
 % See also: CONV2, FILTER2, BWDIST
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 1. June, 2024
 
 DEM.Z = acvfun(DEM.Z);
 DEM.name = 'ACV';
@@ -88,7 +88,7 @@ F = {     [ 0  0  0  0  0; ...
             
 ACV = zeros(siz);
  
-for r = 1:4;
+for r = 1:4
     ACV = ACV + (conv2(dem,F{r},'valid') - dz_AVG).^2;
 end
 
@@ -111,7 +111,7 @@ F = {      [ 0  0  0;...
             -1  0  0];...
      };
 
-for r = 1:4;
+for r = 1:4
     ACV = ACV + (conv2(dem,F{r},'valid') - dz_AVG).^2;
 end
 

@@ -43,6 +43,8 @@ function [DEMr,zone] = reproject2utm(DEM,res,varargin)
 % Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
 % Date: 31. May, 2024
 
+
+
 if ~isa(res,'GRIDobj')
     % get latitude and longitude vectors
     [lon,lat] = getcoordinates(DEM);
@@ -73,7 +75,7 @@ addRequired(p,'res',@(x) (~isa(x,'GRIDobj') && isscalar(x) && x > 0) || isa(x,'G
 % optional
 addParameter(p,'zone',zone,@(x) ischar(x) || validateattributes(x,{'numeric'},{'scalar','>=',0,'<=',60}));
 addParameter(p,'hemisphere',hemisphere,@(x) ischar(validatestring(x,{'N','S'})))
-addParameter(p,'method','bilinear',@(x) ischar(validatestring(x,validmethods)));
+addParameter(p,'method','linear',@(x) ischar(validatestring(x,validmethods)));
 
 parse(p,DEM,res,varargin{:});
 

@@ -11,11 +11,11 @@ Changed refmat to wf (worldfile). Referencing matrices are no longer supported b
 - [ ] GRIDOBJ2PM           : combine several GRIDobj into a predictor matrix
 - [ ] GRIDOBJ2POLYGON      : Conversion from drainage basin grid to polygon or polyline
 - [ ] GRIDOBJ2RGB          : Convert GRIDobj to RGB image
-- [ ] ACV                  : Anisotropic coefficient of variation (ACV) 
+- [x] ACV                  : Anisotropic coefficient of variation (ACV) 
 - [ ] AGGREGATE            : resampling a GRIDobj using aggregation
 - [ ] ARCSLOPE             : mean gradient from a digital elevation model sensu ArcGIS
 - [ ] ASPECT               : angle of exposition from a digital elevation model (GRIDobj)
-- [ ] CASTSHADOW           : cast shadow
+- [x] CASTSHADOW           : cast shadow
 - [ ] CELLAREA             : calculate cell areas of a GRIDobj in geographic coordinate system
 - [ ] CLIP                 : clip a GRIDobj with a polygon or another GRIDobj
 - [ ] CONTOUR              : contour plot of an instance of GRIDobj
@@ -64,21 +64,21 @@ Changed refmat to wf (worldfile). Referencing matrices are no longer supported b
 - [ ] LINE2GRIDOBJ         : convert line to a grid
 - [ ] LOCALTOPOGRAPHY      : Local topography
 - [ ] MEASURE              : take interactive measurements along a polyline
-- [ ] MINMAXNORM           : min-max normalization with optional percent clipping
+- [x] MINMAXNORM           : min-max normalization with optional percent clipping
 - [ ] MPOWER               : overloaded power for GRIDobj
 - [ ] MRDIVIDE             : overloaded right division for GRIDobj
 - [ ] MTIMES               : overloaded multiplication for GRIDobj
 - [ ] PAD                  : add or remove a border of pixels around a GRIDobj
 - [ ] POLYGON2GRIDOBJ      : convert polygon to a grid
 - [ ] POSTPROCFLATS        : postprocess flat terrain for visualization purpose
-- [ ] PRCCLIP              : percentile clipping
-- [ ] PROJECT              : transforms a GRIDobj between projected coordinate systems
+- [x] PRCCLIP              : percentile clipping
+- [x] PROJECT              : transforms a GRIDobj between projected coordinate systems
 - [ ] PROMINENCE           : Calculate the prominence of mountain peaks
-- [ ] RAND                 : Compute a GRIDobj with random numbers
+- [x] RAND                 : Compute a GRIDobj with random numbers
 - [ ] RANDOMSAMPLE         : Uniform random sampling of a GRIDobj
 - [ ] RECLABEL             : labels GRIDobj by rectangular fields
 - [ ] RECLASSIFY           : generate univariate class intervals for an instance of GRIDobj
-- [ ] REPROJECT2UTM        : Reproject DEM with WGS84 coordinate system to UTM-WGS84 
+- [x] REPROJECT2UTM        : Reproject DEM with WGS84 coordinate system to UTM-WGS84 
 - [ ] RESAMPLE             : change spatial resolution of a GRIDobj
 - [ ] ROUGHNESS            : terrain ruggedness, position and roughness indices of DEMs
 - [ ] SHUFFLELABEL         : shufflelabel randomly relabels a label matrix
@@ -87,8 +87,8 @@ Changed refmat to wf (worldfile). Referencing matrices are no longer supported b
 - [ ] SURF                 : surface plot for GRIDobj
 - [ ] TANAKACONTOUR        : Relief depiction using Tanaka contours
 - [ ] TOPOSHIELDING        : topographic shielding from cosmic rays
-- [ ] VALIDATEALIGNMENT    : validates whether instances of GRIDobj are spatially aligned
-- [ ] ZSCORE               : standardized z-scores for GRIDobj
+- [x] VALIDATEALIGNMENT    : validates whether instances of GRIDobj are spatially aligned
+- [x] ZSCORE               : standardized z-scores for GRIDobj
 
 ## FLOWobj
 

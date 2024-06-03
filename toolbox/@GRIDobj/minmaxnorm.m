@@ -4,8 +4,8 @@ function A = minmaxnorm(A,prcclip)
 %
 % Syntax
 %
-%     A = minmaxnorm(A)
-%     A = minmaxnorm(A,prc)
+%     B = minmaxnorm(A)
+%     B = minmaxnorm(A,prc)
 %
 % Description
 %
@@ -19,6 +19,14 @@ function A = minmaxnorm(A,prcclip)
 %     A     GRIDobj
 %     prc   percentile, scalar value between 0 and 100.
 %
+% Output arguments
+%
+%     B     GRIDobj with values that range between 0 and 1.
+%
+% See also: normalize, GRIDobj/zscore
+% 
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. June, 2024
 
 if nargin == 1
     minz = min(A);

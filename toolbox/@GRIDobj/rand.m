@@ -1,6 +1,6 @@
 function Z = rand(DEM,dist,params)
 
-%RAND Compute a GRIDobj with random numbers
+%RAND Compute a GRIDobj with random, spatially uncorrelated numbers
 %
 % Syntax
 %
@@ -43,8 +43,8 @@ function Z = rand(DEM,dist,params)
 %
 % See also: GRIDobj
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 31. May, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. May, 2024
 
 
 

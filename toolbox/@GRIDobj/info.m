@@ -1,6 +1,6 @@
 function info(DEM)
 
-%INFO detailed information on GRIDobj instance
+%INFO Detailed information on GRIDobj instance
 %
 % Syntax
 %
@@ -20,10 +20,10 @@ function info(DEM)
 % Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
 % Date: 8. January, 2013
 
-
+wf = DEM.wf;
 s = inputname(1);
-[ul] = [1 1 1] * DEM.refmat;
-[lr] = [DEM.size 1] * DEM.refmat;
+[ul] = wf*[1 1 1]';
+[lr] = wf*[DEM.size 1]';
 
 disp(' ')
 if isempty(s)
@@ -43,17 +43,18 @@ disp(['  maximum z-value:       ' num2str(max(DEM.Z(:)))])
 disp(['  minimum z-value:       ' num2str(min(DEM.Z(:)))])
 disp(['  z-unit:                ' DEM.zunit])
 
-if ~isempty(DEM.georef);
-    try 
-        disp(['  coordinate system:     ' DEM.georef.GeoKeyDirectoryTag.GTCitationGeoKey])
-    catch
-        try
-            disp(['  coordinate system:     ' DEM.georef.GeoKeyDirectoryTag.GeogCitationGeoKey]);
-        catch
-        end
-    end
+tf = isGeographic(DEM);
+if isempty(tf)
+    
+disp(['  coordinate system:     ' ' undefined (.georef empty)'])
 else
-    disp(['  coordinate system:     ' 'undefined'])
+if tf
+disp(['  coordinate system:     ' ' Geographic coordinate system'])
+disp(['                          '  DEM.georef.GeographicCRS.Name])
+else
+disp(['  coordinate system:     ' ' Projected coordinate system'])
+disp(['                          '  char(DEM.georef.ProjectedCRS.Name)])
+end
 end
     
 disp(' ')

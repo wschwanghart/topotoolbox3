@@ -1,6 +1,6 @@
-function SH = castshadow(DEM,varargin)
+function SH = castshadow(DEM,azid,altd)
 
-%CASTSHADOW cast shadow
+%CASTSHADOW Cast shadow calculated from digital terrain
 %
 % Syntax
 %
@@ -32,19 +32,17 @@ function SH = castshadow(DEM,varargin)
 % 
 % See also: GRIDobj/imageschs, GRIDobj/hillshade  
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. June, 2024
+
+arguments
+    DEM  GRIDobj
+    azid {mustBeNumeric} = 180
+    altd {mustBeNumeric} = 45
+end
 
 
-p = inputParser;
-p.FunctionName = 'GRIDobj/castshadow';
-addRequired(p,'DEM', @(x) isa(x,'GRIDobj'));
-addOptional(p,'azid', 180);
-addOptional(p,'altd', 45);
-parse(p,DEM,varargin{:});
-
-
-azid = mod(-p.Results.azid,360);
+azid = mod(-azid,360);
 % force values in the DEM to be larger than zero
 % because imrotate fills loose image ends with zeros
 DEM.Z =  - min(DEM.Z(:)) + DEM.Z + 1;
@@ -62,7 +60,7 @@ tform = maketform('affine',A);
     'Udata',[1 DEM.size(2)],'Vdata',[1 DEM.size(1)]);
 
 % calculate height of sunbeams
-lowering = DEM.cellsize*tand(p.Results.altd);
+lowering = DEM.cellsize*tand(altd);
 demrcopy = demr;
 for r = 2:size(demr,1)
     demr(r,:) = max(demr(r-1,:) - lowering,demr(r,:)).*(demr(r,:)>0);
