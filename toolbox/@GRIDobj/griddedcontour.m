@@ -33,14 +33,19 @@ function C = griddedcontour(DEM,level,fourconn)
 %
 % See also: GRIDobj, GRIDobj/imageschs, GRIDobj/contour
 %
-% 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 27. April, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. June, 2024
 
+arguments
+    DEM    GRIDobj
+    level  {mustBeNumeric}
+    fourconn = false
+end
+
+% Compute contour levels
 [x,y] = contour(DEM,level);
 
-C = DEM;
-C.Z = false(DEM.size);
+C = GRIDobj(DEM,'logical');
 C.name = 'griddedcontour';
 
 I = ~isnan(x);

@@ -18,7 +18,7 @@ Changed refmat to wf (worldfile). Referencing matrices are no longer supported b
 - [x] CASTSHADOW           : cast shadow
 - [ ] CELLAREA             : calculate cell areas of a GRIDobj in geographic coordinate system
 - [ ] CLIP                 : clip a GRIDobj with a polygon or another GRIDobj
-- [ ] CONTOUR              : contour plot of an instance of GRIDobj
+- [x] CONTOUR              : contour plot of an instance of GRIDobj
 - [ ] COORD2IND            : convert x and y coordinates to linear index
 - [ ] COORD2SUB            : convert x and y coordinates to subscripts into a GRIDobj
 - [ ] CREATEMASK           : create a binary mask using polygon mapping
@@ -44,7 +44,7 @@ Changed refmat to wf (worldfile). Referencing matrices are no longer supported b
 - [ ] GETEXTENT            : return extent of a GRIDobj
 - [ ] GETOUTLINE           : get or plot extent of GRIDobj
 - [ ] GRADIENT8            : 8-connected neighborhood gradient of a digital elevation model
-- [ ] GRIDDEDCONTOUR       : plot contours on grid
+- [x] GRIDDEDCONTOUR       : plot contours on grid
 - [ ] HEXGRID              : creates an array of haxagonal points
 - [ ] HILLSHADE            : create hillshading from a digital elevation model (GRIDobj)
 - [ ] HISTOGRAM            : Plot frequency distribution of values in GRIDobj
