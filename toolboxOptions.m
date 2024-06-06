@@ -61,9 +61,13 @@ function opts = toolboxOptions
     platforms.MatlabOnline = true;
     opts.SupportedPlatforms = platforms; 
 
-    % opts.Description = 
+    opts.Description = append("TopoToolbox provides a set of MATLAB functions ",...
+        "for the analysis of digital elevation models (DEMs). TopoToolbox derives ",...
+        "flow networks and focuses on the analysis of river networks. The major aim ",...
+        "of TopoToolbox is to offer analytical GIS utilities in a non-GIS environment ",...
+        "to integrate GIS-specific and other quantitative methods.");
 
-    % opts.Summary = 
+    opts.Summary = "A MATLAB software for the analysis of digital elevation models";
 
     opts.AuthorName = "Wolfgang Schwanghart, Dirk Scherler";
 
@@ -74,7 +78,7 @@ function opts = toolboxOptions
     % Path to the toolbox image file. Can be specified as a relative or
     % absolute path.
     %
-    % opts.ToolboxImageFile = 
+    opts.ToolboxImageFile = fullfile("images","tt3_logo.png"); 
 
     % Files to be packaged in the toolbox, string vector. By default,
     % ToolboxFiles contains the list of all files in toolboxFolder.

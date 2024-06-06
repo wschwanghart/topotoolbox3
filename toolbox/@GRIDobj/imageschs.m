@@ -29,6 +29,10 @@ function rgb = imageschs(DEM,A,varargin)
 %     graphics engine introduced in R2014b and will throw errors when used
 %     with older versions.
 %
+%     If the DEM has a geographic coordinate system (isGeographic(DEM)),
+%     the function will calculate the average spatial resolution in
+%     longitudinal direction and adjust DEM exaggeration accordingly. 
+%
 % Input
 %
 %     DEM         digital elevation model (GRIDobj)
@@ -76,9 +80,11 @@ function rgb = imageschs(DEM,A,varargin)
 %     azimuth          azimuth angle of illumination, (default=315)
 %     altitude         altitude angle of illumination, (default=60)
 %     exaggerate       elevation exaggeration (default=2). Increase to
-%                      pronounce elevation differences in flat terrain. If
-%                      the DEM is in geographic coordinates, use a value of
-%                      0.000003.
+%                      pronounce elevation differences in flat terrain. 
+%     gcsadjust        {true} or false. If true, and if the DEM is in a
+%                      geographic coordinate system, then exaggeration will
+%                      be adjusted to the cellsize in the center of the
+%                      grid.
 %     ticklabels       'default', 'nice' or 'none'
 %     tickstokm        true or {false}. If set to true, coordinates will be
 %                      divided by 1000.
@@ -86,7 +92,6 @@ function rgb = imageschs(DEM,A,varargin)
 %     gridmarkercolor  three element vector (rgb) or color abbreviations
 %                      as given in LineSpec (default = 'k')
 %                 
-%
 % Output
 %
 %     RGB         [DEM.size 3] image (UINT8) with values between 0 and 255
@@ -150,7 +155,7 @@ function rgb = imageschs(DEM,A,varargin)
 % See also: HILLSHADE
 %
 % Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 13. June, 2016
+% Date: 4. June, 2024
 
 
 % Change log
@@ -164,6 +169,7 @@ function rgb = imageschs(DEM,A,varargin)
 % 13.6.2016: added option makepermanent
 % 14.6.2016: added options 
 % 06.4.2018: new example
+% 04.6.2024: changed to be fit for TopoToolbox 3
 
 persistent H
 
@@ -197,27 +203,28 @@ p.FunctionName = 'GRIDobj/imageschs';
 addRequired(p,'DEM',@(x) isa(x,'GRIDobj'));
 addRequired(p,'A',@(x) isa(x,'GRIDobj') || ismatrix(A));
 % optional
-addParamValue(p,'colormap',defaultcolormap,@(x)(ischar(x) || size(x,2)==3));
-addParamValue(p,'caxis',[],@(x) numel(x) == 2);
-addParamValue(p,'percentclip',[],@(x) isscalar(x) && x>=0 && x<50);
-addParamValue(p,'truecolor',defaulttruecolor,@(x) isequal(size(x),[1 3]) && (max(x)<=1) && (min(x) >= 0));
-addParamValue(p,'falsecolor',defaultfalsecolor,@(x) isequal(size(x),[1 3]) && (max(x(:))<=1) && (min(x(:)) >= 0));
-addParamValue(p,'nancolor',defaultnancolor,@(x) isequal(size(x),[1 3]) && (max(x(:))<=1) && (min(x(:)) >= 0));
-addParamValue(p,'exaggerate',defaultexaggerate,@(x) isscalar(x) && x>0);
-addParamValue(p,'azimuth',defaultazimuth ,@(x) isscalar(x) && x>0);
-addParamValue(p,'altitude',defaultaltitude,@(x) isscalar(x) && x>0);
-addParamValue(p,'colorbar',defaultcolorbar,@(x) isscalar(x));
-addParamValue(p,'medfilt',defaultmedfilt,@(x) isscalar(x));
-addParamValue(p,'ticklabels','default',@(x) ischar(x));
-addParamValue(p,'gridmarkers',[],@(x) numel(x) == 1 || numel(x) == 2);
-addParamValue(p,'gridmarkercolor','k');
-addParamValue(p,'useparallel',true);
-addParamValue(p,'usepermanent',false);
-addParamValue(p,'colorbarlabel',[],@(x) ischar(x));
-addParamValue(p,'colorbarylabel',[],@(x) ischar(x));
-addParamValue(p,'tickstokm',false,@(x) isscalar(x));
-addParamValue(p,'method','surfnorm');
-addParamValue(p,'brighten',0,@(x) x>=-1 & x <= 1);
+addParameter(p,'colormap',defaultcolormap,@(x)(ischar(x) || size(x,2)==3));
+addParameter(p,'caxis',[],@(x) numel(x) == 2);
+addParameter(p,'percentclip',[],@(x) isscalar(x) && x>=0 && x<50);
+addParameter(p,'truecolor',defaulttruecolor,@(x) isequal(size(x),[1 3]) && (max(x)<=1) && (min(x) >= 0));
+addParameter(p,'falsecolor',defaultfalsecolor,@(x) isequal(size(x),[1 3]) && (max(x(:))<=1) && (min(x(:)) >= 0));
+addParameter(p,'nancolor',defaultnancolor,@(x) isequal(size(x),[1 3]) && (max(x(:))<=1) && (min(x(:)) >= 0));
+addParameter(p,'exaggerate',defaultexaggerate,@(x) isscalar(x) && x>0);
+addParameter(p,'azimuth',defaultazimuth ,@(x) isscalar(x) && x>0);
+addParameter(p,'altitude',defaultaltitude,@(x) isscalar(x) && x>0);
+addParameter(p,'colorbar',defaultcolorbar,@(x) isscalar(x));
+addParameter(p,'medfilt',defaultmedfilt,@(x) isscalar(x));
+addParameter(p,'ticklabels','default',@(x) ischar(x));
+addParameter(p,'gridmarkers',[],@(x) numel(x) == 1 || numel(x) == 2);
+addParameter(p,'gridmarkercolor','k');
+addParameter(p,'useparallel',true);
+addParameter(p,'usepermanent',false);
+addParameter(p,'colorbarlabel',[],@(x) ischar(x));
+addParameter(p,'colorbarylabel',[],@(x) ischar(x));
+addParameter(p,'tickstokm',false,@(x) isscalar(x));
+addParameter(p,'method','surfnorm');
+addParameter(p,'brighten',0,@(x) x>=-1 & x <= 1);
+addParameter(p,'gcsadjust',true)
 parse(p,DEM,A,varargin{:});
 
 % required
@@ -237,7 +244,15 @@ colorBarLabel  =p.Results.colorbarlabel;
 colorBarYLabel =p.Results.colorbarylabel;
 meth       = validatestring(p.Results.method,{'default','surfnorm','mdow'});
 
-
+% If the DEM is in a geographic coordinate system, adjust exaggeration
+% according to the pixel width in the center of the DEM.
+if isGeographic(DEM) && p.Results.gcsadjust
+    [lon,lat] = getcoordinates(DEM);
+    mlat = mean(lat);
+    dlon = distance(mlat,lon(1),mlat,lon(2),DEM.georef.GeographicCRS.Spheroid);
+    exag = exag*(DEM.cellsize)/dlon;
+end
+    
 ticklabels = validatestring(p.Results.ticklabels,{'default','none','nice'});
 gridmarkers= p.Results.gridmarkers;
 gridmarkercolor = p.Results.gridmarkercolor;
@@ -284,13 +299,9 @@ nhs = 256;
 if usepermanent && isequal(size(H),DEM.size)
 
 else
-    H = hillshade(DEM,'exaggerate',exag,'azimuth',azi,'altitude',alti,'useparallel',p.Results.useparallel,'method',meth);
-%     switch meth
-%         case 'default'    
-%             H = hillshade(DEM,'exaggerate',exag,'azimuth',azi,'altitude',alti,'useparallel',p.Results.useparallel);
-%         case 'mdow'
-%             H = hillshademdow(DEM,'exaggerate',exag,'useparallel',p.Results.useparallel);
-%     end
+    H = hillshade(DEM,'exaggerate',exag,'azimuth',azi,'altitude',alti,...
+        'useparallel',p.Results.useparallel,'method',meth);
+
     H = H.Z;
     Inan = isnan(H);
     if any(Inan(:))

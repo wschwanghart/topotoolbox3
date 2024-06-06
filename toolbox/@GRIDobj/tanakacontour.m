@@ -6,13 +6,28 @@ function tanakacontour(DEM,nlevels)
 %
 %     tanakacontour(DEM,nlevels)
 %
+% Description
+%
+%     Tanaka contours, also known as illuminated contours, are a
+%     cartographic technique used to enhance the visual representation of
+%     contour lines on maps. This method was developed by Japanese
+%     geographer Kitiro Tanaka in the early 20th century. Tanaka contours
+%     aim to simulate the effect of light and shadow to create a
+%     three-dimensional appearance, making the terrain easier to interpret.
+%
+% Input arguments
+%
+%     DEM       GRIDobj
+%     nlevels   number of contours (default = 10)
+%
 % See also: contourf, hillshade
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 8. December, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 6. June, 2024
 
-if nargin == 1
-    nlevels = 10;
+arguments
+    DEM  GRIDobj
+    nlevels = 10
 end
 
 % calculate solar vector

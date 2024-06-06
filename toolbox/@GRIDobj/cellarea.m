@@ -1,60 +1,54 @@
-function CA = cellarea(DEM,unit)
+function CA = cellarea(DEM)
 
-%CELLAREA calculate cell areas of a GRIDobj in geographic coordinate system
+%CELLAREA Calculate cell areas of a GRIDobj in geographic coordinate system
 %
 % Syntax
 %
 %     CA = cellarea(DEM)
-%     CA = cellarea(DEM,unit)
 %
 % Description
 %
 %     cellarea returns the area for each cell in the DEM with a geographic 
-%     coordinate system (requires the mapping toolbox).
+%     coordinate system (requires the mapping toolbox). DEM must have a
+%     geographic coordinate system.
 %
 % Input arguments
 %
 %     DEM     GRIDobj
-%     unit    'm' (default) or 'km' (returns either m^2 or km^2)
 %
 % Output arguments
 %
-%     CA      cell areas (GRIDobj)
+%     CA      cell areas (GRIDobj) in m^2.
 %
-% 
+% See also: GRIDobj/isGeographic 
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 20. May, 2016
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. June, 2024
 
-if nargin == 1
-    unit = 'm';
+arguments
+    DEM   GRIDobj
 end
 
-try 
-	GST = DEM.georef.SpatialRef.CoordinateSystemType;
-catch
-	GST = 'geographic';
+if isProjected(DEM)
+    error("DEM must have a geographic coordinate system.")
 end
 
-switch GST
-    case 'geographic'
-    otherwise
-        error('DEM has a projected coordinate system')
+if isGeographic(DEM)
+    % There is a geocellreference or geopostingsreference
+    unit = DEM.georef.GeographicCRS.Spheroid.LengthUnit;
+    unit = validatestring(unit,{'meter','kilometer'});
+    [~,ca] = areamat(true(DEM.size),DEM.georef);
+    total_surface_area = 1;
+    switch unit
+        case 'kilometer'
+            scale = 1e-6;
+        otherwise
+            scale = 1;
+    end
+else
+    error('DEM must have a geographic coordinate system.')
 end
 
-
-switch lower(unit)
-    case 'm'
-        scale = 1e6;
-    case 'km'
-        scale = 1;
-    otherwise
-        error('unknown unit')
-end
-
-total_surface_area = 510072000; %km^2
-
-[~,ca] = areamat(true(DEM.size),DEM.refmat);
 ca = total_surface_area * ca * scale;
 
 CA   = DEM;

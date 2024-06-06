@@ -46,8 +46,8 @@ function DEM = reclassify(DEM,varargin)
 %
 % See also: k_means, graythresh
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 28. March, 2023
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. May, 2024
 
 narginchk(1,3)
 
@@ -83,10 +83,10 @@ switch method
         if inan
             DEM.Z(~INAN) = mat2gray(DEM.Z(~INAN));
             DEM.Z = grayslice(DEM.Z,num);
-            if num == 256;
+            if num == 256
                 DEM.Z = double(DEM.Z) + 1;
                 DEM.Z(INAN) = nan;
-            elseif num < 256;
+            elseif num < 256
                 DEM.Z = DEM.Z + 1;
                 DEM.Z(INAN) = 0;
             else

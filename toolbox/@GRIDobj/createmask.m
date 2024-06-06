@@ -1,11 +1,11 @@
-function MASK = createmask(DEM,usehillshade)
+function [MASK,pos] = createmask(DEM,options)
 
-%CREATEMASK create a binary mask using polygon mapping
+%CREATEMASK Create a binary mask using polygon mapping
 %
 % Syntax
 %
 %     MASK = createmask(DEM)
-%     MASK = createmask(DEM,usehillshade)
+%     MASK = createmask(DEM,pn,pv,...)
 %
 % Description
 %
@@ -15,50 +15,68 @@ function MASK = createmask(DEM,usehillshade)
 % Input arguments
 %
 %     DEM           GRIDobj
-%     usehillshade  use hillshade as background image ({false} or true)
+%
+%     Parameter name/value pairs
+%
+%     'hillshade'  use hillshade as background image ({false} or true)
+%     'rect'       mask is an axis-aligned rectangle
 %
 % Output arguments
 %
 %     MASK   GRIDobj with logical mask
+% 
+% Example
 %
-%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     BW = createmask(DEM);
+%     DEM = clip(DEM,~BW);
+%     DEM =  inpaintnans(DEM);
+%     imageschs(DEM)
+%    
 % See also: imroi, GRIDobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 6. June, 2024
 
-if nargin == 1
-    usehillshade = false;
+arguments
+    DEM  GRIDobj
+    options.hillshade = false
+    options.rect      = false
 end
 
 figure
-if usehillshade
-   imageschs(DEM);
+if options.hillshade
+    imageschs(DEM);
 else
-   imagesc(DEM);
+    imagesc(DEM);
 end
-title('Create polygon');
-usedrawpolygon = ~verLessThan('matlab','9.5');
-if usedrawpolygon
-    ext = getextent(DEM);  
+
+if ~options.rect
+    title('Draw polygon');
+else
+    title('Draw rectangle');
+end
+
+if ~options.rect
+    ext = getextent(DEM);
 
     h = drawpolygon('DrawingArea',...
         [ext(1) ext(3) ext(2)-ext(1) ext(4)-ext(3)]);
     pos = customWait(h);
 else
-    h = impoly; 
-    pos = wait(h);
+    ext = getextent(DEM);
+
+    h = drawrectangle('DrawingArea',...
+        [ext(1) ext(3) ext(2)-ext(1) ext(4)-ext(3)]);
+    pos = customWait(h);
 end
 
 MASK = DEM;
 MASK.name = 'mask';
 MASK.Z = createMask(h);
 
-if usedrawpolygon
-    pos = h.Position;
-else
-    pos = getPosition(h);
-end
+pos = h.Position;
+
 delete(h);
 hold on
 plot(pos([1:end 1],1),pos([1:end 1],2));

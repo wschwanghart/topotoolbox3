@@ -1,4 +1,4 @@
-function [X,Y] = hexgrid(DEM,d)
+function [X,Y,VGrid] = hexgrid(DEM,d)
 
 %HEXGRID creates an array of haxagonal points
 %
@@ -66,8 +66,9 @@ sx(1:2:end) = sx(1:2:end)+1;
 dX = repmat(sx.*dx/2,[1,nc]);
 X = X + dX;
 
-% if nargout == 3
-%     DT = delaunayTriangulation(X,Y);
-%     [V,r] = voronoiDiagram(DT);
-% 
-% end
+if nargout == 3
+    DT = delaunayTriangulation(X(:),Y(:));
+    [V,r] = voronoiDiagram(DT);
+
+
+end

@@ -1,6 +1,6 @@
 function OUT = aspect(DEM,classify)
 
-%ASPECT angle of exposition from a digital elevation model (GRIDobj)
+%ASPECT Direction of the steepest slope
 %
 % Syntax
 %
@@ -41,15 +41,12 @@ function OUT = aspect(DEM,classify)
 %
 % See also: GRIDobj/gradient8, GRIDobj/reclassify
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 5. June, 2024
 
-narginchk(1,2)
-
-if nargin == 1
-    classify = false;
-else
-   
+arguments
+    DEM   GRIDobj
+    classify = false
 end
 
 OUT     = DEM;
@@ -71,8 +68,6 @@ end
 
 OUT.name = 'aspect';
 OUT.zunit = 'degree';
-
-
 
 
 function ASP = aspfun(Z) 

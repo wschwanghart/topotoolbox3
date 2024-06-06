@@ -4,7 +4,7 @@ function [Z,R,wf] = createRasterFromFile(filename,options)
 %
 % Syntax
 %
-%     [Z,R] = createRasterFromFile(filename,options)
+%     [Z,R,wf,GeoKeyDirTag] = createRasterFromFile(filename,options)
 %
 % Description
 %
@@ -25,8 +25,18 @@ if license('test','MAP_Toolbox')
         'CoordinateSystemType',options.CoordinateSystemType);
     wf = worldFileMatrix(R);
 
-    % check, if R contains a projcrs or a geocrs
-
+    % [~,~,ext] = fileparts(filename);
+    % switch lower(ext)
+    %     case {'.tif','.tiff'}
+    %         in = geotiffinfo(filename);
+    %         try
+    %             GeoKeyDirTag = in.GeoTIFFTags.GeoKeyDirectoryTag;
+    %         catch
+    %             GeoKeyDirTag = [];
+    %         end
+    %     otherwise
+    %         GeoKeyDirTag = [];
+    % end
 
 else
 
@@ -67,7 +77,9 @@ else
                     'extension ' worldfileext '. If a world file is not\n' ...
                     'available, check other options to construct a GRIDobj.'])
             end
+            
     end
+    GeoKeyDirTag = [];
 
 end
 

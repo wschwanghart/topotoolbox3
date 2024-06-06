@@ -52,10 +52,10 @@ function [RGB,x,y] = GRIDobj2rgb(DEM,varargin)
 %     RGB5 = uint8(single(RGB3) .* (single(RGB4)/255));
 %     image(x,y,RGB5)
 %
-% See also: imageschs, GRIDobj2im
+% See also: GRIDobj/imageschs, GRIDobj/GRIDobj2im
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 21. February, 2023
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 6. June, 2024
 
 % Parse input
 p = inputParser;

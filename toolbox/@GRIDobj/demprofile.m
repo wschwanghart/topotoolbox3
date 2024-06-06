@@ -66,7 +66,7 @@ if nargin <= 2
     end
     
 else
-    if n ~= numel(x);
+    if n ~= numel(x)
         x = x(:);
         y = y(:);
         do = getdistance(x,y);

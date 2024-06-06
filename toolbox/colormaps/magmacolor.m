@@ -37,7 +37,7 @@ function clr = magmacolor(n)
 % Date: 18. August, 2017
 
 if nargin == 0
-    n = 256;
+    n = 255;
 end
 
 magma_data = [[0.001462, 0.000466, 0.013866];...

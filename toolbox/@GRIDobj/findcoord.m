@@ -5,11 +5,14 @@ function varargout = findcoord(DEM)
 % Syntax
 %
 %     [x,y] = findcoord(DEM)
-%     [x,y,val] = findcoord(DEM)
+%     [lon,lat] = findcooord(DEM)
+%     [...,val] = findcoord(DEM)
 %
 % Description
 %
-%     This function returns the coordinates of nonzero values in DEM. 
+%     This function returns the coordinates of nonzero values in DEM. If 
+%     the DEM is in a geographic coordinate system, then the function
+%     returns lon and lat.
 %
 % Input arguments
 %
@@ -22,8 +25,8 @@ function varargout = findcoord(DEM)
 %
 % See also: find, GRIDobj/coord2ind, GRIDobj/ind2coord, GRIDobj/find           
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 10. December, 2014
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 4. June, 2024
 
 ix = find(DEM);
 [x,y] = ind2coord(DEM,ix);

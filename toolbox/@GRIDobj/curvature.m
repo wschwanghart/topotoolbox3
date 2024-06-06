@@ -1,6 +1,6 @@
-function C = curvature(DEM,ctype,varargin)
+function C = curvature(DEM,ctype,options)
 
-%CURVATURE 8-connected neighborhood curvature of a digital elevation model 
+%CURVATURE Curvature of a digital elevation model 
 %
 % Syntax
 %
@@ -59,33 +59,28 @@ function C = curvature(DEM,ctype,varargin)
 %
 % See also: GRIDobj/gradient8
 %        
-% Author:  Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author:  Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 5. May, 2024
 
-
-% check input arguments
-narginchk(1,inf);
-if nargin == 1
-    ctype = 'profc';
-else
-    ctype = validatestring(ctype,{'profc','planc','tangc','meanc','total'});
+arguments
+    DEM    GRIDobj
+    ctype {mustBeTextScalar} = 'profc'
+    options.meanfilt = false
+    options.useblockproc = false
+    options.blocksize = 5000
+    options.useparallel = false
 end
 
-p = inputParser;
-p.FunctionName = 'GRIDobj/curvature';
-addParamValue(p,'useblockproc',false,@(x) isscalar(x));
-addParamValue(p,'blocksize',5000,@(x) isscalar(x));
-addParamValue(p,'useparallel',false,@(x) isscalar(x));
-addParamValue(p,'meanfilt',false,@(x) isscalar(x));
-parse(p,varargin{:});
+% Validate curvature type
+ctype = validatestring(ctype,{'profc','planc','tangc','meanc','total'});
 
-if p.Results.meanfilt
+if options.meanfilt
     DEM = filter(DEM);
 end
 
 % create a copy of the DEM instance
 C = DEM;
-c = class(DEM.Z);
+c = underlyingType(DEM);
 switch c
     case 'double'
         C.Z = double.empty(0,0);
@@ -96,14 +91,14 @@ end
 % Large matrix support. Break calculations in chunks using blockproc
 % Parallisation for large grids using blockproc does in my experience with
 % four cores hardly increase the speed. 
-if p.Results.useblockproc
-    blksiz = bestblk(size(DEM.Z),p.Results.blocksize); 
+if options.useblockproc
+    blksiz = bestblk(size(DEM.Z),options.blocksize); 
     cs  = C.cellsize;
     fun = @(x) curvaturesub(x,cs,ctype); 
     C.Z = blockproc(DEM.Z,blksiz,fun,...
            'BorderSize',[1 1],...
            'Padmethod','symmetric',...
-           'UseParallel',p.Results.useparallel);
+           'UseParallel',options.useparallel);
 else
     C.Z = curvaturesub(DEM.Z,C.cellsize,ctype);
 end

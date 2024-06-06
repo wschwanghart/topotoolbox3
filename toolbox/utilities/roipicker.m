@@ -1,4 +1,4 @@
-function ext = roipicker(varargin)
+function ext = roipicker(options)
 
 %ROIPICKER Choose region in geoaxes
 %
@@ -45,15 +45,15 @@ function ext = roipicker(varargin)
 %
 % Date: 28. September, 2022
 
-% Parse inputs 
-p = inputParser;
-p.FunctionName = 'roipicker';
-addParameter(p,'basemap','topographic')
-addParameter(p,'ellipsoid',referenceSphere('earth','km'));
-addParameter(p,'ask',true)
-addParameter(p,'drawingarea',[-90 -180 180 360])
-addParameter(p,'requestlimit',inf) % in km
-parse(p,varargin{:})
+arguments
+    options.basemap = 'topographic'
+    options.ellipsoid = referenceSphere('earth','km')
+    options.ask = true
+    options.drawingarea = [-90 -180 180 360]
+    options.requestlimit = inf
+
+end
+
 
 % Define ext 
 ext = [];
@@ -68,7 +68,7 @@ mfig = figure('Units','Normalized','Position',[0.20 .1 .70 .80],...
 
 % Create map
 warning off
-gx = geoaxes(mfig,'Basemap',p.Results.basemap);
+gx = geoaxes(mfig,'Basemap',options.basemap);
 gx.Toolbar.Visible = 'on';
 enableDefaultInteractivity(gx)
 
@@ -106,14 +106,14 @@ items = {'topographic','satellite','landcover','streets-light',...
          'colorterrain', 'bluegreen', 'darkwater','grayland'};
 
 dd1 = uidropdown(grid1,'Editable','off','Items',items,...
-    'ValueChangedFcn',@(dd,event) basemapselect(dd,p));
+    'ValueChangedFcn',@(dd,event) basemapselect(dd,options));
 
 % Labels to display information about
 lbl1 = uilabel(grid1,"Text",'Area = NaN', 'Interpreter','html',...
     'FontName','Arial');
 lbl2 = uilabel(grid1,"Text",'Extent = NaN');
 
-if p.Results.ask
+if options.ask
 cfig.CloseRequestFcn = @my_closereq;
 mfig.CloseRequestFcn = @my_closereq;
 end
@@ -142,7 +142,7 @@ waitfor(b5,'UserData');
             b4.Enable = false;
             b5.Enable = false;
 
-            roi = drawrectangle(gx,'DrawingArea',p.Results.drawingarea,...
+            roi = drawrectangle(gx,'DrawingArea',options.drawingarea,...
                 'Deletable', false);
             displayarea
             addlistener(roi,'MovingROI',@allevents);
@@ -214,7 +214,7 @@ waitfor(b5,'UserData');
 
         roi = drawrectangle(gx,'Position',[latLimits(1) lonLimits(1) ...
             latLimits(2)-latLimits(1) lonLimits(2)-lonLimits(1)],...
-            'DrawingArea',p.Results.drawingarea);
+            'DrawingArea',options.drawingarea);
         displayarea
         addlistener(roi,'MovingROI',@allevents);
         addlistener(roi,'ROIMoved',@allevents);
@@ -276,10 +276,10 @@ waitfor(b5,'UserData');
         pos(3) = pos(3)+pos(1);
         pos(4) = pos(4)+pos(2);
 
-        area    = areaquad(pos(1),pos(2),pos(3),pos(4),p.Results.ellipsoid);
+        area    = areaquad(pos(1),pos(2),pos(3),pos(4),options.ellipsoid);
         areastr = ['Area: ' num2str(area,2) ' km<sup>2</sup>'];
         
-        if area > p.Results.requestlimit
+        if area > options.requestlimit
             lbl1.FontColor = 'r';
             b5.Enable = false;
             areastr = [areastr ' (ROI too large)'];

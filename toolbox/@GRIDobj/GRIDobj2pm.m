@@ -1,6 +1,6 @@
 function [X,ix,txt,txtname] = GRIDobj2pm(varargin)
 
-%GRIDobj2pm combine several GRIDobj into a predictor matrix
+%GRIDobj2pm Combine several GRIDobjs into a predictor matrix
 %
 % Syntax
 %
@@ -43,11 +43,11 @@ function [X,ix,txt,txtname] = GRIDobj2pm(varargin)
 %     imageschs(DEM,CL)
 %     
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 6. June, 2024
 
 
-if ischar(varargin{end});
+if ischar(varargin{end})
     usetall = true;
     nrgrids = nargin - 1;
 else

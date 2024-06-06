@@ -61,13 +61,12 @@ if ~isa(res,'GRIDobj')
     zone = str2double(zone(1:end-1));
 else
     zone = [];
-    hemisphere = [];
-    
+    hemisphere = []; 
 end
 
 % parse input arguments 
 p = inputParser;
-validmethods = {'bicubic','bilinear','nearest','linear'}; 
+validmethods = {'cubic','linear','nearest'}; 
 p.FunctionName = 'GRIDobj/reproject2UTM';
 % required
 addRequired(p,'DEM',@(x) isa(x,'GRIDobj'));

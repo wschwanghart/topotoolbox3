@@ -1,4 +1,4 @@
-function varargout = evansslope(DEM,varargin)
+function varargout = evansslope(DEM,options)
 
 %EVANSSLOPE Calculate surface slope using Evans method
 %
@@ -47,18 +47,19 @@ function varargout = evansslope(DEM,varargin)
 %
 % See also: GRIDobj/gradient8, GRIDobj/arcslope, GRIDobj/curvature
 %        
-% Author:  Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 5. January, 2023
+% Author:  Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 6. June, 2024
 
-% Parse input arguments
-p = inputParser;
-p.FunctionName = 'GRIDobj/evansslope';
-addParameter(p,'padval','replicate')
-addParameter(p,'modified',false)
-addParameter(p,'removenans',true)
-parse(p,varargin{:})
+arguments
+    DEM    GRIDobj
+    options.padval = 'replicate'
+    options.modified = false
+    options.removenans = true
+end
 
-if p.Results.removenans
+% Remove nans by inpainting of holes and nearest neighbor interpolation, 
+% otherwise 
+if options.removenans
     I = isnan(DEM);
 
     if any(I)
@@ -73,15 +74,15 @@ if p.Results.removenans
 end
       
 
-if p.Results.modified
+if options.modified
     kernel = [0 1 0; 1 41 1; 0 1 0]/45;
     DEM.Z = conv2(padarray(DEM.Z,[1 1],'replicate'),kernel,'valid');
 end
 
-if ischar(p.Results.padval) || isstring(p.Results.padval)
-    padval = validatestring(p.Results.padval,{'none','replicate','symmetric','circular'});
+if ischar(options.padval) || isstring(options.padval)
+    padval = validatestring(options.padval,{'none','replicate','symmetric','circular'});
 else
-    padval = p.Results.padval;
+    padval = options.padval;
 end
 
 switch lower(padval)
@@ -101,7 +102,7 @@ fy = conv2(dem,kernel,shape);
 
 if nargout == 1
     
-    switch lower(p.Results.padval)
+    switch lower(options.padval)
         case 'none'
             varargout{1} = GRIDobj(DEM)*nan;
             varargout{1}.Z(2:end-1,2:end-1) = sqrt(fx.^2 + fy.^2);
@@ -114,7 +115,7 @@ if nargout == 1
         varargout{1} = clip(varargout{1},~I);
     end
 else
-    switch lower(p.Results.padval)
+    switch lower(options.padval)
         case 'none'
             varargout{1} = GRIDobj(DEM)*nan;
             varargout{1}.Z(2:end-1,2:end-1) = fx;

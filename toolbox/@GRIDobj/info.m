@@ -50,7 +50,7 @@ disp(['  coordinate system:     ' ' undefined (.georef empty)'])
 else
 if tf
 disp(['  coordinate system:     ' ' Geographic coordinate system'])
-disp(['                          '  DEM.georef.GeographicCRS.Name])
+disp(['                          '  char(DEM.georef.GeographicCRS.Name)])
 else
 disp(['  coordinate system:     ' ' Projected coordinate system'])
 disp(['                          '  char(DEM.georef.ProjectedCRS.Name)])

@@ -1,6 +1,6 @@
 function DEMr = project(SOURCE,TARGET,varargin)
 
-%PROJECT transforms a GRIDobj between projected coordinate systems
+%PROJECT Warps a GRIDobj to a different coordinate system
 %
 % Syntax
 %
@@ -10,20 +10,24 @@ function DEMr = project(SOURCE,TARGET,varargin)
 % Description
 %
 %     project reprojects the GRIDobj 'SOURCE' to have the same projection
-%     as the GRIDobj 'TARGET'. Both GRIDobj's need to have an mstruct in
-%     their 'georef' fields. If SOURCE does not, then it is assumed to have
-%     a geographic coordinate system (horizontal WGS84 datum). The function
-%     transforms the projected coordinates first to geographic coordinates
-%     and then back to projected coordinates using the functions mfwdtran
-%     and minvtran (both part of the Mapping Toolbox). The spatial
-%     resolution of the output (OUT) will be the same as of TARGET, unless
-%     set differently by the optional variable res.
+%     as the GRIDobj 'TARGET'. Both GRIDobj's need to have a valid
+%     projection in their 'georef' properties. If SOURCE does not, then it
+%     is assumed to have a geographic coordinate system (horizontal WGS84
+%     datum). The function supports to project from geographic to projected
+%     coordinates, and from projected to geographic coordinates. It also
+%     supports transformation from a projected to another projected
+%     coordinate (via WGS84 geographic coordinates). The spatial resolution
+%     of the output (OUT) will be the same as of TARGET, unless set
+%     differently by the optional variable res.
 %
 % Input arguments
 %
 %     SOURCE         instance of GRIDobj that shall be transformed
-%     TARGET         instance of GRIDobj with the target projection or 
-%                    mapping projection structure (mstruct)
+%     TARGET         instance of GRIDobj with the target projection. 
+%                    Alternatively, target can be a raster reference object
+%                    (MapCellReference, GeoCellReference, ...) or it can be
+%                    a EPSG number which is accepted by the function
+%                    projcrs or geocrs.
 %
 %     Parameter name/value pairs
 %     
@@ -45,8 +49,13 @@ function DEMr = project(SOURCE,TARGET,varargin)
 %
 %     OUT            instance of GRIDobj
 %
+% Example
 %
-% See also: GRIDobj, reproject2utm, egm96heights
+%    DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%    DEMgcs = project(DEM,4326,res = 0.001);
+%    imageschs(DEMgcs)
+%
+% See also: GRIDobj, GRIDobj/reproject2utm, egm96heights, imtransform
 %
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de) and Wolfgang
 %         Schwanghart (schwangh[at]uni-potsdam.de)
@@ -192,14 +201,12 @@ else
         'XYScale',[Rtarget.PixelExtentInWorldX Rtarget.PixelExtentInWorldY],...
         'Fillvalues',fillval,'size',Rtarget.ImageSize); % ,xdata,ydata
 end
- 
-% Znew = flipud(Znew); 
 
 if p.Results.align && targetisGRIDobj
     % If aligned, this is easy. The transformed GRIDobj will be perfectly
     % aligned with TARGET
     DEMr = TARGET;
-    DEMr.Z = Znew;
+    DEMr.Z = flipud(Znew);
 else
     % We have calculated the imtransform with 'ColumnsStartFrom' south. 
     % GRIDobjs use 'ColumnsStartFrom' north
@@ -328,18 +335,12 @@ if isempty(SOURCE.georef)
     sourceisproj = false;
     prj = [];
 else
-    try 
-        prj = SOURCE.georef.ProjectedCRS;
-        sourceisproj = true;
-    catch
-        try
+    if isProjected(SOURCE)
+            prj = SOURCE.georef.ProjectedCRS;
+            sourceisproj = true;
+    else        
             prj = SOURCE.georef.GeographicCRS;
             sourceisproj = false;
-        catch
-            prj = [];
-            sourceisproj = false;
-
-        end
     end
 end
 end
@@ -347,15 +348,16 @@ end
 %% ----------------------------------------------------------------------
 % functions to create imref2d objects
 function [R,Z] = GRIDobj2imref2d(DEM,isproj)
+RM = DEM.georef;
 if isproj
-    R = imref2d(DEM.georef.RasterSize,...
-        DEM.georef.XWorldLimits,DEM.georef.YWorldLimits);
-    columnsStartNorth = strcmp(DEM.georef.ColumnsStartFrom,'north');
+    R = imref2d(RM.RasterSize,...
+        RM.XWorldLimits,RM.YWorldLimits);
+    columnsStartNorth = strcmp(RM.ColumnsStartFrom,'north');
 else
-    if ~isempty(DEM.georef)
-        R = imref2d(DEM.georef.RasterSize,...
-            DEM.georef.LongitudeLimits,DEM.georef.LatitudeLimits);
-        columnsStartNorth = strcmp(DEM.georef.ColumnsStartFrom,'north');
+    if ~isempty(RM)
+        R = imref2d(RM.RasterSize,...
+            RM.LongitudeLimits,RM.LatitudeLimits);
+        columnsStartNorth = strcmp(RM.ColumnsStartFrom,'north');
     else
         [x,y] = getcoordinates(DEM);
         if y(1) > y(end)

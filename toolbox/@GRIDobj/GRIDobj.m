@@ -137,7 +137,10 @@ classdef GRIDobj
 %    GeographicPostingsRefernce object if the Mapping Toolbox is available.
 %    These objects contain a projcrs or geocrs object which stores the type
 %    of coordinate reference system. This information is required if a
-%    GRIDobj or any output shall be stored as georeferenced data.
+%    GRIDobj or any output shall be stored as georeferenced data. In
+%    addition, the georef stores a structure array (GeoKeyDirTag), which is
+%    only non-empty if the GRIDobj was created from a geotiff-file. It is
+%    required to export a GRIDobj as geotiff (see GRIDobj2geotiff).
 %
 %    See also GRIDobj, geotiffinfo        
         georef    
@@ -191,6 +194,7 @@ classdef GRIDobj
                         y   = linspace(cs/2,siz(1)*cs-cs/2,siz(1))';
 
                         [Z,R,wf] = createRasterFromMat(x,y,Z);
+                        
                     else
                         % cs is a maprefpostings or georefpostings object
                         css = superclasses(class(cs));
@@ -202,7 +206,7 @@ classdef GRIDobj
 
                         Z = varargin{1};
                         R = varargin{2};
-                        wf = worldFileMatrix(R);
+                        wf = worldFileMatrix(R);                  
 
                         % check whether size of Z is same as in referencing
                         % object
@@ -247,9 +251,9 @@ classdef GRIDobj
                 end
 
                 if strcmp(cl,'logical')
-                    Z = false(DEM.size);
+                    Z = false(varargin{1}.size);
                 else
-                    Z = zeros(DEM.size,cl);
+                    Z = zeros(varargin{1}.size,cl);
                 end
                 R = varargin{1}.georef;
                 wf = varargin{1}.wf;
@@ -266,6 +270,8 @@ classdef GRIDobj
             DEM.zunit    = '';
             DEM.name     = '';
             DEM.georef   = R;
+            % DEM.georef.GeoKeyDirTag = GeoKeyDirTag;
+
 
         end
 

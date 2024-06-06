@@ -33,13 +33,13 @@ function varargout = find(DEM)
 
 nargoutchk(0,3);
 
-if isfloat(DEM.Z);
+if isUnderlyingNumeric(DEM)
     DEM.Z(isnan(DEM.Z)) = 0;
 end
 
-if nargout == 1;
+if nargout == 1
     varargout{1} = find(DEM.Z);
-elseif nargout == 2;
+elseif nargout == 2
     [varargout{1},varargout{2}] = find(DEM.Z);
 else
     [varargout{1},varargout{2},varargout{3}] = find(DEM.Z);

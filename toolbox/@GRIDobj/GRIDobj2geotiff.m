@@ -48,11 +48,15 @@ end
 
 % try to use geotiffwrite, which comes with the Mapping Toolbox
 try
-    if isempty(A.georef);
-        geotiffwrite(file,A.Z,A.refmat);
+    if isempty(A.georef)
+        geotiffwrite(file,A.Z,A.wf);
     else
-        geotiffwrite(file,A.Z,A.georef.SpatialRef,...
-            'GeoKeyDirectoryTag',A.georef.GeoKeyDirectoryTag);
+        GeoKeyDirectoryTag = createGeoKeyDirectoryTag(A);
+        geotiffwrite(file,A.Z,A.georef,...
+            "GeoKeyDirectoryTag",GeoKeyDirectoryTag ...
+            );
+        %geotiffwrite(file,A.Z,A.georef.SpatialRef,...
+        %    'GeoKeyDirectoryTag',A.georef.GeoKeyDirectoryTag);
     end
 catch ME
     warning('TopoToolbox:GRIDobj',...
@@ -61,21 +65,18 @@ catch ME
          'GRIDobj2geotiff instead writes a tif-image together with a world \n'...
          'file (*.tfw) which contains data on spatial referencing of the \n' ...
          'image, yet which lacks information on the type of projection used.']); 
-         
-         
+              
     % if geotiffwrite is not available or any other error occurs
     % a tif file will be written to the disk together with a worldfile
     % .tfw-file.
     [pathstr, name, ~] = fileparts(file);
-    k = refmat2worldfile(A.refmat);
-    dlmwrite(fullfile(pathstr,[name '.tfw']),k,'precision', '%.10f');
+    dlmwrite(fullfile(pathstr,[name '.tfw']),DEM.wf(:),'precision', '%.10f');
     A = A.Z;
-    
-    
+     
     siz = size(A);
     cla = class(A);
     
-    switch cla;
+    switch cla
         case 'double'
             BpS = 64;
             TSF = Tiff.SampleFormat.IEEEFP;
@@ -118,3 +119,64 @@ k(4,1) = r(1,2);
 k(5,1) = r(3,1)+k(1);
 k(6,1) = r(3,2)+k(4);
 end
+
+function GeoKeyDirectoryTag = createGeoKeyDirectoryTag(DEM)
+% Attempts to create a GeoKeyDirectoryTag from the referencing information
+% in the maprefcells object in R
+
+isproj = isProjected(DEM);
+
+% Projected or geographic?
+if isproj
+    GeoKeyDirectoryTag.GTModelTypeGeoKey = 1; % Projected coordinate system
+    GeoKeyDirectoryTag.GTCitationGeoKey = DEM.georef.ProjectedCRS.Name;
+    GeoKeyDirectoryTag.GeogCitationGeoKey = DEM.georef.ProjectedCRS.GeographicCRS.Name;
+    wkt = wktstring(DEM.georef.ProjectedCRS);
+    wkt = char(wkt);
+
+    epsg = extractEPSG(wkt);
+
+    % ix = strfind(wkt,'"EPSG",');
+    % c  = wkt(ix(end):end);
+    % c  = extractAfter(c,'"EPSG",');
+    % c  = extractBefore(c,']');
+
+    GeoKeyDirectoryTag.ProjectedCSTypeGeoKey = epsg(end); %str2double([hemisphere sprintf('%02d',str2double(zone(regexp(zone,'[0-9]'))))]);
+    GeoKeyDirectoryTag.ProjLinearUnitsGeoKey = 9001; % Linear_Meter
+else
+    GeoKeyDirectoryTag.GTModelTypeGeoKey = 2;
+    GeoKeyDirectoryTag.GTCitationGeoKey = DEM.georef.GeographicCRS.Name;
+    GeoKeyDirectoryTag.GeogCitationGeoKey = DEM.georef.GeographicCRS.Name;
+    % wkt = wktstring(DEM.georef.GeographicCRS);
+end
+
+% Reference = cells or postings?
+switch lower(DEM.georef.RasterInterpretation)
+    case 'cells'
+        GeoKeyDirectoryTag.GTRasterTypeGeoKey = 1; % RasterPixelIsArea
+    case 'postings'
+        GeoKeyDirectoryTag.GTRasterTypeGeoKey = 0; % RasterPixelIsPoint
+end
+
+GeoKeyDirectoryTag.GeogAngularUnitsGeoKey = 9102; %Angular_Degree
+
+end
+
+function epsgCode = extractEPSG(wktString)
+    % This function extracts the EPSG code from a WKT string.
+    %
+    % Input:
+    % wktString - A string containing the WKT representation of the CRS.
+    %
+    % Output:
+    % epsgCode - The EPSG code as a numeric value. Returns NaN if EPSG code is not found.
+
+    % Regular expression to find the EPSG code in the WKT string
+    pattern = 'ID\["EPSG",(\d+)\]';
+    matches = regexp(wktString, pattern, 'tokens');
+    if ~isempty(matches)
+        epsgCode = cellfun(@str2double,matches);
+    else
+        epsgCode = nan;
+    end
+end 

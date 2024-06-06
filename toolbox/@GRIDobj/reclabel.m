@@ -1,6 +1,6 @@
 function [L,IX] = reclabel(DEM,dx,dy)
 
-%RECLABEL labels GRIDobj by rectangular fields
+%RECLABEL Labels GRIDobj by rectangular fields
 %
 % Syntax
 %     L = reclabel(DEM,dx,dy)
@@ -35,7 +35,7 @@ function [L,IX] = reclabel(DEM,dx,dy)
 % See also: GRIDobj, checkerboard
 %
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
-% Date: 25. June, 2014
+% Date: 3. June, 2024
 
 toggle = 1;
 if nargout>1 && dx~=dy

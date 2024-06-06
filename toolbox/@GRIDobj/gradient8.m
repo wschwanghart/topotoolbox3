@@ -48,7 +48,7 @@ function G = gradient8(DEM,unit,varargin)
 % Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
 % Date: 18. August, 2017
 
-if nargin == 1;
+if nargin == 1
     unit = 'tangent';
 else
     unit = validatestring(unit,{'tangent' 'degree' 'radian' 'percent' 'sine'},'gradient8','unit',2);
@@ -56,9 +56,9 @@ end
 
 p = inputParser;
 p.FunctionName = 'GRIDobj/gradient8';
-addParamValue(p,'useblockproc',false,@(x) isscalar(x));
-addParamValue(p,'blocksize',5000,@(x) isscalar(x));
-addParamValue(p,'useparallel',false,@(x) isscalar(x));
+addParameter(p,'useblockproc',false,@(x) isscalar(x));
+addParameter(p,'blocksize',5000,@(x) isscalar(x));
+addParameter(p,'useparallel',false,@(x) isscalar(x));
 parse(p,varargin{:});
 
 

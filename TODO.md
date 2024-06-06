@@ -13,8 +13,8 @@ Changed refmat to wf (worldfile). Referencing matrices are no longer supported b
 - [ ] GRIDOBJ2RGB          : Convert GRIDobj to RGB image
 - [x] ACV                  : Anisotropic coefficient of variation (ACV) 
 - [x] AGGREGATE            : resampling a GRIDobj using aggregation
-- [ ] ARCSLOPE             : mean gradient from a digital elevation model sensu ArcGIS
-- [ ] ASPECT               : angle of exposition from a digital elevation model (GRIDobj)
+- [x] ARCSLOPE             : mean gradient from a digital elevation model sensu ArcGIS
+- [x] ASPECT               : angle of exposition from a digital elevation model (GRIDobj)
 - [x] CASTSHADOW           : cast shadow
 - [ ] CELLAREA             : calculate cell areas of a GRIDobj in geographic coordinate system
 - [ ] CLIP                 : clip a GRIDobj with a polygon or another GRIDobj
@@ -24,7 +24,7 @@ Changed refmat to wf (worldfile). Referencing matrices are no longer supported b
 - [ ] CREATEMASK           : create a binary mask using polygon mapping
 - [ ] CREATERECTMASK       : create a binary mask using rectangle mapping
 - [ ] CROP                 : crop an instance of GRIDobj with axis-aligned minimum bounding box
-- [ ] CURVATURE            : 8-connected neighborhood curvature of a digital elevation model 
+- [x] CURVATURE            : 8-connected neighborhood curvature of a digital elevation model 
 - [ ] DEMAREA              : Calculate the corrected surface area of a DEM
 - [ ] DEMPROFILE           : get profile along path
 - [ ] DIFFUSION            : Solve the diffusion equation
@@ -34,7 +34,7 @@ Changed refmat to wf (worldfile). Referencing matrices are no longer supported b
 - [ ] DISTANCE             : distance transform
 - [ ] ELEVATEMINIMA        : elevate regional minima in a DEM to their lowest neighbor
 - [ ] ERODE                : morphological erosion
-- [ ] EVANSSLOPE           : Calculate surface slope using Evans method
+- [x] EVANSSLOPE           : Calculate surface slope using Evans method
 - [ ] EXCESSTOPOGRAPHY     : reconstruct surface with threshold-slope surface
 - [ ] FILLSINKS            : fill/remove pits, sinks or topographic depressions
 - [ ] FILTER               : 2D-filtering of DEMs with different kernels 
@@ -74,19 +74,21 @@ Additional work to be done is to replace impoly with drawpolygon.
 - [ ] POSTPROCFLATS        : postprocess flat terrain for visualization purpose
 - [x] PRCCLIP              : percentile clipping
 - [x] PROJECT              : transforms a GRIDobj between projected coordinate systems
+Currently, the function still relies on imtransform, but takes now advantage of projcrs and geocrs. The function still needs testing.
 - [ ] PROMINENCE           : Calculate the prominence of mountain peaks
 - [x] RAND                 : Compute a GRIDobj with random numbers
 - [ ] RANDOMSAMPLE         : Uniform random sampling of a GRIDobj
 - [ ] RECLABEL             : labels GRIDobj by rectangular fields
-- [ ] RECLASSIFY           : generate univariate class intervals for an instance of GRIDobj
+- [x] RECLASSIFY           : generate univariate class intervals for an instance of GRIDobj
 - [x] REPROJECT2UTM        : Reproject DEM with WGS84 coordinate system to UTM-WGS84 
+The function now is just a wrapper for the function project. 
 - [ ] RESAMPLE             : change spatial resolution of a GRIDobj
 - [ ] ROUGHNESS            : terrain ruggedness, position and roughness indices of DEMs
 - [ ] SHUFFLELABEL         : shufflelabel randomly relabels a label matrix
 - [ ] SNAP2STREAM          : snap gauges or pour points to stream raster
 - [ ] SUB2COORD            : convert subscripts to x and y coordinates
 - [ ] SURF                 : surface plot for GRIDobj
-- [ ] TANAKACONTOUR        : Relief depiction using Tanaka contours
+- [x] TANAKACONTOUR        : Relief depiction using Tanaka contours
 - [ ] TOPOSHIELDING        : topographic shielding from cosmic rays
 - [x] VALIDATEALIGNMENT    : validates whether instances of GRIDobj are spatially aligned
 - [x] ZSCORE               : standardized z-scores for GRIDobj

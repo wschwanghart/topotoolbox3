@@ -15,7 +15,9 @@ function cmap = ttscm(name,n,percrange)
 %     TTSCM provides access to scientific colormaps compiled by Fabio 
 %     Crameri (http://www.fabiocrameri.ch/colourmaps.php). 
 %
-%     TTSCM(name) returns a 255*3 matrix with rgb values.
+%     TTSCM(name) returns a 255*3 matrix with rgb values. Several colormaps
+%     have names that end with a number (e.g. 10). These discrete colormaps 
+%     are returned with their original number of colors.
 %
 %     TTSCM(name,n) returns a n*3 matrix with rgb values.
 %
@@ -79,26 +81,27 @@ function cmap = ttscm(name,n,percrange)
 %
 % See also: GRIDobj/IMAGESCHS, ttcmap
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 10. June, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 6. June, 2024
 
-allowedcmaps = {'acton' 'bamako', 'batlow', 'hawaii', 'imola' 'nuuk' ...
-                'buda' ...
-                'devon','davos','oslo','bilbao','lajolla',...
-                'grayC','broc','cork','vik','lisbon','tofino',...
-				'berlin','turku','tokyo','lapaz','roma','oleron', ...
-                'brocO','corkO','vikO', 'bam', 'bamO', 'batlowK', 'batlowW',...
-				'bukavu','fes'};
+arguments 
+    name = "batlow"
+    n    = 255
+    percrange = []
+end
 
-				
 % get location of this function
 p = fileparts(mfilename('fullpath'));
+
+files = dir(fullfile(p,'private','colormaps','*.mat'));
+[~,allowedcmaps] = cellfun(@fileparts,{files.name},'UniformOutput',false);
+
 if nargin == 0 && nargout == 0
     figure('MenuBar','none','Color','w','Toolbar','none',...
            'Name', 'Scientific Colour Maps', 'NumberTitle', 'off');
            
 	imshow([p filesep 'private' ...
-            filesep '+ScientificColourMaps_FabioCrameri.png'],...
+            filesep '+ScientificColourMaps8-FabioCrameri.png'],...
             'InitialMagnification','fit')
 	return
 elseif nargin == 0 && nargout == 1
@@ -108,7 +111,14 @@ end
 
 cmaptype = validatestring(name,allowedcmaps);
 if nargin == 1
-    n = 255;
+    ncmap = regexp(cmaptype,'\d+','match');
+    
+    if isempty(ncmap)
+        n = 255;
+    else
+        ncmap = ncmap{1};
+        n = str2double(ncmap);
+    end
 else
     validateattributes(n,{'numeric'},{'>',1},'ttscm','n',2)
 end

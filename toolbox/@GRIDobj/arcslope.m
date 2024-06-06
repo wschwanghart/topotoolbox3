@@ -1,6 +1,6 @@
 function SLP = arcslope(DEM,unit)
 
-%ARCSLOPE mean gradient from a digital elevation model sensu ArcGIS
+%ARCSLOPE Slope from a digital elevation model sensu ArcGIS
 %
 % Syntax
 %
@@ -9,9 +9,9 @@ function SLP = arcslope(DEM,unit)
 %
 % Description
 %
-%     ARCSLOPE returns the gradient as calculated by ArcGIS (mean slope of
+%     ARCSLOPE returns the slope as calculated by ArcGIS (mean slope of
 %     8 connected neighborhood). Default unit is as tangent, but you can 
-%     specify alternative units identical to gradient8 function.
+%     specify alternative units identical to the gradient8 function.
 %
 % Input
 %
@@ -29,15 +29,21 @@ function SLP = arcslope(DEM,unit)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     SLP = arcslope(DEM);
+%     SLP = arcslope(DEM,'deg');
 %     imageschs(DEM,SLP);
 %
 % See also: GRIDobj/gradient8
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de) and
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de) and
 %         Adam M. Forte (aforte[a]asu.edu) 
-% Date: 6. February, 2017
+% Date: 3. June, 2024
 
+arguments
+    DEM   GRIDobj
+    unit  {mustBeTextScalar} = "tangent"
+end
+
+unit = validatestring(unit,{'tangent' 'degree' 'radian' 'percent' 'sine'},'arcslope','unit',2);
 
 z=DEM.Z;
 
@@ -57,13 +63,6 @@ end
 kernel = [ -1 -2 -1; 0 0 0; 1 2 1]';
 rr = sqrt((conv2(zp,kernel','valid')./(8*DEM.cellsize)).^2 + ...
                 (conv2(zp,kernel,'valid')./(8*DEM.cellsize)).^2);
-
-% Package output
-if nargin == 1
-    unit = 'tangent';
-else
-    unit = validatestring(unit,{'tangent' 'degree' 'radian' 'percent' 'sine'},'gradient8','unit',2);
-end
 
 if in
     rr(I(2:end-1,2:end-1)) = nan;
