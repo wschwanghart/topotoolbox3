@@ -1,6 +1,6 @@
 function DEM = elevateminima(DEM,maxarea)
 
-%ELEVATEMINIMA elevate regional minima in a DEM to their lowest neighbor
+%ELEVATEMINIMA Elevate regional minima in a DEM to their lowest neighbor
 %
 % Syntax
 %
@@ -32,7 +32,7 @@ function DEM = elevateminima(DEM,maxarea)
 %
 % Output arguments
 %
-%     DEMe      digital elevation model (GRIDobj)
+%     DEMe      digital elevation model (GRIDobj) with elevated minima
 %
 % Example
 %
@@ -43,16 +43,13 @@ function DEM = elevateminima(DEM,maxarea)
 %
 % See also: GRIDobj/fillsinks, imregionalmin, imreconstruct
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 30. January, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 6. June, 2024
 
-narginchk(1,2);
-if nargin == 1;
-    maxarea = 1;
-else
-    validateattributes(maxarea,{'numeric'},{'scalar','integer','>=',1},'elevateminima','maxarea',2);
+arguments
+    DEM   GRIDobj
+    maxarea {mustBePositive,mustBeInteger} = 1
 end
-
 
 
 INAN = isnan(DEM.Z); 
@@ -68,13 +65,13 @@ IXoffset = [-1 -1+nrrows nrrows 1+nrrows 1 1-nrrows -nrrows -1-nrrows];
 
 DEM.Z(I) = inf;
 
-for n = 1:8;
+for n = 1:8
     DEM.Z(IX) = min(DEM.Z(IX),DEM.Z(IX+IXoffset(n)));
 end
 
 if maxarea > 1
     STATS = regionprops(I,DEM.Z,'MinIntensity','PixelIdxList');
-    for r = 1:numel(STATS);
+    for r = 1:numel(STATS)
         DEM.Z(STATS(r).PixelIdxList) = STATS(r).MinIntensity;
     end
 end

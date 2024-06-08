@@ -32,7 +32,7 @@ Changed refmat to wf (worldfile). Referencing matrices are no longer supported b
 - [ ] DIST2CURVE           : labels pixels in a GRIDobj by their directed distance to a curved line
 - [ ] DIST2LINE            : labels pixels in a GRIDobj by their distance to a straight line
 - [ ] DISTANCE             : distance transform
-- [ ] ELEVATEMINIMA        : elevate regional minima in a DEM to their lowest neighbor
+- [x] ELEVATEMINIMA        : elevate regional minima in a DEM to their lowest neighbor
 - [ ] ERODE                : morphological erosion
 - [x] EVANSSLOPE           : Calculate surface slope using Evans method
 - [ ] EXCESSTOPOGRAPHY     : reconstruct surface with threshold-slope surface

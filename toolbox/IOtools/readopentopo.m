@@ -1,6 +1,6 @@
-function DEM = readopentopo(varargin)
+function DEM = readopentopo(options)
 
-%READOPENTOPO Read DEM using the opentopography.org API
+%READOPENTOPO Read global DEMs using the opentopography.org API
 %
 % Syntax
 %
@@ -11,13 +11,15 @@ function DEM = readopentopo(varargin)
 %     readopentopo reads DEMs from opentopography.org using the API
 %     described on:
 %     http://www.opentopography.org/developers
-%     The DEM comes in geographic coordinates (WGS84) and should be
-%     projected to a projected coordinate system (use reproject2utm) before
-%     analysis in TopoToolbox.
+%     Most of the DEMs come in geographic coordinates (WGS84) and should be
+%     projected to a projected coordinate system (use reproject2utm or 
+%     project) before analysis in TopoToolbox.     
 %
 %     NOTE: Starting on January 1st, 2022, an API authorization key will be 
 %     required for this API. Users can request an API key via myOpenTopo in 
 %     the OpenTopography portal (https://opentopography.org/developers).
+%     See also the description below to learn how to make your API key
+%     permanently available to readopentopo.
 %
 % Input arguments
 %
@@ -100,32 +102,31 @@ function DEM = readopentopo(varargin)
 %
 % Reference: http://www.opentopography.org/developers
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 13. February, 2023
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 6. June, 2024
 
-
-p = inputParser;
-addParameter(p,'filename',[tempname '.tif']);
-addParameter(p,'interactive',false);
-addParameter(p,'extent',[]);
-addParameter(p,'addmargin',0.01);
-addParameter(p,'north',37.091337);
-addParameter(p,'south',36.738884);
-addParameter(p,'west',-120.168457);
-addParameter(p,'east',-119.465576);
-addParameter(p,'demtype','SRTMGL3');
-addParameter(p,'deletefile',true);
-addParameter(p,'verbose',true);
-addParameter(p,'apikey',[]);
-addParameter(p,'checkrequestlimit',true)
-parse(p,varargin{:});
+arguments
+    options.demtype {mustBeTextScalar} = 'SRTMGL3'
+    options.filename = [char(tempname) '.tif']
+    options.interactive = false
+    options.extent = []
+    options.addmargin = 0.01
+    options.north = 37.091337
+    options.south = 36.738884
+    options.west  = -120.168457
+    options.east  = -119.465576
+    options.deletefile = true
+    options.verbose = true
+    options.apikey  = ''
+    options.checkrequestlimit = true
+end
 
 validdems = {'SRTMGL3','SRTMGL1','SRTMGL1_E',...
      'AW3D30','AW3D30_E','SRTM15Plus',...
      'NASADEM','COP30','COP90',...
      'EU_DTM','GEDI_L3','GEBCOSubIceTopo','GEBCOIceTopo'};
 
-demtype = validatestring(p.Results.demtype,...
+demtype = validatestring(options.demtype,...
     validdems,'readopentopo');
 
 % Access global topographic datasets including SRTM GL3 (Global 90m), 
@@ -145,11 +146,11 @@ requestlimit  = requestlimits(strcmp(demtype,validdems));
 url = 'https://portal.opentopography.org/API/globaldem?';
 
 % create output file
-f = fullfile(p.Results.filename);
+f = fullfile(options.filename);
 
 % check api
 
-if isempty(p.Results.apikey)
+if isempty(options.apikey)
     % check whether file opentopography.apikey is available
     if exist('opentopography.apikey','file')
         fid = fopen('opentopography.apikey');
@@ -161,53 +162,41 @@ if isempty(p.Results.apikey)
         error('Readopentopo requires an API Key. Please read the help.')
     end
 else
-    apikey = p.Results.apikey;
+    apikey = options.apikey;
 end
 
 
 % save to drive
-options = weboptions('Timeout',100000);
+woptions = weboptions('Timeout',100000);
 
 % get extent
-if ~isempty(p.Results.extent)
-    if isa(p.Results.extent,'GRIDobj')
-        ext = getextent(p.Results.extent,true);
-        west  = ext(1) - p.Results.addmargin;
-        east  = ext(2) + p.Results.addmargin;
-        south = ext(3) - p.Results.addmargin;
-        north = ext(4) + p.Results.addmargin;
+if ~isempty(options.extent)
+    if isa(options.extent,'GRIDobj')
+        ext = getextent(options.extent,true);
+        west  = ext(1) - options.addmargin;
+        east  = ext(2) + options.addmargin;
+        south = ext(3) - options.addmargin;
+        north = ext(4) + options.addmargin;
         
-    elseif numel(p.Results.extent) == 4
-        west = p.Results.extent(1);
-        east = p.Results.extent(2);
-        south = p.Results.extent(3);
-        north = p.Results.extent(4);
+    elseif numel(options.extent) == 4
+        west = options.extent(1);
+        east = options.extent(2);
+        south = options.extent(3);
+        north = options.extent(4);
     else
         error('Unknown format of extent')
     end
 else
-    west = p.Results.west;
-    east = p.Results.east;
-    south = p.Results.south;
-    north = p.Results.north;
+    west = options.west;
+    east = options.east;
+    south = options.south;
+    north = options.north;
 end
 
 % now we have an extent. Or did the user request interactively choosing
 % the extent.
-if any([isempty(west) isempty(east) isempty(south) isempty(north)]) || p.Results.interactive
-    if p.Results.interactive == 2
-        wm = webmap;
-        % get dialog box
-        messagetext = ['Zoom and resize the webmap window to choose DEM extent. ' ...
-            'Click the close button when you''re done.'];
-        d = waitdialog(messagetext);
-        uiwait(d);
-        [latlim,lonlim] = wmlimits(wm);
-        west = lonlim(1);
-        east = lonlim(2);
-        south = latlim(1);
-        north = latlim(2);
-    else
+if any([isempty(west) isempty(east) isempty(south) isempty(north)]) || options.interactive
+    if options.interactive 
         ext = roipicker('requestlimit',requestlimit);
         if isempty(ext)
             DEM = [];
@@ -225,13 +214,13 @@ a = areaint([south south north north],...
             [west east east west],...
             almanac('earth','radius','kilometers'));
 
-if p.Results.checkrequestlimit && (a > requestlimit)
+if options.checkrequestlimit && (a > requestlimit)
     error('TopoToolbox:readopentopo',...
             ['Request limit (' num2str(requestlimit) ' km^2) exceeded.\n'...
              'Your extent is ' num2str(a,1) ' km^2. Choose a smaller area.' ])
 end
 
-if p.Results.verbose
+if options.verbose
 
     disp('-------------------------------------')
     disp('readopentopo process:')
@@ -240,7 +229,7 @@ if p.Results.verbose
     disp(['Local file name: ' f])
     disp(['Area: ' num2str(a,2) ' sqkm'])
     disp('-------------------------------------')
-    disp(['Starting download: ' datestr(now)])
+    disp(['Starting download: ' char(datetime("now"))])
 end
 
 % Download with websave
@@ -251,7 +240,7 @@ if isempty(apikey)
         'south',south,...
         'outputFormat', 'GTiff', ...
         'demtype', demtype, ...
-        options);
+        woptions);
 else
     outfile = websave(f,url,'west',west,...
         'east',east,...
@@ -260,29 +249,29 @@ else
         'outputFormat', 'GTiff', ...
         'demtype', demtype, ...
         'API_Key',apikey,...
-        options);
+        woptions);
 end
 
-if p.Results.verbose
-    disp(['Download finished: ' datestr(now)])
-    disp(['Reading DEM: ' datestr(now)])
+if options.verbose
+    disp(['Download finished: ' char(datetime("now"))])
+    disp(['Reading DEM: ' char(datetime("now"))])
 end
 
 try
-    warning off
+
     DEM      = GRIDobj(f);
-    warning on
     
-    msg = lastwarn;
-    if ~isempty(msg)
+    if ~isProjected(DEM)
         disp(' ')
-        disp(msg)
-        disp(' ')
+        disp('The downloaded DEM is not in a projected coordinate system.')
+        disp('Make sure to project the DEM using GRIDobj/project or')
+        disp('GRIDobj/reproject2utm.')
+        disp('  ')
     end
     
     DEM.name = demtype;
-    if p.Results.verbose
-        disp(['DEM read: ' datestr(now)])
+    if options.verbose
+        disp(['DEM read: ' char(datetime("now"))])
     end
     
 catch
@@ -297,32 +286,15 @@ catch
 end
     
 
-if p.Results.deletefile
+if options.deletefile
     delete(f);
-    if p.Results.verbose
+    if options.verbose
         disp('Temporary file deleted')
     end
 end
 
-if p.Results.verbose
-    disp(['Done: ' datestr(now)])
+if options.verbose
+    disp(['Done: ' char(datetime("now"))])
     disp('-------------------------------------')
 end
 end
-
-function d = waitdialog(messagetext)
-    d = dialog('Position',[300 300 250 150],'Name','Choose rectangle region',...
-        'WindowStyle','normal');
-
-    txt = uicontrol('Parent',d,...
-               'Style','text',...
-               'Position',[20 80 210 40],...
-               'String',messagetext);
-
-    btn = uicontrol('Parent',d,...
-               'Position',[85 20 70 25],...
-               'String','Close',...
-               'Callback','delete(gcf)');
-end
-
-

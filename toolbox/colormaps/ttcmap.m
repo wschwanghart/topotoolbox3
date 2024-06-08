@@ -70,8 +70,8 @@ function [cmap,zlimits] = ttcmap(zlimits,varargin)
 %
 % See also: IMAGESCHS
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 5. February, 2018
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 5. June, 2024
 
 allowedcmaps = {'gmtrelief','france','mby','gmtglobe','etopo1'};
 if nargin == 0
@@ -101,9 +101,9 @@ end
 p = inputParser;
 p.FunctionName = 'ttcmap';
 % optional
-addParamValue(p,'n',255,@(x)isnumeric(x) && x>=1);
-addParamValue(p,'cmap','gmtrelief');
-addParamValue(p,'zero','land');
+addParameter(p,'n',255,@(x)isnumeric(x) && x>=1);
+addParameter(p,'cmap','gmtrelief');
+addParameter(p,'zero','land');
 parse(p,varargin{:});
 
 cmaptype = validatestring(p.Results.cmap,allowedcmaps);
@@ -114,6 +114,7 @@ end
 
 nr = 255;
 [elev,clr] = getcolormap(cmaptype);
+
 
 
 % Problem: the color map should 
@@ -128,8 +129,8 @@ if zlimits(1)<0 && zlimits(2)>0
             case 'land'
                 elev = [elev(1:ix-1);elev(ix-1)./1000; elev(ix:end)];
                 clr  = [clr(1:ix-1,:);clr(ix-1,:); clr(ix:end,:)];
-            case 'water'
-                elev = [elev(1:ix);elev(ix)./1000; elev(ix+1:end)];
+            case {'water','sea'}
+                elev = [elev(1:ix);elev(ix)+1/1000; elev(ix+1:end)];
                 clr  = [clr(1:ix,:);clr(ix,:); clr(ix+1:end,:)];
         end
     end

@@ -1,6 +1,6 @@
 function OUT2 = hillshade(DEM,varargin)
 
-%HILLSHADE create hillshading from a digital elevation model (GRIDobj)
+%HILLSHADE Calculate hillshading from a digital elevation model
 %
 % Syntax
 %    
@@ -62,13 +62,13 @@ p = inputParser;
 p.StructExpand  = true;
 p.KeepUnmatched = false;
 p.FunctionName = 'hillshade'; 
-addParamValue(p,'azimuth',315,@(x) isscalar(x) && x>= 0 && x<=360);
-addParamValue(p,'altitude',60,@(x) isscalar(x) && x>= 0 && x<=90);
-addParamValue(p,'exaggerate',1,@(x) isscalar(x) && x>0);
-addParamValue(p,'useparallel',true);
-addParamValue(p,'blocksize',2000);
-addParamValue(p,'useblockproc',true,@(x) isscalar(x));
-addParamValue(p,'method','default');
+addParameter(p,'azimuth',315,@(x) isscalar(x) && x>= 0 && x<=360);
+addParameter(p,'altitude',60,@(x) isscalar(x) && x>= 0 && x<=90);
+addParameter(p,'exaggerate',1,@(x) isscalar(x) && x>0);
+addParameter(p,'useparallel',true);
+addParameter(p,'blocksize',2000);
+addParameter(p,'useblockproc',true,@(x) isscalar(x));
+addParameter(p,'method','default');
 parse(p,varargin{:});
 
 OUT     = DEM;

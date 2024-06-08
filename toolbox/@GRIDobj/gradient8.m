@@ -15,7 +15,7 @@ function G = gradient8(DEM,unit,varargin)
 %
 % Input
 %
-%     DEM       digital elevation model (class: GRIDobj)
+%     DEM       Digital elevation model (class: GRIDobj)
 %     unit      'tan' --> tangent (default)
 %               'rad' --> radian
 %               'deg' --> degree
@@ -31,7 +31,7 @@ function G = gradient8(DEM,unit,varargin)
 % 
 % Output
 %
-%     G         gradient (class: GRIDobj)
+%     G         Gradient (class: GRIDobj)
 %                  
 % Example
 % 
@@ -45,14 +45,15 @@ function G = gradient8(DEM,unit,varargin)
 %
 % See also: GRIDobj, GRIDobj/CURVATURE, GRIDobj/ASPECT, GRIDobj/arcslope
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 6. June, 2024
 
 if nargin == 1
     unit = 'tangent';
 else
     unit = validatestring(unit,{'tangent' 'degree' 'radian' 'percent' 'sine'},'gradient8','unit',2);
 end
+
 
 p = inputParser;
 p.FunctionName = 'GRIDobj/gradient8';
@@ -122,7 +123,7 @@ end
 
 function G = steepestgradient(z,cellsize,c)
 
-if isstruct(z);
+if isstruct(z)
     z = z.data;
 end
     
