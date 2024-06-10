@@ -10,8 +10,10 @@ function G = gradient8(DEM,unit,varargin)
 %
 % Description
 %
-%     gradient8 returns the numerical steepest downward gradient of a
-%     digital elevation model using an 8-connected neighborhood. 
+%     gradient8 calculates the steepest downward gradient using the D8 
+%     (deterministic eight-node) algorithm of O'Callaghan and Mark (1984).
+%     Here, the slope at a pixel is determined by the steepest descent
+%     among its eight neighboring pixels.
 %
 % Input
 %
@@ -42,6 +44,12 @@ function G = gradient8(DEM,unit,varargin)
 %     subplot(2,1,2)
 %     imagesc(G)
 %
+% Reference
+%
+%     O’Callaghan, J. F. and Mark, D. M.: The extraction of drainage
+%     networks from digital elevation data, Computer Vision, Graphics, and
+%     Image Processing, 28, 323–344,
+%     https://doi.org/10.1016/S0734-189X(84)80011-0, 1984.
 %
 % See also: GRIDobj, GRIDobj/CURVATURE, GRIDobj/ASPECT, GRIDobj/arcslope
 % 
