@@ -4,29 +4,32 @@ function [x,y] = ind2coord(FD,ix)
 %
 % Syntax
 %
-%     [x,y] = ind2coord(FD,ix)
+%     [x,y] = ind2coord(DEM,ix)
 %
 % Description
 %
-%     ind2coord converts a linear index into an instance of FLOWobj to x
-%     and y coordinates.
+%     ind2coord converts a linear index into an instance of GRIDobj to x
+%     and y coordinates. The function returns column vectors.
 %
 % Input arguments
 %
-%     FD      instance of FLOWobj
+%     DEM     instance of GRIDobj
 %     ix      linear index
 %
 % Output arguments
 %
 %     x,y     x- and y-coordinates  
 %
-% See also: FLOWobj/coord2ind
+% See also: GRIDobj/coord2ind, GRIDobj/getcoordinates
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 30. January, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 30. May, 2024
 
 
+% Get intrinsic coordinates
 [r,c] = ind2sub(FD.size,ix(:));
-xy    = double([r c ones(numel(ix),1)])*FD.refmat;
+% Calculate map coordinates
+xy    = (FD.wf*double([c-1 r-1 ones(numel(ix),1)]'))';
+% Split coordinates in x and y vector
 x = xy(:,1);
 y = xy(:,2);

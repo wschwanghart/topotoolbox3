@@ -58,7 +58,7 @@ if mod(narg,2)~=0
 end
 narg = narg/2;
 
-if isa(L,'GRIDobj');
+if isa(L,'GRIDobj')
     % get unique labels in L
     l = unique(L.Z(:));
 
@@ -83,7 +83,7 @@ if wb
     h = waitbar(0,'please wait');
 end
 
-for r=1:nrlabels;
+for r=1:nrlabels
     if wb
         waitbar(r/nrlabels,h);
     end
@@ -95,8 +95,8 @@ for r=1:nrlabels;
             I.Z(ix(r)) = true;
         case 'shape'
             I = GRIDobj(FD,'logical');
-            
-            P = [L(r).X(:) - I.refmat(3,1), L(r).Y(:) - I.refmat(3,2)]/I.refmat(1:2,:);
+            RR = I.wf';
+            P = [L(r).X(:) - I.wf(1,3), L(r).Y(:) - I.wf(2,3)]/RR(1:2,:);
             x = P(:,1);
             y = P(:,2);
             
@@ -110,7 +110,8 @@ for r=1:nrlabels;
             maxy = ceil(max(y));
             
             ii = poly2mask(x-minx+1,y-miny+1,maxx-minx+1,maxy-miny+1);
-            if any(ii);
+            
+            if any(ii)
                 I.Z(minx:maxx,miny:maxy) = ii;
             else
                 IX = coord2ind(I,L(r).X(:),L(r).Y(:));
@@ -136,12 +137,12 @@ for r=1:nrlabels;
     stats(r).Ycentr = mean(yy);
     
     if narg > 0
-        for r2 = 1:narg;
+        for r2 = 1:narg
             v = varargin{(r2-1)*2 +2}.Z(I.Z);
             v = v(:);
             v = v(~isnan(v));
             
-            if islogical(v);
+            if islogical(v)
                 stats(r).([varargin{(r2-1)*2 +1} '_mean']) = mean(double(v));
             else
             v = double(v);

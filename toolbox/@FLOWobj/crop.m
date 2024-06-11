@@ -37,8 +37,8 @@ function [FD,W] = crop(FD,mask)
 % 
 % See also: GRIDobj/crop, GRIDobj/pad
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 2. February, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. June, 2024
 
 validatealignment(FD,mask)
 
@@ -80,7 +80,7 @@ FD.ix  = mask.Z(FD.ix);
 FD.ixc = mask.Z(FD.ixc);
 
 FD.size = I.size;
-FD.refmat = I.refmat;
+FD.wf = I.wf;
 FD.georef = I.georef;
 FD.fastindexing = false;
 

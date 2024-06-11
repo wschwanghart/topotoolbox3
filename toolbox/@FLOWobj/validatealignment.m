@@ -24,12 +24,12 @@ function tf = validatealignment(FD,G)
 %
 % See also: FLOWobj, GRIDobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 4. March, 2016
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. June, 2024
 
 % check if geometric properties of a FLOWobj and GRIDobj instance are equal
 if isa(G,'GRIDobj')
-    TF = isequal(FD.size,G.size) && isequal(FD.refmat,G.refmat);
+    TF = isequal(FD.size,G.size) && isequal(FD.wf,G.wf);
 else
     TF = isequal(FD.size,size(G));
 end
@@ -43,7 +43,7 @@ else
                 ['FLOWobj and GRIDobj do not align each other. Make sure that \n' ...
                 'both instances have the same spatial reference. Both variables \n' ...
                 'are deemed to have the same reference if their properties ''size'' \n' ...
-                'and ''refmat'' are both equal.']);
+                'and ''wf'' are both equal.']);
         else
             error('TopoToolbox:incorrectinput',...
                 ['FLOWobj and input matrix do not align each other. Make sure that \n' ...
