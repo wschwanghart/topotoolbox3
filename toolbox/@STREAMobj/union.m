@@ -13,12 +13,12 @@ function S = union(varargin)
 %
 %     union(S1,S2,...) combines all instances into a new STREAMobj. The
 %     networks might be subset of each others. All networks must have been
-%     derived from the same flow direction object (FLOWobj). If this is not the case, the function might have an
-%     unexpected behavior. 
+%     derived from the same flow direction object (FLOWobj). If this is not
+%     the case, the function might have an unexpected behavior.
 %
-%     union(S1,S2,...,FD) takes in addition an instance of FLOWobj as last input
-%     variable and it is assumed that all STREAMobjs have been derived
-%     from this FLOWobj (e.g., all STREAMobjs are subgraphs of the
+%     union(S1,S2,...,FD) takes in addition an instance of FLOWobj as last
+%     input variable and it is assumed that all STREAMobjs have been
+%     derived from this FLOWobj (e.g., all STREAMobjs are subgraphs of the
 %     FLOWobj). This syntax reestablishes the connectivity between adjacent
 %     nodes that are connected in the FLOWobj but not in the STREAMobjs.
 %
@@ -49,13 +49,13 @@ function S = union(varargin)
 % See also: STREAMobj, FLOWobj, STREAMobj/modify, STREAMobj/trunk
 %           STREAMobj/STREAMobj2cell, STREAMobj/intersect
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 5. October, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 5. June, 2024
 
 narginchk(2,inf)
 
 % are instances spatially aligned?
-for r = 1:numel(varargin);
+for r = 2:numel(varargin)
     validatealignment(varargin{1},varargin{r})
 end
 
@@ -68,22 +68,20 @@ if isa(varargin{end},'FLOWobj')
     pg = properties(G);
     pf = properties(varargin{end});
     p  = intersect(pg,pf);
-    for r = 1:numel(p);
+    for r = 1:numel(p)
         G.(p{r}) = varargin{end}.(p{r});
     end
     G.Z = false(G.size);
     
     % create a stream raster
-    for r = 1:(numel(varargin)-1);
+    for r = 1:(numel(varargin)-1)
         G.Z(varargin{r}.IXgrid) = true;
     end
     
     % use stream raster to create a new STREAMobj
     S = STREAMobj(varargin{end},G);
     
-    
 else
-    
     
     % vertical concatenate indices
     IXgrid = [];
@@ -114,9 +112,10 @@ else
     S.ix     = ix;
     S.ixc    = ixc;
     S.IXgrid = IXgrid;
-    
-    [r,c] = ind2sub(S.size,S.IXgrid);
-    xy    = double([r c ones(numel(S.IXgrid),1)])*S.refmat;
+
+    [rows,cols] = ind2sub(S.size,S.IXgrid);
+    xy =  S.wf*[double(cols(:))-1 double(rows(:))-1 ones(numel(rows),1)]';
+    xy = xy';
     S.x = xy(:,1);
     S.y = xy(:,2);
     

@@ -427,16 +427,5 @@ end
 
 end
 
-%% Easy handling of nals.
-function z = ezgetnal(S,z)
-if isa(z,'GRIDobj')
-    z = double(getnal(S,z));
-elseif isnal(S,z)
-    z = double(z);
-elseif isnumeric(z) && isscalar(z)
-    z = getnal(S) + double(z);
-else
-    error('Cannot handle input')
-end
-end
+
 

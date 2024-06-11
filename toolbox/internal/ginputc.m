@@ -1,4 +1,3 @@
-
 function [x, y, button, ax] = ginputc(varargin)
 %GINPUTC Graphical input from mouse.
 %   GINPUTC behaves similarly to GINPUT, except you can customize the

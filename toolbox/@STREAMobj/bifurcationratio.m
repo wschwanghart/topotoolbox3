@@ -48,6 +48,10 @@ function [Rb,Ns,s] = bifurcationratio(S)
 % Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
 % Date: 6. May, 2024
 
+arguments
+    S    STREAMobj
+end
+
 % Calculate streamorder
 s = streamorder(S);
 

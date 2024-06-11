@@ -116,39 +116,33 @@ p = inputParser;
 p.FunctionName = 'plotdz';
 addRequired(p,'S',@(x) isa(x,'STREAMobj'));
 addRequired(p,'DEM', @(x) isa(x,'GRIDobj') || numel(x) == nrnodes);
-addParamValue(p,'annotation',[])
-addParamValue(p,'color',clr);
-addParamValue(p,'annotationtext',{});
-addParamValue(p,'distance',[],@(x) isempty(x) || isnal(S,x) || isa(x,'STREAMobj') || ischar(x));
-addParamValue(p,'dunit','m',@(x) ischar(validatestring(x,{'m' 'km'})));
-addParamValue(p,'doffset',0,@(x) isscalar(x));
-addParamValue(p,'colormap','parula');
-addParamValue(p,'linewidth',1);
-addParamValue(p,'colormethod','line');
-addParamValue(p,'colorbar',true);
-addParamValue(p,'cbarlabel','');
-addParamValue(p,'type','plot');
+addParameter(p,'annotation',[])
+addParameter(p,'color',clr);
+addParameter(p,'annotationtext',{});
+addParameter(p,'distance',[],@(x) isempty(x) || isnal(S,x) || isa(x,'STREAMobj') || ischar(x));
+addParameter(p,'dunit','m',@(x) ischar(validatestring(x,{'m' 'km'})));
+addParameter(p,'doffset',0,@(x) isscalar(x));
+addParameter(p,'colormap','parula');
+addParameter(p,'linewidth',1);
+addParameter(p,'colormethod','line');
+addParameter(p,'colorbar',true);
+addParameter(p,'cbarlabel','');
+addParameter(p,'type','plot');
 
 % only relevant for 'type' = 'area' or 'stairsarea'
-addParamValue(p,'EdgeColor',[.3 .3 .3]);
-addParamValue(p,'FaceColor',[.7 .7 .7]);
-addParamValue(p,'FaceAlpha',1);
-addParamValue(p,'EdgeAlpha',1);
-addParamValue(p,'BaseValue',[]);
+addParameter(p,'EdgeColor',[.3 .3 .3]);
+addParameter(p,'FaceColor',[.7 .7 .7]);
+addParameter(p,'FaceAlpha',1);
+addParameter(p,'EdgeAlpha',1);
+addParameter(p,'BaseValue',[]);
 
 parse(p,S,DEM,varargin{:});
 S   = p.Results.S;
 DEM = p.Results.DEM;
 type = validatestring(p.Results.type,{'plot','area','stairs','stairsarea'});
 
-if isa(DEM,'GRIDobj')
-    validatealignment(S,DEM);
-    zz = getnal(S,DEM);
-elseif isnal(S,DEM)
-    zz = DEM;
-else
-    error('Imcompatible format of second input argument')
-end
+% Get elevation nal
+zz = ezgetnal(S,DEM);
 
 % get dynamic properties of S
 order    = S.orderednanlist;

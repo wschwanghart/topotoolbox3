@@ -1,4 +1,4 @@
-function c = chitransform(S,A,varargin)
+function c = chitransform(S,A,options)
 
 %CHITRANSFORM Coordinate transformation using the integral approach
 %
@@ -66,75 +66,59 @@ function c = chitransform(S,A,varargin)
 %     TopoToolbox blog posts >>Chimaps in a few lines of codes<<
 %     <a href="https://topotoolbox.wordpress.com/2017/08/18/chimaps-in-a-few-lines-of-code-final/">See overview here.</a>
 %     
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 21. March, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 6. June, 2024
 
+arguments
+    S      STREAMobj 
+    A      {mustBeGRIDobjOrNal(A,S)}
+    options.mn     {mustBeNumeric,mustBePositive} = 0.45
+    options.a0     {mustBeNumeric,mustBePositive} = 1e6
+    options.plot   = false
+    options.correctcellsize = true
+    options.K      {mustBeGRIDobjOrNalOrEmpty(options.K,S)} = []
+    options.tribsonly = []
 
-% Parse Inputs
-p = inputParser;         
-p.FunctionName = 'chitransform';
-addRequired(p,'S',@(x) isa(x,'STREAMobj'));
-addRequired(p,'A', @(x) isa(x,'GRIDobj') || isnal(S,x));
-
-addParamValue(p,'mn',0.45,@(x) isscalar(x) || isempty(x));
-addParamValue(p,'a0',1e6,@(x) isscalar(x) && isnumeric(x));
-addParamValue(p,'plot',false);
-addParamValue(p,'correctcellsize',true,@(x) isscalar(x));
-addParamValue(p,'K',[],@(x) isempty(x) || isnal(S,x) || isa(x,'GRIDobj'));
-addParamValue(p,'tribsonly',[])
-
-parse(p,S,A,varargin{:});
-
-% get node attribute list with elevation values
-if isa(A,'GRIDobj')
-    validatealignment(S,A);
-    a = getnal(S,A);
-elseif isnal(S,A)
-    a = A;
-else
-    error('Imcompatible format of second input argument')
 end
 
-if ~isempty(p.Results.K)
+% Retrieve node attribute lists
+a = ezgetnal(S,A);
+
+if ~isempty(options.K)
     calcwithk = true;
-    if isnal(S,p.Results.K)
-        K = p.Results.K;
-    else 
-        K = getnal(S,p.Results.K);
-    end
+    K = ezgetnal(S,options.K);
 else
     calcwithk = false;
 end
         
-       
-if p.Results.correctcellsize
+if options.correctcellsize
     a = a.*S.cellsize^2;
 end
 
 if ~calcwithk
-    a = ((p.Results.a0) ./a).^p.Results.mn;
+    a = ((options.a0) ./a).^options.mn;
 else
     % This transformation is only possible if we assume that n in the
     % mn-ratio is one.
-    a = (1./(K)).*(1./a).^p.Results.mn;
+    a = (1./(K)).*(1./a).^options.mn;
 end
 
-if ~isempty(p.Results.tribsonly)
+if ~isempty(options.tribsonly)
     Scopy = S;
-    S = modify(S,'tributaryto2',p.Results.tribsonly);
+    S = modify(S,'tributaryto2',options.tribsonly);
     a = nal2nal(S,Scopy,a);
 end
 
 % cumulative trapezoidal integration
 c = cumtrapz(S,a);
 
-if ~isempty(p.Results.tribsonly)
+if ~isempty(options.tribsonly)
     c = nal2nal(Scopy,S,c,0);
     S = Scopy;
 end
 
 % plot if required
-if p.Results.plot
+if options.plot
     plotc(S,c)
 end
 

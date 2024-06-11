@@ -101,31 +101,32 @@ if ~isempty(labeldist)
     xyd = [];
     % find nan separators
     ixnansep = [0; find(isnan(d))];
-    if iscell(labeldist);
+    if iscell(labeldist)
         linestyle = labeldist{2};
         labeldist = labeldist{1};
     else
         linestyle = '+b';
     end
     labeldist = double(labeldist(:));
-    for r = 1:numel(ixnansep)-1;
+    for r = 1:(numel(ixnansep)-1)
         ix = ixnansep(r)+1:ixnansep(r+1)-1;
         xy = interp1(d(ix),[x(ix) y(ix)],labeldist,'linear',nan);
         inan = ~isnan(xy(:,1));
-        if any(inan);
+        if any(inan)
             xyd = [xyd;[xy(inan,:) labeldist(inan)]];            
         end
     end
     ih = ishold;
     hold on;
-    if ~strcmpi(linestyle,'text');
+    if ~strcmpi(linestyle,'text')
         ht(2) = plot(xyd(:,1),xyd(:,2),linestyle);
     else
         h(2) = plot(xyd(:,1),xyd(:,2),'.k');
-        htext = text(xyd(:,1),xyd(:,2),num2str(xyd(:,3)),'verticalalignment','baseline');
+        htext = text(xyd(:,1),xyd(:,2),num2str(xyd(:,3)),...
+            'verticalalignment','baseline');
         h    = [h htext(:)'];
     end
-    if ~ih;
+    if ~ih
         hold off;
     end
 end

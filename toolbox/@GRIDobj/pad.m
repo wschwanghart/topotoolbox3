@@ -1,6 +1,6 @@
 function DEM = pad(DEM,varargin)
 
-%PAD add or remove a border of pixels around a GRIDobj
+%PAD Add or remove a border of pixels around a GRIDobj
 %
 % Syntax
 %
@@ -14,6 +14,8 @@ function DEM = pad(DEM,varargin)
 %     zeros. To control the value and amount of padding, use the arguments
 %     val and px, respectively. px can be negative. In this case, the DEM
 %     is cropped by the number of pixels at each grid border.
+%
+%     The transformation of the grid must be 'rectilinear'.
 %
 % Input arguments
 %
@@ -39,8 +41,8 @@ function DEM = pad(DEM,varargin)
 % 
 % See also: GRIDobj/crop, padarray
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. June, 2024
 
 
 % check input arguments
@@ -85,10 +87,27 @@ end
 
 % adjust referencing
 DEM.Z           = Znew;
-DEM.refmat(3,:) = DEM.refmat(3,:)-px*[DEM.refmat(2,1) DEM.refmat(1,2)];
+DEM.wf(:,3)     = DEM.wf(:,3) -px.*[DEM.wf(1,1) DEM.wf(2,2)]';
 DEM.size        = size(DEM.Z);
 
 if ~isempty(DEM.georef)
-    DEM.georef.SpatialRef = refmatToMapRasterReference(DEM.refmat,size(Znew));
+    if isProjected(DEM)
+        
+        R = DEM.georef;
+        Rnew = maprasterref(DEM.wf,DEM.size,R.RasterInterpretation);
+        Rnew.ProjectedCRS = R.ProjectedCRS;
+
+    elseif isGeographic(DEM)
+        R = DEM.georef;
+        Rnew = georasterref(DEM.wf,DEM.size,R.RasterInterpretation);
+        Rnew.GeographicCRS = R.GeographicCRS;
+    end
+    DEM.georef = Rnew;
+    
+    % Now check whether DEM.size == DEM.georef.RasterSize
+    if ~isequal(DEM.size,DEM.georef.RasterSize)
+        warning('We have a problem!')
+    end
+    
 end
 

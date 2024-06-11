@@ -1,22 +1,25 @@
-function dz = diff(S,z)
+function dz = diff(S,z,fillval)
 
 %DIFF Differences between adjacent pixels in a stream network
 %
 % Syntax 
 % 
 %     dz = diff(S,z)
+%     dz = diff(S,z,fillval)
 %
 % Description
 %
 %     DIFF calculates the difference of each pixel i and its downstream
 %     neighbor j so that dz(i) = dz(i)-dz(j). dz is a node-attribute list.
-%     Stream nodes without downstream neighbor (outlets) receive a value of
-%     0.
+%     By default, stream nodes without downstream neighbor (outlets) receive a value of
+%     0. If this value should be different, also set the input argument
+%     fillval.
 %
 % Input arguments
 %
-%     S     STREAMobj
-%     z     node-attribute list
+%     S        STREAMobj
+%     z        node-attribute list
+%     fillval  value that dz should have at outlets (default = 0)
 %
 % Output arguments
 %
@@ -35,19 +38,17 @@ function dz = diff(S,z)
 % 
 % See also: STREAMobj/gradient, STREAMobj/cumsum
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. November, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. June, 2024
 
-
-% get node attribute list with elevation values
-if isa(z,'GRIDobj')
-    validatealignment(S,z);
-    z = double(getnal(S,z));
-elseif isnal(S,z)
-    z = double(z);
-else
-    error('Imcompatible format of second input argument')
+arguments
+    S   STREAMobj
+    z   {mustBeGRIDobjOrNal(z,S)}
+    fillval = 0
 end
 
-dz = zeros(size(z));
+% get node attribute list with elevation values
+z = ezgetnal(S,z);
+
+dz = getnal(S) + fillval;
 dz(S.ix) = z(S.ix)-z(S.ixc);

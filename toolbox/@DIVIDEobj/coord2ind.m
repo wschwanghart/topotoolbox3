@@ -36,13 +36,13 @@ function [IX,res] = coord2ind(D,x,y)
 
 narginchk(3,3);
 % get coordinate vectors
-[X,Y] = refmat2XY(D.refmat,D.size);
+[X,Y] = wf2XY(D.wf,D.size);
 X = X(:);
 Y = Y(:);
 
 % check input
 np = numel(x);
-if np ~= numel(y);
+if np ~= numel(y)
     error('TopoToolbox:wronginput',...
         'x and y must have the same number of elements.');
 end
@@ -62,10 +62,13 @@ IX2 = round(IX2);
 
 I = IX1>D.size(2) | IX1<1 | IX2>D.size(1) | IX2<1;
 
-if any(I(:));
+if any(I(:))
     warning('TopoToolbox:outsidegrid',...
         'There are some points outside the grid''s borders');
 end
+
+% Check for nans because they cause errors since 2024a
+I = I | isnan(x) | isnan(y);
 
 x(I)    = [];
 y(I)    = [];

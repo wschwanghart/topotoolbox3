@@ -88,10 +88,10 @@ addParameter(p,'LineWidth',0.5);
 parse(p,S,zz,varargin{:});
 S   = p.Results.S;
 
-if isempty(p.Results.distance);
+if isempty(p.Results.distance)
     dist = S.distance;
 else
-    if isa(p.Results.distance,'STREAMobj');
+    if isa(p.Results.distance,'STREAMobj')
         dist = distance(S,p.Results.distance);
     elseif ischar(p.Results.distance)
         dist = S.distance;

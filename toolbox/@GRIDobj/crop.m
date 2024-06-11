@@ -1,6 +1,6 @@
 function [DEMc,MASK] = crop(DEM,varargin)
 
-%CROP crop an instance of GRIDobj with axis-aligned minimum bounding box
+%CROP Crop an instance of GRIDobj with axis-aligned minimum bounding box
 %
 % Syntax
 %

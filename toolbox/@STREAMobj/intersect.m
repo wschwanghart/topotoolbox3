@@ -8,12 +8,12 @@ function S = intersect(varargin)
 %
 % Description
 %
-%     intersect combines different instances of STREAMobj into a new STREAMobj.
-%     All STREAMobjs must have been derived
-%     from the same FLOWobj (e.g., all STREAMobjs are subgraphs of the
-%     FLOWobj). If this is not the case, the function might have an
-%     unexpected behavior. In terms of set theory, the functions produces
-%     an intersection of the nodes in all instances of S.
+%     intersect combines different instances of STREAMobj into a new
+%     STREAMobj. All STREAMobjs must have been derived from the same
+%     FLOWobj (e.g., all STREAMobjs are subgraphs of the FLOWobj). If this
+%     is not the case, the function might have an unexpected behavior. In
+%     terms of set theory, the functions produces an intersection of the
+%     nodes in all instances of S.
 %
 % Input arguments
 %
@@ -40,12 +40,12 @@ function S = intersect(varargin)
 % See also: STREAMobj, FLOWobj, STREAMobj/modify, STREAMobj/trunk
 %           STREAMobj/STREAMobj2cell, STREAMobj/union
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 5. October, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. June, 2024
 
 
 % are instances spatially aligned?
-for r = 1:numel(varargin);
+for r = 1:numel(varargin)
     validatealignment(varargin{1},varargin{r})
 end
 
@@ -72,14 +72,11 @@ S.ix     = ix;
 S.ixc    = ixc;
 S.IXgrid = IXgrid;
 
-[r,c] = ind2sub(S.size,S.IXgrid);
-xy    = double([r c ones(numel(S.IXgrid),1)])*S.refmat;
+[rows,cols] = ind2sub(S.size,S.IXgrid);
+xy =  S.wf*[double(cols(:))-1 double(rows(:))-1 ones(numel(rows),1)]';
+xy = xy';
 S.x = xy(:,1);
 S.y = xy(:,2);
-
-
-
-
 
 end
 

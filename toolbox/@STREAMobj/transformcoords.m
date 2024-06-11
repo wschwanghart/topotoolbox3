@@ -1,4 +1,4 @@
-function varargout = transformcoords(S,varargin)
+function varargout = transformcoords(S,options)
 
 %TRANSFORMCOORDS transform coordinates of stream network
 %
@@ -49,18 +49,17 @@ function varargout = transformcoords(S,varargin)
 %
 % See also: STREAMobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 23. May, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. June, 2024
+
+arguments
+    S  STREAMobj
+    options.method = 'interactive'
+    options.nonnegcoords = false
+end
 
 
-
-p = inputParser;
-p.FunctionName = 'STREAMobj/transformcoords';
-addParameter(p,'method','interactive');
-addParameter(p,'nonnegcoords',false);
-parse(p,varargin{:});
-
-method = validatestring(p.Results.method,{'pca','interactive','inv'});
+method = validatestring(options.method,{'pca','interactive','inv'});
 
 switch method
     case 'pca'
@@ -93,17 +92,17 @@ switch method
         yy = hypot(yy(:,1),yy(:,2));
         yy = yy.*s;
     case 'inv'
-        nrrows = S.size(1);
-        nrcols = S.size(2);
 
-        x = [ones(nrcols,1) (1:nrcols)' ones(nrcols,1)]*S.refmat;
-        xx = x(:,1)';
+        [rows,cols] = ind2sub(S.size,S.IXgrid);
+        xy =  S.wf*[double(cols(:))-1 double(rows(:))-1 ones(numel(rows),1)]';
+        xy = xy';
+        xx = xy(:,1);
+        yy = xy(:,2);
 
-        y = [(1:nrrows)' ones(nrrows,2)]*S.refmat;
-        yy = y(:,2)';
+
 end
 
-if p.Results.nonnegcoords
+if options.nonnegcoords
     xx = xx - min(xx);
     yy = yy - min(yy);
 end

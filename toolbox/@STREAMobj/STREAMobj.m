@@ -62,7 +62,7 @@ properties
     ix        % [edge attribute] topologically sorted nodes (givers) 
     ixc       % [edge attribute] topologically sorted nodes (receivers)
     cellsize  % cellsize
-    refmat    % 3-by-2 affine transformation matrix (see makerefmat)
+    wf        % 2-by-3 affine transformation matrix (see worldfilematrix)
     georef    % additional information on spatial referencing
     IXgrid    % [node attribute] linear index of stream nodes into instance of GRIDobj
     x         % [node attribute] x-coordinate vector 
@@ -112,11 +112,11 @@ methods
             p = inputParser;
             p.FunctionName = 'STREAMobj';
             addRequired(p,'FD',@(x) isa(x,'FLOWobj'));
-            addParamValue(p,'minarea',default_minarea,@(x) isscalar(x) && x>=0);
-            addParamValue(p,'unit',default_units,@(x) ischar(validatestring(x, ...
+            addParameter(p,'minarea',default_minarea,@(x) isscalar(x) && x>=0);
+            addParameter(p,'unit',default_units,@(x) ischar(validatestring(x, ...
                             {'pixels', 'mapunits','m2','km2'}))); 
-            addParamValue(p,'outlets',[],@(x) isnumeric(x));
-            addParamValue(p,'channelheads',[],@(x) isnumeric(x));
+            addParameter(p,'outlets',[],@(x) isnumeric(x));
+            addParameter(p,'channelheads',[],@(x) isnumeric(x));
             
             parse(p,FD,varargin{:});
             
@@ -185,7 +185,7 @@ methods
         S.ixc      = double(FD.ixc(I));
         
         S.cellsize = FD.cellsize;
-        S.refmat   = FD.refmat;
+        S.wf       = FD.wf;
         S.georef   = FD.georef;
 
         % recalculate stream indices
@@ -203,7 +203,8 @@ methods
 
         % get coordinate pairs
         [rows,cols] = ind2sub(S.size,S.IXgrid);
-        xy =  [double(rows(:)) double(cols(:)) ones(numel(rows),1)] * S.refmat;
+        xy =  S.wf*[double(cols(:))-1 double(rows(:))-1 ones(numel(rows),1)]';
+        xy = xy';
         S.x = xy(:,1);
         S.y = xy(:,2);
           

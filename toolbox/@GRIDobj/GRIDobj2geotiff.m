@@ -84,7 +84,7 @@ catch ME
             BpS = 32;
             TSF = Tiff.SampleFormat.IEEEFP;
         otherwise
-            if islogical(A);
+            if islogical(A)
                 A = uint32(A);
                 cla = 'uint32';
             end
@@ -111,14 +111,6 @@ end
 
 end
 
-function k = refmat2worldfile(r)
-% does not support rotation
-
-k(1,1) = r(2,1);
-k(4,1) = r(1,2);
-k(5,1) = r(3,1)+k(1);
-k(6,1) = r(3,2)+k(4);
-end
 
 function GeoKeyDirectoryTag = createGeoKeyDirectoryTag(DEM)
 % Attempts to create a GeoKeyDirectoryTag from the referencing information

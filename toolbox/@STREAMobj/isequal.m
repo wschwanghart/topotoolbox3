@@ -35,18 +35,18 @@ function tf = isequal(S1,S2,type)
 %
 % See also: STREAMobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 23. January, 2020
+% Author: Wolfgang Schwanghart (schwang[at]uni-potsdam.de)
+% Date: 11. June, 2024
 
-if nargin == 2
-    type = 'topology';
-else    
-    type = validatestring(type,{'referencing','geometry','topology'});
+arguments
+    S1    STREAMobj
+    S2    STREAMobj
+    type  = 'topology'
 end
 
 
-% georeferencing and refmat
-tf = isequal(S1.refmat,S2.refmat);
+% georeferencing and wf
+tf = isequal(S1.wf,S2.wf);
 if ~tf || strcmp(type,'referencing'); return; end
 
 % geometry

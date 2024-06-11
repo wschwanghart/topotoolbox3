@@ -34,8 +34,8 @@ function [x,y,varargout] = STREAMobj2XY(S,varargin)
 %     [x,y,d] = STREAMobj2XY(S,S.distance);
 %     plot(x,y)
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 30. January, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 6. June, 2024
 
 
 order = S.orderednanlist;

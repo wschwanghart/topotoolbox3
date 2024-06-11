@@ -69,33 +69,23 @@ p.FunctionName = 'gradient';
 validunits = {'tangent' 'degree' 'radian' 'percent' 'sine'};
 validmethods = {'forward' 'centered' 'robust'};
 
-addParamValue(p,'unit','tangent',@(x) ischar(validatestring(x,validunits)));
-addParamValue(p,'method','forward',@(x) ischar(validatestring(x,validmethods)));
-addParamValue(p,'drop',10,@(x) isscalar(x) && x>0);
-addParamValue(p,'imposemin',false,@(x) isscalar(x));
+addParameter(p,'unit','tangent',@(x) ischar(validatestring(x,validunits)));
+addParameter(p,'method','forward',@(x) ischar(validatestring(x,validmethods)));
+addParameter(p,'drop',10,@(x) isscalar(x) && x>0);
+addParameter(p,'imposemin',false,@(x) isscalar(x));
 
 parse(p,varargin{:});
 
 % get node attribute list with elevation values
-if isa(DEM,'GRIDobj')
-    validatealignment(S,DEM);
-    z = double(getnal(S,DEM));
-elseif isnal(S,DEM);
-    z = double(DEM);
-else
-    error('Imcompatible format of second input argument')
-end
+z = ezgetnal(S,DEM);
 
 % if imposemin
-if p.Results.imposemin
-    for r = 1:numel(S.ix);
-        z(S.ixc(r)) = min(z(S.ix(r)),z(S.ixc(r)));
-    end
-end
+z = imposemin(S,z);
 
+% Inter-node distances
 d = hypot(S.x(S.ix)-S.x(S.ixc),S.y(S.ix)-S.y(S.ixc));
 
-switch validatestring(p.Results.method,validmethods);
+switch validatestring(p.Results.method,validmethods)
     case 'forward'
         s       = zeros(size(S.x));
         s(S.ix) = (z(S.ix)-z(S.ixc))./d;
@@ -111,7 +101,7 @@ switch validatestring(p.Results.method,validmethods);
         s = nan(size(S.x));
         drop = p.Results.drop;
         
-        for r = 1:numel(S.ix);
+        for r = 1:numel(S.ix)
             
             zz = z(S.ix(r));
             dd = 0;
@@ -119,27 +109,20 @@ switch validatestring(p.Results.method,validmethods);
             c  = r;
             
             % first go until a cell height difference is less than the drop
-            while (c ~= 0) && (zz-z(S.ixc(c)) < drop);
+            while (c ~= 0) && (zz-z(S.ixc(c)) < drop)
                 dd = dd+d(c);
                 c = ixcix(S.ixc(c));
             end
             
-            if c == 0;
+            if c == 0
                 s(S.ix(r)) = nan;
             else
-%                 z1 = z(S.ix(c));
                 z2 = z(S.ixc(c));
                 
                 s(S.ix(r)) = (zz-z2)./(d(c) + dd);
                 % lower the subsequent cell a little (check, if this is ok)
                 z(S.ixc(r)) = min(z(S.ix(r)) - s(S.ix(r))*d(r),z(S.ixc(r)));
-%                 
-%                 z1  = -(zz-z(S.ix(c))-drop);
-%                 z2  = zz-z(S.ixc(c))-drop;
-%                 
-%                 ddd = z2/z1 *d(c) + dd;
-%                 
-%                 s(S.ix(r)) = drop./ddd;
+
             end
         end
 end

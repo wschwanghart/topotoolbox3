@@ -43,7 +43,7 @@ if nargout == 2
     
     xn = [];
     yn = [];
-    for r = 1:numel(ixs);
+    for r = 1:numel(ixs)
         % vector with interpolation locations
         dmax = d(ixs(r));
         dmin = d(ixe(r));
@@ -71,7 +71,7 @@ else
     
     MS = STREAMobj2mapstruct(S);
     
-    for r = 1:numel(MS);
+    for r = 1:numel(MS)
         x = MS(r).X;
         y = MS(r).Y;
         
@@ -84,7 +84,7 @@ else
         
         dd = 0:spacing:d(end);
         
-        if dd(end) ~= d(end);
+        if dd(end) ~= d(end)
             dd(end+1) = d(end);
         end
         

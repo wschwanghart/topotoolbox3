@@ -1,6 +1,6 @@
 function L = line2GRIDobj(DEM,varargin)
 
-%LINE2GRIDOBJ convert line to a grid
+%LINE2GRIDOBJ Convert line to a grid
 %
 % Syntax
 %
@@ -38,8 +38,8 @@ function L = line2GRIDobj(DEM,varargin)
 %
 % See also: GRIDobj/coord2ind, GRIDobj/sub2coord, GRIDobj/getcoordinates
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 26. August, 2018
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. June, 2024
 
 % 26/8/2018 line2GRIDobj now deals with lines that have their start and end
 % points outside the grid borders.
@@ -56,7 +56,7 @@ else
 end
 
 %%
-[X,Y] = refmat2XY(DEM.refmat,DEM.size);
+[X,Y] = wf2XY(DEM.wf,DEM.size);
 X = X(:);
 Y = Y(:);
 

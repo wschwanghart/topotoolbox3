@@ -28,15 +28,15 @@ function GRIDobj2ascii(DEM,filename,type)
 %     GRIDobj2ascii(DEM,'bigtujunga_ascii.txt');  
 % 
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. June, 2024
 
 narginchk(1,3)
 
 allowedExtensions = {'.txt','.asc'};
-[X,Y] = refmat2XY(DEM.refmat,DEM.size);
+[X,Y] = wf2XY(DEM.wf,DEM.size);
 
-if nargin == 1;    
+if nargin == 1    
     
     [FileName,PathName] = uiputfile({'*.txt';'*.asc'});
     if FileName == 0
@@ -48,7 +48,7 @@ if nargin == 1;
     
 elseif nargin == 2
     [~,~,ext] = fileparts(filename);    
-    if any(strcmpi(ext,allowedExtensions));
+    if any(strcmpi(ext,allowedExtensions))
 
     else
         error('File extension ambiguous.')
@@ -76,7 +76,7 @@ fclose(fid);
 
 DEM.Z(isnan(DEM.Z)) = nodata;
 
-if cellsize<0;
+if cellsize<0
     DEM.Z        = flipud(DEM.Z);
 end
 

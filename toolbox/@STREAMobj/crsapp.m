@@ -214,8 +214,8 @@ function smoothnetwork(hObject,callbackdata)
     end
     
     assignin('base','params',params);
-    
-    zs = crs(S,z,params,'split',isempty(gcp('nocreate')));
+    paramsc = namedargs2cell(params);
+    zs = crs(S,z,paramsc{:},'split',isempty(gcp('nocreate')));
     if exist('hlsmooth','var')
         delete(hlsmooth)
     end
