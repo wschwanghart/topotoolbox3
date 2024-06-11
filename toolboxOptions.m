@@ -98,7 +98,10 @@ function opts = toolboxOptions
     % Files included in AppGalleryFiles must also be included in
     % ToolboxFiles.
     %
-    % opts.AppGalleryFiles = 
+    opts.AppGalleryFiles = {...
+        fullfile("toolbox","apps","flowpathapp.m"), ...
+        fullfile("toolbox","apps","mappingapp.m"),...
+        };
 
     % Files to add to the Java class path during toolbox installation,
     % specified as a string vector. When specifying ToolboxJavaPath,
