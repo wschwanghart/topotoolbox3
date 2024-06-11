@@ -46,7 +46,7 @@ x = x(I);
 y = y(I);
 
 %%
-[X,Y] = refmat2XY(DEM.refmat,DEM.size);
+[X,Y] = wf2XY(DEM.wf,DEM.size);
 X = X(:);
 Y = Y(:);
 

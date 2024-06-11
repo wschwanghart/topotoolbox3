@@ -52,7 +52,7 @@ hcs = cs/2;
 fracs = hcs*1e-6;
 DG = GRIDobj([]);
 DG.size = FD.size+[1 1];
-DG.refmat = FD.refmat+[0 0;0 0;-hcs,hcs];
+DG.wf   = FD.wf+[0 0;0 0;-hcs,hcs]';
 
 
 % Identify internal drainage 
