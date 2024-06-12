@@ -139,12 +139,9 @@ hButtonExportSHP = uimenu(hMenuExport,'Label','Export streams to Shapefile','Cal
 
 % calculate hillshade
 
-hs = true;
-if hs
-    RGB  = imageschs(DEM,DEM,'colormap',[1 1 1]);
-else
-    RGB  = DEM.Z;
-end
+
+RGB  = imageschs(DEM,DEM,'colormap',landcolor(255));
+
 % create empty axes in figure
 % hAx = axes('parent',hFig);
 hAx = imgca(hFig);
@@ -154,7 +151,14 @@ if exist('S','var')
     WW(S.IXgrid) = true;
     [rr,cc] = ind2sub(DEM.size,S.IXgrid);
     [~,~,rr,cc] = STREAMobj2XY(S,rr,cc);
-%     RGB(repmat(WW,[1 1 3])) = 150;    
+    
+    clrriv = uint8(ttclr('river')*255);
+    for r = 1:size(RGB,3)
+        temp = RGB(:,:,r);
+        temp(WW) = clrriv(r);
+        RGB(:,:,r) = temp;
+    end
+  
     [~,SNAPRASTER] = bwdist(WW,'q');
     
     FD.ixcix(~WW) = 0;
@@ -180,12 +184,6 @@ imoverview(hIm)
 
 % create figure for profiles
 [hFigProfiles,hAxProfiles] = getprofilefig;
-
-if nargin == 3
-    hold(hAx,'on')
-    plot(hAx,cc,rr,'color',[.7 .7 .7]);
-    hold(hAx,'off')
-end
 
 
 %% add callbacks
@@ -354,7 +352,7 @@ hPlotProfiles = [];
             
             fid = fopen([PathName FileName], 'w');
             
-            for r = 1:numel(header);
+            for r = 1:numel(header)
                 fprintf(fid, header{r});
                 if r < numel(header)
                     fprintf(fid, '\t');
@@ -362,7 +360,7 @@ hPlotProfiles = [];
             end
             fprintf(fid, '\n');
 
-            for row=1:size(D,1);
+            for row=1:size(D,1)
                 fprintf(fid, '%d\t%f\t%f\t%f\t%f\t%f\t%f\n', D(row,:));
             end
 
@@ -379,7 +377,7 @@ hPlotProfiles = [];
         else
             
             
-            for r = 1:numel(IXchannel);
+            for r = 1:numel(IXchannel)
                 SHP(r).Geometry = 'Line';
                 [SHP(r).X SHP(r).Y] = ind2coord(DEM,IXchannel{r}(:)); 
                 SHP(r).X = SHP(r).X';
@@ -389,7 +387,7 @@ hPlotProfiles = [];
                 SHP(r).maxZ = double(max(DEM.Z(IXchannel{r})));
                 SHP(r).length = double(max(distance{r})-min(distance{r}));
                 SHP(r).tribtoID = double(LOGgrid(IXchannel{r}(end)));
-                if SHP(r).tribtoID == SHP(r).ID;
+                if SHP(r).tribtoID == SHP(r).ID
                     SHP(r).tribtoID = 0;
                 end
             end
@@ -423,9 +421,9 @@ hPlotProfiles = [];
         A = flowacc(FD);
         G = gradient(FD,DEM);
         D = cell(numel(IXchannel),1);
-        for r = 1:numel(IXchannel);
+        for r = 1:numel(IXchannel)
             D{r}(1:numel(IXchannel{r}),1) = repmat(r,numel(IXchannel{r}),1);
-            [D{r}(:,2) D{r}(:,3)] = ind2coord(DEM,IXchannel{r}(:));            
+            [D{r}(:,2), D{r}(:,3)] = ind2coord(DEM,IXchannel{r}(:));            
             D{r}(:,4) = distance{r}(:);
             D{r}(:,5) = DEM.Z(IXchannel{r}(:));
             D{r}(:,6) = A.Z(IXchannel{r}(:)).*(DEM.cellsize).^2;
@@ -622,11 +620,11 @@ isStringOrCellString = @(c) iscellstr(c)||ischar(c);
 p = inputParser;
 p.CaseSensitive = false;
 addRequired(p,'prompts',isStringOrCellString);
-addParamValue(p,'Introduction','',@ischar);
-addParamValue(p,'InputTypes',[],isStringOrCellString);
-addParamValue(p,'InputDimensions',[],@isnumeric);
-addParamValue(p,'ValidationFcn',[],@(c) iscell(c)|| isa(c,'function_handle'));
-addParamValue(p,'SampleData',[])
+addParameter(p,'Introduction','',@ischar);
+addParameter(p,'InputTypes',[],isStringOrCellString);
+addParameter(p,'InputDimensions',[],@isnumeric);
+addParameter(p,'ValidationFcn',[],@(c) iscell(c)|| isa(c,'function_handle'));
+addParameter(p,'SampleData',[])
 
 parse(p,prompts,varargin{:})
 
