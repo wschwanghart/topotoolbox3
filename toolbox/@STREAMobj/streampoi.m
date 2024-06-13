@@ -1,6 +1,6 @@
 function [OUT,OUT2] = streampoi(S,type,outformat)
 
-%STREAMPOI stream points of interest
+%STREAMPOI Points of interest on the stream network
 %
 % Syntax
 %
@@ -55,25 +55,19 @@ function [OUT,OUT2] = streampoi(S,type,outformat)
 % Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
 % Date: 26. November, 2020
 
-
-%% check input arguments
-narginchk(1,3)
-
-if nargin == 1
-    type = {'channelheads'};
-    outformat = 'xy';
-else
-    if ischar(type)
-        type = {type};
-    end
-    if nargin > 2
-        outformat = validatestring(outformat,{'xy','ix','logical','mappoint','geopoint','PPS'},'streampoi','outformat',3);
-    else       
-        outformat = 'xy';
-    end  
+arguments
+    S   STREAMobj
+    type = 'channelheads'
+    outformat  {mustBeMember(outformat,...
+        {'xy','ix','logical','mappoint','geopoint','PPS'})} = 'xy'
 end
 
-% Sparse matrix
+if ischar(type) || isstring(type)
+    type = {type};
+end
+outformat = validatestring(outformat,{'xy','ix','logical','mappoint','geopoint','PPS'},'streampoi','outformat',3);
+
+% Sparse matrix representation of the network
 ix  = S.ix;
 ixc = S.ixc;
 nrc = numel(S.x);
@@ -87,8 +81,7 @@ for r = 1:numel(type)
     t = validatestring(type{r},...
         {'channelheads','confluences','bconfluences','outlets'},...
         'streampoi','type',2);
-    
-    
+   
     switch t
         case 'channelheads'
             
@@ -111,7 +104,7 @@ for r = 1:numel(type)
 end
 
 % prepare output
-switch outformat
+switch lower(outformat)
     case 'xy'      
         ix   = find(V);
         ix   = ix(:);
@@ -140,10 +133,10 @@ switch outformat
         
         ix   = find(V);
         ix   = ix(:);
-        [lat,lon] = minvtran(S.georef.mstruct,S.x(ix),S.y(ix));
+        [lat,lon] = projinv(S.georef.ProjectedCRS,S.x(ix),S.y(ix));
         OUT  = geopoint(lat,lon);
         
-    case 'PPS'
+    case 'pps'
         
         OUT   = PPS(S,'pp',S.IXgrid(V));
 end

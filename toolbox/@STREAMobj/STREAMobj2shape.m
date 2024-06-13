@@ -14,7 +14,7 @@ function [GS,val] = STREAMobj2shape(S,varargin)
 %     STREAMobj2shape takes a STREAMobj and converts it to a geoshape or
 %     mapshape object. geoshape or mapshape objects are ways to store
 %     vector features with either point, line, or polygon topology. They
-%     can be exported as shapefile, and hopefully soon support projections.
+%     can be exported as shapefile.
 %
 % Input parameters
 %
@@ -88,19 +88,17 @@ MS = STREAMobj2mapstruct(S,'seglength',p.Results.seglength,...
     'attributes',p.Results.attributes);
 
 % remove nans from coordinates if any
-
-
 if ~isempty(p.Results.summarizeby)
     if ~isfield(MS,p.Results.summarizeby)
         error('Invalid summary field')
     end
 end
 
-type = validatestring(p.Results.type,{'geoshape' 'mapshape'});
+type = validatestring(p.Results.type,{'geolineshape' 'maplineshape'});
 
 switch type
-    case 'geoshape'
-        [lat,lon] = cellfun(@(x,y) minvtran(S.georef.mstruct,x,y),{MS.X},{MS.Y},'UniformOutput',false);
+    case 'geolineshape'
+        [lat,lon] = cellfun(@(x,y) projinv(S.georef.mstruct,x,y),{MS.X},{MS.Y},'UniformOutput',false);
         [MS.Lat] = deal(lat{:});
         [MS.Lon] = deal(lon{:});
         
@@ -129,7 +127,7 @@ switch type
             GS = accumarray(bins(:),(1:numel(MS))',[],@(ix) geoshape(MS(ix)));
             val = edges(1:end-1) + diff(edges)/2;
         else
-            GS = mapshape(MS);
+            GS = maplineshape(MS);
             val = [];
             try 
                 GS.GTCitationGeoKey = DEM.georef.GeoKeyDirectoryTag.GTCitationGeoKey;
