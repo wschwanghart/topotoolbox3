@@ -65,13 +65,14 @@ parse(p,varargin{:});
 
 if ~isnal(S,p.Results.color) && ~isa(p.Results.color,'GRIDobj')
     % STREAMobj to lat lon
-    switch S.georef.SpatialRef.CoordinateSystemType
-        case 'geographic'
-            [lon,lat] = STREAMobj2XY(S);
-        otherwise
-            [lat,lon] = STREAMobj2latlon(S);
+    if isGeographic(S)
+        [lon,lat] = STREAMobj2XY(S);
+    elseif isProjected(S)
+        [lat,lon] = STREAMobj2latlon(S);
+    else
+        error("S has an undefined CRS.")
     end
-    
+
     minlat = min(lat);
     maxlat = max(lat);
     minlon = min(lon);

@@ -32,12 +32,13 @@ function S = removeshortstreams(S,d)
 %     hold on
 %     plot(S2)     
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 17. August, 2017
 
-narginchk(2,2)
-
-validateattributes(d,{'numeric'},{'scalar','>',0},'removeshortstreams','d',2);
+arguments
+    S   STREAMobj
+    d   {mustBePositive}
+end
 
 % calculate streamorder
 s = streamorder(S);

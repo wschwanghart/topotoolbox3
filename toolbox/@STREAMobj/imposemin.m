@@ -54,32 +54,31 @@ function DEM = imposemin(S,DEM,sl)
 %
 % See also: FLOWobj/imposemin
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. June, 2024
 
+arguments
+    S    STREAMobj
+    DEM  {mustBeGRIDobjOrNal(DEM,S)}
+    sl   = 0
+end
 
-narginchk(2,3)
-
+z = ezgetnal(S,DEM);
 if isa(DEM,'GRIDobj')
     inp = 'GRIDobj';
-    validatealignment(S,DEM);
-    z = getnal(S,DEM);
-elseif isnal(S,DEM);
-    inp = 'nal';
-    z = DEM;
 else
-    error('Imcompatible format of second input argument')
+    inp = 'nal';
 end
-    
-if nargin == 2;
-    for r = 1:numel(S.ix);
+     
+if nargin == 2 || sl == 0
+    for r = 1:numel(S.ix)
         z(S.ixc(r)) = min(z(S.ix(r)),z(S.ixc(r)));
     end    
-elseif nargin == 3;
+elseif nargin == 3
     
     d = sqrt((S.x(S.ix)-S.x(S.ixc)).^2 + (S.y(S.ix)-S.y(S.ixc)).^2); 
     d = d*sl;
-    for r = 1:numel(S.ix);
+    for r = 1:numel(S.ix)
         z(S.ixc(r)) = min(z(S.ix(r))-d(r),z(S.ixc(r)));
     end
 end

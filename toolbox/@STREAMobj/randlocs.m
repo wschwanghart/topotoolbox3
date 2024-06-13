@@ -42,14 +42,10 @@ function varargout = randlocs(S,n,wr)
 % Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
 % Date: 26. November, 2020
 
-
-narginchk(2,3);
-nargoutchk(1,2);
-
-if nargin == 2
-    wr = true;
-else
-    wr = wr>0;
+arguments
+    S    STREAMobj
+    n    = 100
+    wr   = true
 end
 
 if wr

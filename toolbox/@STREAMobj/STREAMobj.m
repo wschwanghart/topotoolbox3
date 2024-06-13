@@ -591,6 +591,26 @@ methods
     end
 
 
+    function tf = isGeographic(A)
+        %ISGEOGRAPHIC Determines whether STREAMobj has a geographic coordinate system
+        %
+        % Syntax
+        %
+        %     tf = isgeographic(A)
+        %
+        tf = isprop(A.georef,"GeographicCRS");
+    end
+
+    function tf = isProjected(A)
+        %ISPROJECTED Determines whether STREAMobj has a projected coordinate system
+        %
+        % Syntax
+        %
+        %     tf = isProjected(A)
+        %
+        tf = isprop(A.georef,"ProjectedCRS");
+    end
+
 end
 end   
     

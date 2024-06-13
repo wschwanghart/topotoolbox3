@@ -38,14 +38,19 @@ function [lat,lon,varargout] = STREAMobj2latlon(S,varargin)
 %
 % See also: STREAMobj/STREAMobj2XY
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 20. February, 2015
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. June, 2024
 
+if isProjected(S)
+elseif isGeographic(S)
+    error("S already has a geographic CRS.")
+else
+    error("S has an undefined CRS.")
+end
+    
 nr = numel(varargin);
 c  = cell(1,nr);
 [x,y,c{:}] = STREAMobj2XY(S,varargin{:});
-if isempty(S.georef)
-    error('The STREAMobj contains no georeferencing information');
-end
-[lat,lon] = minvtran(S.georef.mstruct,x,y);
+
+[lat,lon] = projinv(S.georef.ProjectedCRS,x,y);
 varargout = c;

@@ -1,6 +1,6 @@
 function S = klargestconncomps(S,k)
 
-%KLARGESTCONNCOMPS retain k largest connected components in an instance of STREAMobj
+%KLARGESTCONNCOMPS Keep k largest connected components in an instance of STREAMobj
 %
 % Syntax
 %
@@ -36,16 +36,13 @@ function S = klargestconncomps(S,k)
 %
 % See also: STREAMobj/modify, STREAMobj/conncomps
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 12. October, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. June, 2024
 
 
-% check input arguments
-narginchk(1,2)
-if nargin == 1
-    k = 1;
-else
-    validateattributes(k,{'numeric'},{'scalar','integer','>',0},'klargestconncomps','k',2);
+arguments
+    S    STREAMobj
+    k    {mustBePositive,mustBeInteger} = 1
 end
 
 % create sparse adjacency matrix

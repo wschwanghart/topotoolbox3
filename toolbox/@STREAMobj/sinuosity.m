@@ -1,6 +1,6 @@
 function s = sinuosity(S,seglength)
 
-%SINUOSITY sinuosity coefficient 
+%SINUOSITY Sinuosity coefficient 
 %
 % Syntax
 %
@@ -39,9 +39,13 @@ function s = sinuosity(S,seglength)
 %
 % See also: STREAMobj, STREAMobj/labelreach
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 21. March, 2018
+% Author: Wolfgang Schwanghart (schwanghart[at]uni-potsdam.de)
+% Date: 12. June, 2024
 
+arguments
+    S    STREAMobj
+    seglength {mustBePositive}
+end
 
 if seglength < (S.cellsize*3)
     error('Choose a larger value of seglength');

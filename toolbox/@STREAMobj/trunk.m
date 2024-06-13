@@ -1,4 +1,4 @@
-function [S,locb] = trunk(S,varargin)
+function [S,locb] = trunk(S,A)
 
 %TRUNK extract trunk stream (longest stream) 
 %
@@ -48,22 +48,22 @@ function [S,locb] = trunk(S,varargin)
 % See also: chiplot, FLOWobj/flowpathextract, STREAMobj/klargestconncomps,
 %           STREAMobj/istrunk, STREAMobj/modify
 %  
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 23. February, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. June, 2024
 
 
+arguments
+    S   STREAMobj
+    A   {mustBeGRIDobjOrNalOrEmpty(A,S)} = []
+end
 
 narginchk(1,2);
 
+
 if nargin == 2
-    if isa(varargin{1},'GRIDobj')
-        a = getnal(S,varargin{1});
-    elseif isnal(S,varargin{1})
-        a = varargin{1};
-    else
-        error('Cannot handle second input argument.');
-    end
+    a = ezgetnal(S,A);
 end
+
         
 if nargout > 1
     % make copy
