@@ -1,6 +1,6 @@
 function [zs,exitflag,output] = crs(S,DEM,options)
 
-%CRS constrained regularized smoothing of the channel length profile
+%CRS Constrained regularized smoothing of the channel length profile
 %
 % Syntax
 %

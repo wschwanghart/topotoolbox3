@@ -186,6 +186,10 @@ if p.Results.plot
     if ~ISHOLD
         hold(ax,'off')
     end
+    
+    % The uncertainty patch may overlap the axes, making them partly
+    % invisible. A way to bring them back to front is:
+    set(ax,'Layer','top')
 
     ylabel(['\rho(' p.Results.name ')'])
     xlabel(p.Results.name)

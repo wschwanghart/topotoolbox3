@@ -1,11 +1,10 @@
 function s = streamorder(S,type)
 
-%STREAMORDER calculate Strahler Stream Order from STREAMobj
+%STREAMORDER Calculate stream order from STREAMobj
 %
 % Syntax
 %
 %     s = streamorder(S)
-%     streamorder(S)
 %
 % Description
 %
@@ -41,14 +40,12 @@ function s = streamorder(S,type)
 % 
 % See also: STREAMobj, FLOWobj/streamorder, STREAMobj/plotstreamorder
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 5. January, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 14. June, 2024
 
-
-if nargin == 1;
-    type = 'strahler';
-else
-    type = validatestring(type,{'strahler','shreve'},'STREAMobj/streamorder','type',2);
+arguments
+    S  STREAMobj
+    type {mustBeMember(type,{'strahler','shreve'})} = 'strahler'
 end
 
 switch type
@@ -56,8 +53,8 @@ switch type
         nrc = numel(S.x);
         s   = zeros(nrc,1);
         
-        for r = 1:numel(S.ix);
-            if s(S.ix(r)) == 0;
+        for r = 1:numel(S.ix)
+            if s(S.ix(r)) == 0
                 s(S.ix(r)) = 1;
             end
             
@@ -73,7 +70,7 @@ switch type
         s = streampoi(S,'channelheads','logical');
         s = double(s);
         
-        for r = 1:numel(S.ix);
+        for r = 1:numel(S.ix)
             s(S.ixc(r)) = s(S.ix(r))+s(S.ixc(r));
         end
 end

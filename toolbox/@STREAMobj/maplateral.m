@@ -1,6 +1,6 @@
-function [a,mask] = maplateral(S,A,dist,aggfun,varargin)
+function [a,mask] = maplateral(S,A,dist,aggfun,options)
 
-%MAPLATERAL map values of regions adjacent to streams to stream network
+%MAPLATERAL Map values of regions adjacent to streams to stream network
 %
 % Syntax
 %
@@ -65,18 +65,20 @@ function [a,mask] = maplateral(S,A,dist,aggfun,varargin)
 %
 % See also: STREAMobj, SWATHobj, STREAMobj/smooth
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 23. February, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 14. June, 2024
 
-% Input checking and parsing
-validatealignment(S,A)
-p = inputParser;
-p.FunctionName = 'STREAMobj/maplateral';
-addParamValue(p,'excludestream',true,@(x) isscalar(x));
-addParamValue(p,'inpaintnans',true,@(x) isscalar(x));
-addParamValue(p,'flat',false,@(x) isscalar(x));
-addParamValue(p,'fillval',nan);
-parse(p,varargin{:});
+arguments
+    S    STREAMobj
+    A    {validatealignment(S,A)}
+    dist {mustBePositive}
+    aggfun = @mean
+    options.excludestream = true
+    options.inpaintnans = true
+    options.flat = false
+    options.fillval = nan
+end
+
 
 % create mask, if required
 if nargout == 2
@@ -111,14 +113,14 @@ else
 end
 
 % flat tops?
-if p.Results.flat
+if options.flat
     endpoints = streampoi(S,{'channelhead','outlet'},'logical');
     II = ismember(L,S.IXgrid(endpoints));
     I(II) = false;
     I  = (imdilate(I,ones(3)) & II) | I;
 end
 
-if p.Results.excludestream
+if options.excludestream
     I(S.IXgrid) = false;
 end
 
@@ -135,14 +137,14 @@ L  = L(:);
 if iscell(aggfun)
     a = nan(numel(S.IXgrid),numel(aggfun));
     for r = 1:numel(aggfun)
-        a(:,r)  = accumarray(locb,double(A),size(S.IXgrid),aggfun{r},p.Results.fillval);
+        a(:,r)  = accumarray(locb,double(A),size(S.IXgrid),aggfun{r},options.fillval);
     end
 else
-    a  = accumarray(locb,double(A),size(S.IXgrid),aggfun,p.Results.fillval);
+    a  = accumarray(locb,double(A),size(S.IXgrid),aggfun,options.fillval);
 end
 
 % inpaint nans
-if p.Results.inpaintnans
+if options.inpaintnans
     for r = 1:size(a,2)
         a(:,r) = inpaintnans(S,a(:,r));
     end

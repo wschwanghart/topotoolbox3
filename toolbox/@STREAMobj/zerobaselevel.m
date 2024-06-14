@@ -1,6 +1,6 @@
 function [z,zbase] = zerobaselevel(S,DEM)
 
-%ZEROBASELEVEL set base level to zero
+%ZEROBASELEVEL Set base level of stream elevation to zero
 %
 % Syntax
 %
@@ -38,20 +38,16 @@ function [z,zbase] = zerobaselevel(S,DEM)
 %
 % See also: STREAMobj, STREAMobj/plotdz, STREAMobj/getnal
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 12. October, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 14. June, 2024
 
-narginchk(2,2)
+arguments
+    S    STREAMobj
+    DEM  {mustBeGRIDobjOrNal(DEM,S)}
+end
 
 % get node attribute list with elevation values
-if isa(DEM,'GRIDobj')
-    validatealignment(S,DEM);
-    z = getnal(S,DEM);
-elseif isnal(S,DEM)
-    z = DEM;
-else
-    error('Imcompatible format of second input argument')
-end
+z = ezgetnal(S,DEM);
 
 % set the base level of all streams to zero
 zbase = z;

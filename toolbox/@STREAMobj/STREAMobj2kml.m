@@ -90,7 +90,7 @@ parse(p,varargin{:});
 MS = STREAMobj2mapstruct(S,'seglength',p.Results.seglength,...
     'attributes',{'Z' p.Results.attribute p.Results.aggfun});
 
-[lat,lon] = cellfun(@(x,y) minvtran(S.georef.mstruct,x,y),{MS.X},{MS.Y},'UniformOutput',false);
+[lat,lon] = cellfun(@(x,y) projinv(S.georef.ProjectedCRS,x,y),{MS.X},{MS.Y},'UniformOutput',false);
 [MS.Lat] = deal(lat{:});
 [MS.Lon] = deal(lon{:});
         
