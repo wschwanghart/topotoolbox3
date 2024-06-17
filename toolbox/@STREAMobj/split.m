@@ -1,4 +1,4 @@
-function S = split(S,varargin)
+function S = split(S,V,removeedge,doclean)
 
 %SPLIT split drainage network at predefined locations
 %
@@ -55,30 +55,41 @@ function S = split(S,varargin)
 %     S2 = split(S,randlocs(S,100));
 %     plotc(S2,S2.distance)
 %
+% Example 3: Split at changes along a classified grid
+%
+%     C = reclassify(DEM,'equalint',5);
+%     DEM = imposemin(S,DEM);
+%     S2 = split(S,C,'outgoing',true);
+%     [x,y] = streampoi(S2,'outlets','xy');
+%     imageschs(DEM,C)
+%     hold on
+%     plot(x,y,'wo')
+%     hold off
+%
 % See also: STREAMobj, STREAMobj/modify, STREAMobj/randlocs, 
 %           STREAMobj/STREAMobj2cell, STREAMobj/clean
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 3. December, 2018
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. June, 2024
 
+arguments
+    S     STREAMobj
+    V    = streampoi(S,'confluences','logical')
+    removeedge = 'incoming'
+    doclean  = true
+end
 
-narginchk(1,4)
-if nargin == 1
-    V = streampoi(S,'confluences','logical');
-else
-    if isa(varargin{1},'GRIDobj') || isnal(S,varargin{1})
-        d = gradient(S,varargin{1});
+if nargin >= 2
+    if isa(V,'GRIDobj') || isnal(S,V)
+        d = gradient(S,V);
         V = d~=0;
-    else    
-        V = ismember(S.IXgrid,varargin{1});
+    else
+        V = ismember(S.IXgrid,V);
     end
 end
 
-if nargin <= 2
-    method = 'incoming';
-else
-    method = validatestring(varargin{2},{'outgoing','incoming'},'STREAMobj/split','removeedge',3);
-end
+
+method = validatestring(removeedge,{'outgoing','incoming'},'STREAMobj/split','removeedge',3);
 
 switch method
     case 'outgoing'
@@ -90,13 +101,6 @@ end
 S.ix(I) = [];
 S.ixc(I) = [];
 
-if nargin <= 3
+if doclean
     S = clean(S);
-else
-    if varargin{3}
-        S = clean(S);
-    end
 end
-
-
-% 

@@ -1,6 +1,6 @@
-function [xn,yn,IX,D,MP] = snap2stream(S,x,y,varargin)
+function [xn,yn,IX,D,MP] = snap2stream(S,x,y,options)
 
-%SNAP2STREAM snap locations to nearest stream location
+%SNAP2STREAM Snap locations to nearest stream location
 %
 % Syntax
 %
@@ -83,48 +83,51 @@ function [xn,yn,IX,D,MP] = snap2stream(S,x,y,varargin)
 %     S   = STREAMobj(FD,A>1000);
 %     IX  = randperm(prod(DEM.size),20);
 %     [x,y] = ind2coord(DEM,IX);
-%     [xn,yn,IX,res,d,MP] = snap2stream(S,x,y,'alongflow',FD,'plot',true);
+%     [xn,yn,IX,res,MP] = snap2stream(S,x,y,'alongflow',FD,'plot',true);
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 12. January, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. June, 2024
 
-
-% Parse Inputs
-p = inputParser;         
-p.FunctionName = 'snap2stream';
+arguments
+    S     STREAMobj
+    x     {mustBeNumeric}
+    y     {mustBeNumeric,mustBeEqualSize(x,y)}
+    options.snapto {mustBeTextScalar} = 'all'
+    options.streamorder = []
+    options.maxdist {mustBeNumeric,mustBePositive} = inf
+    options.inputislatlon = false
+    options.plot = false
+    options.nalarea {mustBeGRIDobjOrNalOrEmpty(options.nalarea,S)} = []
+    options.pointarea {mustBeEqualSizeOrEmpty(x,options.pointarea)} = []
+    options.alongflow = []
+end
 
 snaptomethods = {'all','confluence','outlet','channelhead'};
+snapto = validatestring(options.snapto,snaptomethods);
+I      = true(size(S.x));
 
-addParamValue(p,'snapto','all',@(x) ischar(validatestring(x,snaptomethods)));
-addParamValue(p,'maxdist',inf,@(x) isscalar(x) && x>0);
-addParamValue(p,'streamorder',[]);
-addParamValue(p,'inputislatlon',false,@(x) isscalar(x));
-addParamValue(p,'plot',false,@(x) isscalar(x));
-addParamValue(p,'nalarea',[],@(x) isnal(S,x));
-addParamValue(p,'pointarea',[],@(x) numel(x) == numel(x));
-addParamValue(p,'alongflow',[],@(x) isa(x,'FLOWobj') || isempty(x));
-
-parse(p,varargin{:});
-
-if ~isempty(p.Results.nalarea)
-    if isempty(p.Results.pointarea) || isempty(p.Results.maxdist)
+if ~isempty(options.nalarea)
+    options.nalarea = ezgetnal(S,options.nalarea);
+    if isempty(options.pointarea) || isempty(options.maxdist)
         error('TopoToolbox:snap2stream',...
             ['snap2stream requires the arguments pointarea and maxdist\newline'...
             'if nalarea is provided']);
     end
 end
-        
 
-snapto = validatestring(p.Results.snapto,{'all','confluence','outlet','channelhead'});
-I      = true(size(S.x));
-
-if p.Results.inputislatlon
-    if isempty(S.georef)
+if options.inputislatlon    
+    if isProjected(S)
+        [x,y] = projfwd(S.georef.ProjectedCRS,x,y);
+    elseif isGeographic(S)
+        % Do nothing, but issue a warning
+        warning('TopoToolbox:input',...
+            ['STREAMobj is in a geographic CRS. Snapping might create\n'...
+             'some unexpected results.'])
+    else
         error('TopoToolbox:georeferencing',...
             ['Projection of stream network unknown. Cannot convert ' ...
              'geographic coordinates.']);
     end
-    [x,y] = mfwdtran(S.georef.mstruct,x,y);
 end
 
 % evaluate optional arguments to restrict search to specific stream
@@ -147,21 +150,21 @@ switch snapto
         end
 end
         
-if ~isempty(p.Results.streamorder)
+if ~isempty(options.streamorder)
     
     so = streamorder(S);
-    if isnumeric(p.Results.streamorder)
-        validateattributes(p.Results.streamorder,{'numeric'},...
+    if isnumeric(options.streamorder)
+        validateattributes(options.streamorder,{'numeric'},...
             {'scalar','integer','>',0,'<=',max(so)});
-        I = (so == p.Results.streamorder) & I;
+        I = (so == options.streamorder) & I;
     else
         try
             % expecting relational operator
             sothres = nan;
             counter = 1;
             while isnan(sothres)
-                sothres = str2double(p.Results.streamorder(counter+1:end));
-                relop   = p.Results.streamorder(1:counter);
+                sothres = str2double(options.streamorder(counter+1:end));
+                relop   = options.streamorder(1:counter);
                 counter = counter+1;
             end
         catch ME
@@ -187,10 +190,10 @@ IX = IX(:);
 x  = x(:);
 y  = y(:);
 
-if isempty(p.Results.nalarea)
+if isempty(options.nalarea)
     % No area given
     
-    if isempty(p.Results.alongflow)
+    if isempty(options.alongflow)
         % fast and easy using Statistics toolbox
         try
             [IDX,D] = knnsearch([xn yn],[x y]);
@@ -211,7 +214,7 @@ if isempty(p.Results.nalarea)
         xn = nan(size(x));
         yn = nan(size(y));
         
-        FD = p.Results.alongflow;
+        FD = options.alongflow;
         % Get drainage basin of each stream pixel
         [DB,IXOUTLET] = drainagebasins(FD,IX);
         IXO = coord2ind(DB,x,y);
@@ -235,13 +238,13 @@ if isempty(p.Results.nalarea)
     
 else
     
-    ap = p.Results.pointarea(:);
-    an = p.Results.nalarea(I);
+    ap = options.pointarea(:);
+    an = options.nalarea(I);
     
     xnal = xn;
     ynal = yn;
     ixnal = IX;
-    [ix,CD] = rangesearch([xnal,ynal],[x y],p.Results.maxdist);
+    [ix,CD] = rangesearch([xnal,ynal],[x y],options.maxdist);
     xn = nan(size(ap));
     yn = nan(size(ap));
     IX = nan(size(ap));
@@ -264,8 +267,8 @@ end
 
 
 % apply maximum distance
-if ~isinf(p.Results.maxdist)
-    ID = D <= p.Results.maxdist;
+if ~isinf(options.maxdist)
+    ID = D <= options.maxdist;
 else
     ID = true(numel(x),1);
 end
@@ -284,7 +287,7 @@ end
 
 
 
-if ~isinf(p.Results.maxdist)
+if ~isinf(options.maxdist)
     ID = ~ID;
     xn(ID) = nan;
     yn(ID) = nan;
@@ -293,7 +296,7 @@ if ~isinf(p.Results.maxdist)
 end
 
 % plot results
-if p.Results.plot
+if options.plot
     plot(S)
     hold on
     plot(x,y,'sk')
@@ -303,5 +306,23 @@ end
 end
 
 
+function mustBeEqualSize(x,y)
 
+tf = isequal(size(x),size(y));
+if ~tf
+    error('TopoToolbox:input','The size of the input arguments must be the same.')
+end
+end
+
+function mustBeEqualSizeOrEmpty(x,y)
+
+if isempty(x) || isempty(y)
+    return
+end
+
+tf = isequal(size(x),size(y));
+if ~tf
+    error('TopoToolbox:input','The size of the input arguments must be the same.')
+end
+end
 

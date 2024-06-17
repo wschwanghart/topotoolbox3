@@ -1,4 +1,4 @@
-function [st,hs] = plotstreamorder(S,varargin)
+function [st,hs] = plotstreamorder(S,options)
 
 %PLOTSTREAMORDER calculate stream order from STREAMobj
 %
@@ -43,8 +43,6 @@ function [st,hs] = plotstreamorder(S,varargin)
 %     linewidth   scalar or vector of line widths ({max(so/2,1)} where so
 %                 is stream order)
 %    
-%     
-%
 % Output
 %
 %     h         vector of handles to lineseries objects
@@ -55,61 +53,58 @@ function [st,hs] = plotstreamorder(S,varargin)
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     FD = FLOWobj(DEM,'preprocess','carve');
 %     S = STREAMobj(FD,'minarea',1000);
-%     plotstreamorder(S,'colormap',[0 0 0],...
+%     plotstreamorder(S,'colormap',ttclr('river',...
 %                       'LineWidth',max([1 2 3 4 5]/2,1));
 % 
 % See also: STREAMobj, FLOWobj/streamorder, STREAMobj/streamorder
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (w.schwanghart[at]uni-potsdam.de)
+% Date: 17. June, 2024
 
-p = inputParser;
-p.FunctionName = 'STREAMobj/plotstreamorder';
-addParamValue(p,'type','strahler',@(x) ischar(validatestring(x,{'strahler','shreve'})));
-addParamValue(p,'legend',true,@(x) isscalar(x));
-addParamValue(p,'colormap','jet', @(x) ischar(x) || (isnumeric(x) && numel(x)==3));
-addParamValue(p,'parent',[],@(x) ishandle(x));
-addParamValue(p,'linewidth',[]);
+arguments 
+    S    STREAMobj
+    options.type  = 'strahler'
+    options.legend = true
+    options.colormap = 'jet'
+    options.parent   = gca
+    options.linewidth = []
+end
 
-parse(p,varargin{:});
 
 % create mapstruct
-MS  = STREAMobj2mapstruct(S,p.Results.type);
+MS  = STREAMobj2mapstruct(S,options.type);
 un  = unique([MS.streamorder],'sorted');
 nrs = max(un);
 
 % get colormap
-if ischar(p.Results.colormap)
-    cmap = str2func(p.Results.colormap);
+if ischar(options.colormap)
+    cmap = str2func(options.colormap);
     cmap = cmap(nrs);
 else
-    cmap = repmat(p.Results.colormap(:)',nrs,1);
+    cmap = repmat(options.colormap(:)',nrs,1);
 end
 
 % get linewidth
-if isempty(p.Results.linewidth);
-    switch p.Results.type
+if isempty(options.linewidth)
+    switch options.type
         case 'strahler'
             lw = max((1:nrs)/2,1);
         case 'shreve'
             lw = min(((1:nrs)/nrs)*2,0.5);
     end
 else
-    lw = p.Results.linewidth;
+    lw = options.linewidth;
 end
 
-if isempty(p.Results.parent)
-    ax = gca;
-else
-    ax = p.Results.parent;
-end
+ax = options.parent;
+
 t  = ishold;
 fh = zeros(numel(un),1);
 
 s  = [];
 hs = 1:nrs;
 
-for r = 1:numel(un);
+for r = 1:numel(un)
     so = un(r);
     I = [MS.streamorder]==so;
     h = plot(ax,[MS(I).X],[MS(I).Y],'Color',cmap(so,:),'linewidth',lw(min(r,numel(lw))));
@@ -126,7 +121,7 @@ if ~t
 end
 
 
-if p.Results.legend
+if options.legend
     legnames = cellfun(@(x) num2str(x),num2cell(un),'uniformoutput',false);
     legend(fh,legnames);
 end

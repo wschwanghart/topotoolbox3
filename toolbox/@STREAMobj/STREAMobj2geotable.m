@@ -5,8 +5,8 @@ function GT = STREAMobj2geotable(S,varargin)
 % Syntax
 %
 %     GT = STREAMobj2geotable(S)
-%     GT = STREAMobj2shape(S,'seglength',seglength,'type',type)
-%     GT = STREAMobj2shape(...,'attributes',{attname data aggfun ...})
+%     GT = STREAMobj2geotable(S,'seglength',seglength,'type',type)
+%     GT = STREAMobj2geotable(...,'attributes',{attname data aggfun ...})
 %
 % Description
 %
