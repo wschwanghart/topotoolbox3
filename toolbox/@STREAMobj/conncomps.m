@@ -1,6 +1,6 @@
 function [L,nc] = conncomps(S)
 
-%CONNCOMPS labels of connected components (individual trees) in a stream network
+%CONNCOMPS Labels of connected components (individual trees) in a stream network
 %
 % Syntax
 %
@@ -32,8 +32,8 @@ function [L,nc] = conncomps(S)
 %           STREAMobj/extractconncomps
 %
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 27. February, 2015 
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. June, 2024 
 
 nrc = numel(S.x);
 M = sparse(double(S.ix),double(S.ixc),true,nrc,nrc);
@@ -43,6 +43,6 @@ nc = length(r) - 1;
 
 % label matrix
 L = zeros(nrc,1);
-for tt = 1:nc;
+for tt = 1:nc
     L(p(r(tt):r(tt+1)-1)) = tt;
 end

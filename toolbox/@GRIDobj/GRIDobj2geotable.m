@@ -1,20 +1,67 @@
 function [GT,x,y] = GRIDobj2geotable(DB,options)
 
 %GRIDOBJ2GEOTABLE Convert categorical GRIDobj to geotable (polygon) 
+%
+% Syntax
+%
+%     GT = GRIDobj2geotable(DB)
+%
+% Description
+%
+%     GRIDobj2geotable takes a GRIDobj with categorical values and stores
+%     the outlines of each region with the same values as geotable. 
+%
+% Input arguments
+%
+%     DB    GRIDobj with categorical values (this is not meant that the
+%           underlying type is categorical but that there are contiguous
+%           regions with the same values. These need not to be integer
+%           values.
+% 
+%     Parameter name/value pairs
+%
+%     'simplify'     {false} or true (NOT WORKING YET)
+%     'tol'          0 (NOT WORKiNG YET)
+%     'excludezero'  {true} or false. If true, regions with zero value will
+%                    not be polygonized.
+%     'conn'         8 or 4 connectivity. 8 is default.
+%     'holes'        {true} or false
+%     'parallel'     {true} or false. If true, function is run in parallel
+%     'geographic'   {false} or true. If true, the returned geotable will
+%                    store geographic coordinates (lat-lon).
+%
+% Output arguments
+%
+%     GT      geotable
+%     x,y     nan-punctuated coordinate vectors of the polygon outlines
+%     
+% Example
+%
+%     DEM = readexample('taalvolcano');
+%     I = identifyflats(DEM);
+%     I.Z = bwareaopen(I.Z,20);
+%     DEM = clip(DEM,~I);
+%     imageschs(DEM)
+%    
+%     C = reclassify(DEM,'equalint',5);
+%     GT = GRIDobj2geotable(C);
+%     geoplot(GT)
+%
+% See also: GRIDobj/reclassify
+% 
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. June, 2024 
 
 arguments (Input)
     DB   GRIDobj
     options.simplify = false
-    options.to       = 0
-    options.minarea {mustBeGreaterThanOrEqual(options.minarea,0)} = 0
+    options.tol      = 0
     options.multipart = true
-    options.waitbar   = false
     options.excludezero = true
     options.conn      = 8;
     options.holes    = true;
     options.parallel = true;
     options.geographic = false;
-
 end
 
 EXCL.Z = isnan(DB.Z);
@@ -61,13 +108,17 @@ else
     end
 end
 
-parfor (uv = 1:nuniqueval,poolsize)
+%parfor (uv = 1:nuniqueval,poolsize)
+for uv = 1:nuniqueval
 
     I = DB == uniqueval(uv);
     val = uniqueval(uv);
 
     [B,~,~,A] = bwboundaries(I.Z,conn,htxt,"TraceStyle","pixeledge",...
         "CoordinateOrder","xy");
+
+    % Make sure that all polygons are closed
+    B = cellfun(@closePolygon,B,'UniformOutput',false);
 
     % According to the Shapefile white paper (page 8), polygons are stored
     % in a clockwise fashion except for interior polygon hole parts (i.e.
@@ -124,29 +175,33 @@ parfor (uv = 1:nuniqueval,poolsize)
         for k = 1:numel(REG)
             if ~iscw(k)
                 REG{k} = flipud(REG{k});
+                REG{k} = [REG{k};[nan nan]];
+            else
+                REG{k} = [REG{k};[nan nan]];
             end
         end
     end
 
     % get coordinates    
-    XY = cellfun(@(cr)[(wf*[cr-1 ones(size(cr,1),1)]')';[nan nan]],REG,...
+    XY = cellfun(@(cr)(wf*[cr-1 ones(size(cr,1),1)]')',REG,...
         'UniformOutput',false);
-    
+
     if geographic
         [X,Y] = cellfun(@(xy) projinv(prj,xy(:,1),xy(:,2)),XY,...
             'UniformOutput',false);
         XY = cellfun(@(x,y) [x y],X,Y,'UniformOutput',false);
-    
     end
 
     if docoords
         XYC{uv} = vertcat(XY{:});
     end
 
-   
-    % create table entry
+    % create polyshapes
     if multipart
+        % if the shapes are multipart features
         xy = vertcat(XY{:});
+        % xy(end,:) = []; % tried to remove last nan, but doesn't solve the
+                          % problem
         if geographic
             MS = geopolyshape(xy(:,1),xy(:,2));
         else
@@ -155,9 +210,12 @@ parfor (uv = 1:nuniqueval,poolsize)
         end
         MS = table(MS,val,'VariableNames',{'Shape','Value'});
     else
+        % else if shapes are single part features
         MS = [];
         for r = 1:numel(XY)
             xy = XY{r};
+            % xy(end,:) = []; % tried to remove last nan, but doesn't solve the
+                              % problem
             if geographic
                 S = geopolyshape(xy(:,1),xy(:,2));
             else
@@ -182,4 +240,12 @@ if nargout > 1
     x = XYC(:,1);
     y = XYC(:,2);
 end
+end
 
+
+function xy = closePolygon(xy)
+
+if xy(1,:) ~= xy(end,:)
+    xy(end+1,:) = xy(1,:);
+end
+end
