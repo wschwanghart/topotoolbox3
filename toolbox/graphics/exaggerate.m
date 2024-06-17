@@ -25,15 +25,13 @@ function exaggerate(axes_handle,exagfactor)
 %     surf(X,Y,dem); exaggerate(gca,r);
 %     title(['exaggeration factor = ' num2str(r)]);
 %     end
-%
 % 
-% See also: SURF
+% See also: GRIDobj/SURF, exaggerate, GRIDobj/imageschs
 %
-%
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: June 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. June 2024
 
-if nargin == 1;
+if nargin == 1
     exagfactor = 1;
 end
 axis(axes_handle,'image');

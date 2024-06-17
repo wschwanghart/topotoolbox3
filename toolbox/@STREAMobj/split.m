@@ -1,6 +1,6 @@
 function S = split(S,V,removeedge,doclean)
 
-%SPLIT split drainage network at predefined locations
+%SPLIT Split drainage network at predefined locations
 %
 % Syntax
 %

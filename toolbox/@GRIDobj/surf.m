@@ -24,7 +24,24 @@ function ht = surf(DEM,varargin)
 %
 % Parameter name/values
 %
-%     'exaggerate'   height exaggeration, default = 1
+%     'exaggerate'   height exaggeration, default = 1. If DEM has a
+%                    projected coordinate system, then exaggeration will be 
+%                    adjusted to account for the differences in horizontal
+%                    and vertical units.
+%     'block'        {false} or true. If true, then vertical patches will
+%                    drawn along the borders of the DEM will be created.
+%                    Note that there must not be nans in the DEM for
+%                    'block' visualization to work. 
+%     'baselevel'    If block = true, then 'baselevel' gives the lower 
+%                    elevation of the patches. By default, the baselevel is
+%                    baselevel = minz-(maxz-minz)*0.2
+%                    where minz and maxz are the minimum and maximum
+%                    elevations in the DEM, respectively.
+%     'sea'          {false} or true. If true, then surf will draw
+%                    transparent, blue patches to give the impression of
+%                    water below an elevation of 0.
+%     'sealevel'     set the sea level (default = 0)
+%     'seaalpha'     set the alpha value of the sea patches (default = 0.5)
 %      
 %     and all property name/value pairs allowed by surface objects.
 %
@@ -49,10 +66,10 @@ function ht = surf(DEM,varargin)
 %     hold on
 %     plot3(S,DEM-800,'b');
 %
-% See also: imageschs
+% See also: GRIDobj/imageschs
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 30. January, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. June 2024
 
 
 
@@ -130,7 +147,18 @@ else
     h = surf(x,y,double(DEM.Z),pnpv{:});
 end
 
-exaggerate(gca,exagg);
+% If the DEM is in a geographic coordinate system, adjust exaggeration
+% according to the pixel width in the center of the DEM.
+if isGeographic(DEM)
+    [lon,lat] = getcoordinates(DEM);
+    mlat = mean(lat);
+    dlon = distance(mlat,lon(1),mlat,lon(2),DEM.georef.GeographicCRS.Spheroid);
+    exagf = (DEM.cellsize)/dlon;
+else
+    exagf = 1;
+end
+
+exaggerate(gca,exagg*exagf);
 shading interp
 % camlight
 
@@ -186,8 +214,10 @@ if sea
     if any(isnan(DEM))
         error('TopoToolbox:wronginput','DEM must not have NaNs')
     end
-    facecolor  = [1 1 1];
-    facecolordark = [0.8 .8 .8];
+    facecolor  = ttclr('lake');
+    facecolordark = facecolor.*0.8;
+    %facecolor  = [1 1 1];
+    %facecolordark = [0.8 .8 .8];
     
     xp = x(:);
     xp = [xp(1); xp; xp(end:-1:1)];
@@ -225,7 +255,7 @@ if sea
 %     TM = repmat(I,1,1,3);
 
     hold on
-    h = surf(x,y,+I,'FaceAlpha',0.5,'FaceColor',facecolor,'EdgeColor','none');
+    h = surf(x,y,+I,'FaceAlpha',seaalpha,'FaceColor',facecolor,'EdgeColor','none');
     hold off
     
     
@@ -245,48 +275,6 @@ end
 if nargout == 1
     ht = h;
 end
-
-
-function exaggerate(axes_handle,exagfactor)
-
-% elevation exaggeration in a 3D surface plot
-%
-% Syntax
-%
-%     exaggerate(axes_handle,exagfactor)
-%
-% Description
-%
-%     exaggerate is a simple wrapper for calling set(gca...). It controls
-%     the data aspect ratio in a 3D plot and enables elevation
-%     exaggeration.   
-%
-% Input
-%
-%     axes_handle   digital elevation model
-%     exagfactor    exaggeration factor (default = 1)
-%
-% Example
-%
-%     load exampledem
-%     for r = 1:4;
-%     subplot(2,2,r);
-%     surf(X,Y,dem); exaggerate(gca,r);
-%     title(['exaggeration factor = ' num2str(r)]);
-%     end
-%
-% 
-% See also: SURF
-%
-%
-% Author: Wolfgang Schwanghart (w.schwanghart[at]unibas.ch)
-% Date: 6. September, 2010
-
-if nargin == 1
-    exagfactor = 1;
-end
-axis(axes_handle,'image');
-set(axes_handle,'DataAspectRatio',[1 1 1/exagfactor]);
 
 
 

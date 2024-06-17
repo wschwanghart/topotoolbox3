@@ -1,6 +1,6 @@
 function [st,hs] = plotstreamorder(S,options)
 
-%PLOTSTREAMORDER calculate stream order from STREAMobj
+%PLOTSTREAMORDER Calculate stream order from STREAMobj
 %
 % Syntax
 %
