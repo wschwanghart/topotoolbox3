@@ -70,64 +70,17 @@ parse(p,varargin{:});
 % Calculate mapping structure
 GT = STREAMobj2mapstruct(S,'seglength',p.Results.seglength,...
     'attributes',p.Results.attributes);
-GT = rmfield(GT,'Geometry');
 
-% Make sure that vectors in GT are row vectors
-fun = @(x) x(:)';
-T = cellfun(fun,{GT.X},'UniformOutput',false);
-[GT.X] = T{:};
-T = cellfun(fun,{GT.Y},'UniformOutput',false);
-[GT.Y] = T{:};
-
-
-% Project to different coordinate system
 if isProjected(S)
-    switch lower(p.Results.type)
-        case 'geo'
-            for r = 1:numel(GT)
-                [GT(r).Lat,GT(r).Lon] = projinv(S.georef.ProjectedCRS,...
-                    GT(r).X,GT(r).Y);
-            end
-            GT = rmfield(GT,{'X','Y'});
-            proj = geocrs(4326);
-        otherwise
-            proj = S.georef.ProjectedCRS;
-    end
+    proj = S.georef.ProjectedCRS;
+    t    = 'planar';
 elseif isGeographic(S)
-    switch lower(p.Results.type)
-        case 'geo'
-
-            for r = 1:numel(GT)
-                GT(r).Lat = GT(r).Y;
-                GT(r).Lon = GT(r).X;
-            end
-            GT = rmfield(GT,{'X','Y'});
-            proj = geocrs(4326);
-
-        otherwise
-
-            for r = 1:numel(GT)
-                [GT(r).X,GT(r).Y] = projfwd(p.Results.proj,...
-                    GT(r).Y,GT(r).X);
-            end            
-            proj = p.Results.proj;
-
-    end
+    proj = S.georef.GeographicCRS;
+    t    = 'geographic';
 else
-    % Keep X and Y as they are
     proj = [];
+    t    = 'planar';
 end
 
-% Convert to table
-GT = struct2table(GT);
-
-% Convert coordinates to *lineshapes
-GT = table2geotable(GT,"GeometryType","line","CoordinateReferenceSystem",proj);
-
-% Remove the coordinate variables
-switch lower(p.Results.type)
-    case 'geo'
-    GT = removevars(GT,{'Lat','Lon'});
-    case 'map'
-    GT = removevars(GT,{'X','Y'});
-end
+GT = mapstruct2geotable(GT,'CoordinateReferenceSystem',proj,...
+    'coordinateSystemType',t);
