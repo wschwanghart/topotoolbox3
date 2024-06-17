@@ -1,4 +1,4 @@
-function tf =  isempty(S)
+function tf = isempty(S)
 
 %ISEMPTY Determine whether a STREAMobj is empty
 %

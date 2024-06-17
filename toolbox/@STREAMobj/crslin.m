@@ -125,14 +125,7 @@ addParameter(p,'nocr',false);
 parse(p,varargin{:});
 
 % get node attribute list with elevation values
-if isa(DEM,'GRIDobj')
-    validatealignment(S,DEM);
-    z = getnal(S,DEM);
-elseif isnal(S,DEM)
-    z = DEM;
-else
-    error('Imcompatible format of second input argument')
-end
+z = ezgetnal(S,DEM,'double');
 
 if any(isnan(z))
     error('DEM or z may not contain any NaNs')

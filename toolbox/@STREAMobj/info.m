@@ -1,6 +1,6 @@
 function val = info(S,m)
 
-%INFO meta information about STREAMobj
+%INFO Meta information about STREAMobj
 %
 % Syntax
 %
@@ -14,8 +14,8 @@ function val = info(S,m)
 %
 % See also: STREAMobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 4. March, 2016
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. June, 2024
 
 
 validargs = {'nrnodes' ...

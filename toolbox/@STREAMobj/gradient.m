@@ -1,6 +1,6 @@
 function s = gradient(S,DEM,varargin)
 
-%GRADIENT along-stream gradient
+%GRADIENT Along-stream gradient
 %
 % Syntax
 %

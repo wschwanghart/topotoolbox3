@@ -113,8 +113,6 @@ function z = fastscape(S,z,a,varargin)
 %                     'bc',bct,'bctype','elev','tspan',5e5,...
 %                     'u',0.003,'dt',50, 'n',1.3,'ploteach',50);
 %
-%
-%
 % References
 %
 %     Braun, J. and Willett, S. D.: A very efficient O(n), implicit and
@@ -383,7 +381,6 @@ elseif n ~= 1
                 xlabel('\chi [m]')
             end
 
-
             if plotcounter > 2
                 for rr = 1:plotcounter
                     % h(rr).Color = [0 0 0 rr/(plotcounter*2)];
@@ -426,6 +423,4 @@ if plotit
 end
 
 end
-
-
 

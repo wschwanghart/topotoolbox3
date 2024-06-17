@@ -57,7 +57,7 @@ else
         cl = class(nal);
     end
     nal = ezgetnal(S,nal,cl);
-    G   = GRIDobj(S,'cl')*cast(nan,cl);
+    G   = GRIDobj(S,cl)*cast(nan,cl);
     G.Z(S.IXgrid) = nal;
 end
 
