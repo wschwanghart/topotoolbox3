@@ -48,28 +48,32 @@ function nal2 = nal2nal(S2,S1,nal1,fillval)
 %
 % See also: STREAMobj2GRIDobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 5. September, 2018
+% Author: Wolfgang Schwanghart (w.schwanghart[at]uni-potsdam.de)
+% Date: 17. June, 2024
 
-
-if nargin == 3
-    fillval = nan;
+arguments
+    S2    STREAMobj
+    S1    STREAMobj
+    nal1  {mustBeGRIDobjOrNal(nal1,S1)}
+    fillval = nan
 end
 
-nal2size = size(S2.IXgrid);
+% Handle input nal
+if isa(nal1,'GRIDobj')
+    nal1 = ezgetnal(S,nal1,underlyingType(nal1));
+end
 
-if isscalar(fillval)
-    nal2 = repmat(fillval,nal2size);
+% Handle output nal
+if ~islogical(nal1)
+    nal2 = ezgetnal(S2,fillval,class(nal1));
 else
-    tf = isnal(S2,fillval);
-    if ~tf
-        error('TopoToolbox:setnal',...
-            ['The forth input argument must be a scalar or\n'...
-             'a node-attribute list of S2']);
-    end
-    nal2 = fillval;
+    if isscalar(fillval)
+        fillval = false;
+        nal2 = ezgetnal(S2,fillval,'logical');
+    else
+        nal2 = ezgetnal(S2,fillval,class(nal1));
+    end 
 end
-
-
+    
 [I,locb] = ismember(S1.IXgrid,S2.IXgrid);
 nal2(locb(I)) = nal1(I);

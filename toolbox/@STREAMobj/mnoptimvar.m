@@ -21,7 +21,7 @@ function [mn,cm,zm,zsd] = mnoptimvar(S,DEM,A,varargin)
 %
 %     S     STREAMobj
 %     DEM   Digital elevation model
-%     A     Flow accumulation grid 
+%     A     Flow accumulation grid (as returned by flowacc)
 %     z     node-attribute list of elevations
 %     a     node-attribute list of flow accumulation
 %
@@ -61,8 +61,8 @@ function [mn,cm,zm,zsd] = mnoptimvar(S,DEM,A,varargin)
 %
 % See also: STREAMobj, STREAMobj/mnoptim
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 29. January, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. June, 2024
 
 % parse inputs
 p = inputParser;
@@ -85,24 +85,10 @@ a0 = p.Results.a0;
     
 
 % get node attribute list with flow accumulation values
-if isa(A,'GRIDobj')
-    validatealignment(S,A);
-    a = getnal(S,A);
-elseif isnal(S,A)
-    a = A;
-else
-    error('Imcompatible format of second input argument')
-end
+a = ezgetnal(S,A);
 
 % get node attribute list with elevation values
-if isa(DEM,'GRIDobj')
-    validatealignment(S,DEM);
-    z = getnal(S,DEM);
-elseif isnal(S,DEM)
-    z = DEM;
-else
-    error('Imcompatible format of second input argument')
-end
+z = ezgetnal(S,DEM,'double');
 
 % z must be double precision
 z = double(z);

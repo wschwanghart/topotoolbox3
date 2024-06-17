@@ -68,8 +68,8 @@ function [mn,results] = mnoptim(S,DEM,A,varargin)
 %     
 % See also: chiplot, chitransform, slopearea
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 24. October, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. June, 2024
 
 p = inputParser;         
 p.FunctionName = 'STREAMobj/mnoptim';
@@ -77,44 +77,28 @@ addRequired(p,'S',@(x) isa(x,'STREAMobj'));
 addRequired(p,'DEM',@(x)  isa(x,'GRIDobj') || isnal(S,x));
 addRequired(p,'A', @(x) isa(x,'GRIDobj') || isnal(S,x));
 
-addParamValue(p,'mnrange',[.1 1],@(x) numel(x)==2);
-addParamValue(p,'optvar','mn');
-addParamValue(p,'n',1);
-addParamValue(p,'m',0.5);
-addParamValue(p,'nrange',[0.8 1.5]);
-addParamValue(p,'mrange',[0.3 1]);
-addParamValue(p,'a0',1e6,@(x) isscalar(x) && isnumeric(x));
-addParamValue(p,'lossfun','rmse',@(x) ischar(x) || isa(x,'function_handle'));
-addParamValue(p,'plot',false);
-addParamValue(p,'crossval',true);
-addParamValue(p,'verbose',0);
-addParamValue(p,'UseParallel',true);
-addParamValue(p,'MaxObjectiveEvaluations',30);
-
-
+addParameter(p,'mnrange',[.1 1],@(x) numel(x)==2);
+addParameter(p,'optvar','mn');
+addParameter(p,'n',1);
+addParameter(p,'m',0.5);
+addParameter(p,'nrange',[0.8 1.5]);
+addParameter(p,'mrange',[0.3 1]);
+addParameter(p,'a0',1e6,@(x) isscalar(x) && isnumeric(x));
+addParameter(p,'lossfun','rmse',@(x) ischar(x) || isa(x,'function_handle'));
+addParameter(p,'plot',false);
+addParameter(p,'crossval',true);
+addParameter(p,'verbose',0);
+addParameter(p,'UseParallel',true);
+addParameter(p,'MaxObjectiveEvaluations',30);
 
 parse(p,S,DEM,A,varargin{:});
 a0 = p.Results.a0;
 
 % get node attribute list with elevation values
-if isa(DEM,'GRIDobj')
-    validatealignment(S,DEM);
-    z = getnal(S,DEM);
-elseif isnal(S,DEM)
-    z = DEM;
-else
-    error('Imcompatible format of second input argument')
-end
+z = ezgetnal(S,DEM);
 
 % get node attribute list with flow accumulation values
-if isa(A,'GRIDobj')
-    validatealignment(S,A);
-    a = getnal(S,A);
-elseif isnal(S,A)
-    a = A;
-else
-    error('Imcompatible format of second input argument')
-end
+a = ezgetnal(S,A);
 clear A DEM
 
 % set the base level of all streams to zero
@@ -123,12 +107,6 @@ for r = numel(S.ixc):-1:1
     zbase(S.ix(r)) = zbase(S.ixc(r));
 end
 z = z-zbase;
-
-%% ----- beta ------------------------------------------------------------
-% set all rivers to have the same gradient 
-
-
-
 
 
 %% -----------------------------------------------------------------------
