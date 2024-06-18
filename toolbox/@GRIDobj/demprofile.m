@@ -1,6 +1,6 @@
 function [dn,z,x,y] = demprofile(DEM,n,x,y)
 
-%DEMPROFILE get profile along path
+%DEMPROFILE Get profile along path
 %
 % Syntax
 %
@@ -34,8 +34,8 @@ function [dn,z,x,y] = demprofile(DEM,n,x,y)
 % 
 % See also: GRIDobj/interp, GRIDobj/measure
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 2. September, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 18. June, 2024
 
 
 % interactive

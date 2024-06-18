@@ -1,4 +1,4 @@
 function IX = coord2ind(FD,x,y)
 
-[X,Y] = refmat2XY(FD.refmat,FD.size);
+[X,Y] = wf2XY(FD.wf,FD.size);
 IX = coord2ind(X,Y,x,y);

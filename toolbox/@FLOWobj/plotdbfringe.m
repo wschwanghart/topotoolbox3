@@ -1,4 +1,4 @@
-function him = plotdbfringe(FD,varargin)
+function varargout = plotdbfringe(FD,varargin)
 
 %PLOTDBFRINGE Plot semitransparent fringe around each drainage basin
 %
@@ -6,6 +6,7 @@ function him = plotdbfringe(FD,varargin)
 %
 %     h = plotdbfringe(FD)
 %     h = plotdbfringe(FD,S,'pn','pv')
+%     [RGB,alpha] = ...
 %
 % Description
 %
@@ -56,7 +57,7 @@ function him = plotdbfringe(FD,varargin)
 %
 % See also: FLOWobj/drainagebasins, GRIDobj/imageschs
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 20. December, 2021
     
 % parse inputs
@@ -137,11 +138,19 @@ if p.Results.complementalpha
 end
 ALPHA = ALPHA*p.Results.maxalpha;
 
+if nargout <= 1
 % Plot the RGB image
 [x,y] = getcoordinates(D);
 h = image(x,y,RGB);
 h.AlphaData = ALPHA;
 axis xy
+varargout{1} = h;
+elseif nargout == 2
+    varargout{1} = RGB;
+    varargout{2} = ALPHA;
+end
+
+
 
 if nargout == 1
     him = h;

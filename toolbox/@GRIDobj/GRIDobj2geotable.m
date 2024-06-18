@@ -16,7 +16,7 @@ function [GT,x,y] = GRIDobj2geotable(DB,options)
 %     DB    GRIDobj with categorical values (this is not meant that the
 %           underlying type is categorical but that there are contiguous
 %           regions with the same values. These need not to be integer
-%           values.
+%           values.)
 % 
 %     Parameter name/value pairs
 %
@@ -108,8 +108,8 @@ else
     end
 end
 
-%parfor (uv = 1:nuniqueval,poolsize)
-for uv = 1:nuniqueval
+parfor (uv = 1:nuniqueval,poolsize)
+%for uv = 1:nuniqueval
 
     I = DB == uniqueval(uv);
     val = uniqueval(uv);
@@ -245,7 +245,7 @@ end
 
 function xy = closePolygon(xy)
 
-if xy(1,:) ~= xy(end,:)
+if any(xy(1,:) ~= xy(end,:))
     xy(end+1,:) = xy(1,:);
 end
 end

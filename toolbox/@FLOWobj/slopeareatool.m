@@ -41,8 +41,8 @@ function slopeareatool(FD,DEM,varargin)
 %
 % See also: slopearea, chiplot
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 14. June, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 14. June, 2024
 
 
 p = inputParser;
@@ -124,7 +124,7 @@ maxarea = maxarea/(A.cellsize^2);
 
 
 %% Maximum upslope area set?
-if isinf(maxarea);
+if isinf(maxarea)
     maxarea = max(A);
 elseif maxarea < minarea
     error('TopoToolbox:slopeareatool','maxarea must be larger than minarea')
@@ -375,6 +375,7 @@ acenters = aedges + [diff(aedges)/2;0];
                 end
                 if any(legplothandle)
                     hLegendFit = legend(legplothandle,M,'location','northeast');
+                    hLegendFit.AutoUpdate = "off";
                 end
                 
                 
@@ -404,6 +405,7 @@ acenters = aedges + [diff(aedges)/2;0];
                 end
                 if any(legplothandle)
                     hLegendFit = legend(legplothandle,M,'location','northeast');
+                    hLegendFit.AutoUpdate = 'off';
                 end
                 
         end

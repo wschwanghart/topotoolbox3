@@ -10,7 +10,9 @@ function OUT = builtincaller(funname,varargin)
 %
 %     OUT = builtincaller('plus',G1,G2)
 %
-%
+% 
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. June, 2024
 
 
 isGRIDobj = cellfun(@(x) isa(x,'GRIDobj'),varargin);

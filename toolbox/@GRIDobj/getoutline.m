@@ -4,7 +4,7 @@ function varargout = getoutline(DEM,options)
 %
 % Syntax
 %
-%     MS = getoutline(DEM)
+%     GT = getoutline(DEM)
 %     [x,y] = getoutline(DEM)
 %     ... = getoutline(DEM,'pn',pv')
 %
@@ -13,7 +13,8 @@ function varargout = getoutline(DEM,options)
 %     getoutline returns the outline of a GRIDobj. By default, getoutline
 %     returns the coordinate vectors of the DEM edges. By setting shownans
 %     = true, you can get the outline around the valid (non-nan) data in
-%     the DEM.
+%     the DEM. The function returns a geotable or nan-punctuated vectors of
+%     the coordinates.
 %
 % Input arguments
 %
@@ -21,24 +22,19 @@ function varargout = getoutline(DEM,options)
 %     
 %     Parameter name/value pairs
 %     
-%     'shownans'    {false} or true
-%     'output'      {mappolyshape}, mapshape, mapstruct (only applicable if
-%                   called with one output argument.
+%     'shownans'    {false} or true.
 %
 % Output arguments
 %
-%     MS     mapping structure that can be displayed using mapshow or
-%            exported with shapewrite (alternatively, see option 'output'.
-%     x,y    coordinate vectors that can be used to plot the extent
-%            rectangle (plot(x,y))
+%     GT     geotable that can be displayed using mapshow or geoplot. GT
+%            can be exported with shapewrite.            
+%     x,y    coordinate vectors that can be used to plot the extent.            
 %
 % Example 1
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     DEM.Z(DEM.Z>1500) = nan;
-%     MS  = getoutline(DEM,'shownans',true,'output','mappolyshape');
-%     % Plot in geographic axes or mapaxes object
-%     geoplot(MS)
+%     GT  = getoutline(DEM);
+%     geoplot(GT)
 %
 % Example 2
 %
@@ -46,6 +42,8 @@ function varargout = getoutline(DEM,options)
 %     I = identifyflats(DEM);
 %     I.Z = bwareaopen(I.Z,20);
 %     DEM.Z(I.Z) = nan;
+%     GT = getoutline(DEM,'shownans',true);
+%     geoplot(GT)
 %     
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
@@ -55,8 +53,6 @@ function varargout = getoutline(DEM,options)
 arguments (Input)
     DEM  GRIDobj
     options.shownans = 0
-    options.output = "mappolyshape" 
-    options.simplify = true
 end
 
 % Check if there are nans
@@ -76,113 +72,45 @@ if ~nnan
     x = [minx minx maxx maxx minx];
     y = [miny maxy maxy miny miny];
 
-    xy = [x(:) y(:)];
+    
+    if nargout == 1
+    if isGeographic(DEM)
+        GT = table(y,x);
+        GT.Properties.VariableNames = {'Lat','Lon'};
+        GT = table2geotable(GT,"CoordinateReferenceSystem",DEM.georef.GeographicCRS,...
+            "GeometryType","polygon");
+    elseif isProjected(DEM)
+        GT = table(x,y);
+        GT.Properties.VariableNames = {'X','Y'};
+        GT = table2geotable(GT,"CoordinateReferenceSystem",DEM.georef.ProjectedCRS,...
+            "GeometryType","polygon");
+    else
+        GT = table(x,y);
+        GT.Properties.VariableNames = {'X','Y'};
+        GT = table2geotable(GT,"GeometryType","polygon");
+
+    end
+    else
+        x = x(:);
+        y = y(:);
+    end
+    
 
 else
     I = ~I;
-    [B,~,~,A] = bwboundaries(I.Z,8,"holes","TraceStyle","pixeledge",...
-        "CoordinateOrder","xy");
-    G   = digraph(A');
-    deg = indegree(G);
-    d   = distances(G,find(deg == 0));
-    isenclosed = mod(d-1,2) == 0;
-
-    % flip boundaries of enclosed boundaries
-    for r = 1:numel(B)
-        if isenclosed(r)
-            B{r} = flipud(B{r});
-        end
-    end
-
-    % get coordinates
-    wf = DEM.wf;
-    B = cellfun(@(cr)[(wf*[cr-1 ones(size(cr,1),1)]')';[nan nan]],B,...
-        'UniformOutput',false);
     
-    xy = vertcat(B{:});
+    [GT,x,y] = GRIDobj2geotable(I,'excludezero',true,'conn',8,...
+        'parallel',false,'multipart',true);
+
 end
 
-% simplify lines
-if options.simplify
-    xy = dpsimplify(xy,100*eps);
-end
-x = xy(:,1);
-y = xy(:,2);
-
-% Without output arguments, the outline will be plotted
-if nargout == 0
-    if ~wm
-        plot(x,y,'LineWidth',3,'Color',[.8 .8 .8]);
-        hh = ishold;
-        hold on
-        plot(x,y,'k--','LineWidth',1);
-        if ~hh
-            hold off;
-        end
-    else
-        try
-        [lat,lon] = projinv(DEM.georef.ProjectedCRS,x,y);
-        catch
-            lat = y;
-            lon = x;
-        end
-        wmline(lat,lon)
-
-    end
-        
-elseif nargout == 1
-    % One output argument, create mapping structure
-    % split at nans
-    switch options.output
-        case 'geotable'
-            MS = mappolyshape(x,y);
-            MS.ProjectedCRS = DEM.georef.ProjectedCRS;
-            MS = table(MS,1,'VariableNames',{'Shape','ID'});
-        case 'mappolyshape'
-            MS = mappolyshape(x,y);
-            MS.ProjectedCRS = DEM.georef.ProjectedCRS;
-        case 'mapshape'
-            MS = mapshape(x,y,'Geometry','polygon');
-        case 'mapstruct'
-
-            if ~isnan(x(end))
-                x = [x;nan];
-                y = [y;nan];
-            end
-        
-            I = isnan(x);
-            nrlines = nnz(I);
-            ix = find(I)';
-            ixs = [1; ix(1:end-1)'+1];
-            ixe = ix-1;
-            for r = 1:nrlines
-        
-                MS(r).Geometry = 'Polygon';
-                MS(r).X = x(ixs(r):ixe(r));
-                MS(r).Y = y(ixs(r):ixe(r));
-                MS(r).ID = r;
-        
-            end
-
-        case 'geopolyshape'
-            [lat,lon] = projinv(DEM.georef.ProjectedCRS,x,y);
-            MS = geopolyshape(lat,lon);
-            MS.GeographicCRS = geocrs(4326);
-
-        case 'geoshape'
-            [lat,lon] = projinv(DEM.georef.ProjectedCRS,x,y);
-            MS = geoshape(lat,lon,'Geometry','polygon');
-        case ''
-    end
-    varargout{1} = MS;
+if nargout == 1
+    varargout{1} = GT;
 
 elseif nargout == 2
     % Two outputs, return x and y coordinates
-    
+
     varargout{1} = x;
     varargout{2} = y;
 end
-
 end
-    
-       
