@@ -69,7 +69,8 @@ wmlimits([minlat maxlat],[minlon maxlon]);
 
 h = wmline(lat,lon,'OverlayName','Stream network','color',p.linecolor);
 
-[lat,lon] = points(P,'latlon');
+latp = lat(P.PP);
+lonp = lon(P.PP);
 
 % get folder of this function
 path = mfilename('fullpath');
@@ -83,7 +84,7 @@ end
 
 iconpath = [filepath filesep 'private' filesep icon];
 
-h2 = wmmarker(lat,lon,...
+h2 = wmmarker(latp,lonp,...
             'icon',iconpath,...
             'IconScale',0.5,...
             'Alpha',0.8,...

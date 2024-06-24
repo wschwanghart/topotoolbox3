@@ -34,7 +34,7 @@ function [D] = dist2line(DEM,x0,y0,alpha)
 % See also: GRIDobj
 %
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
-% Date: 25. June, 2014, updated 30. March, 2017;
+% Date: 23. June 2024
 
 [x,y] = getcoordinates(DEM);
 [X,Y] = meshgrid(x,y);
@@ -45,8 +45,10 @@ D = DEM;
 D.Z(:) = 0;
 
 % Create line 
-dx = 1;
-dy = dx/tand(alpha);
+alpha = 90-alpha;
+dx = cosd(alpha);
+dy = sind(alpha);
+
 LINE = [x0 y0 dx dy];
 
 D.Z(:) = distancePointLine([x,y],LINE);

@@ -82,7 +82,7 @@ ASP   = mod(90+ASP/pi*180,360);
 
 if classify
     
-    [~,bin] = histc(ASP(:),aspedges);
+    [~,~,bin] = histcounts(ASP(:),aspedges);
     bin     = reshape(bin,size(Z));
     ASPc    = zeros(size(Z),'uint8');
     ASPc(bin>0) = aspclass(bin(bin>0));

@@ -116,8 +116,8 @@ classdef PPS
 % See also: GRIDobj, FLOWobj, STREAMobj, STREAMobj/snap2stream, SWATHobj
 %           DIVIDEobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 21. December, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 23. June, 2024
     
 properties
 %S instance of STREAMobj

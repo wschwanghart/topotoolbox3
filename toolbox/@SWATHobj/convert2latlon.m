@@ -37,14 +37,14 @@ OUT = SW;
 
 for i = 1 : length(SW.xy0)
     % convert swath data to lat,lon using projinv
-    [lat0,lon0] = minvtran(SW.georef.mstruct,SW.xy0(:,1),SW.xy0(:,2));
+    [lat0,lon0] = projinv(SW.georef.ProjectedCRS,SW.xy0(:,1),SW.xy0(:,2));
     OUT.xy0 = [lon0,lat0];
     
-    [lat,lon] = minvtran(SW.georef.mstruct,SW.xy(:,1),SW.xy(:,2));
+    [lat,lon] = projinv(SW.georef.ProjectedCRS,SW.xy(:,1),SW.xy(:,2));
     OUT.xy = [lon,lat];
     
     ix = find(SW.X);
-    [LAT,LON] = minvtran(SW.georef.mstruct,SW.X(ix),SW.Y(ix));
+    [LAT,LON] = projinv(SW.georef.ProjectedCRS,SW.X(ix),SW.Y(ix));
     OUT.X(ix) = LON(ix);
     OUT.Y(ix) = LAT(ix);
 end

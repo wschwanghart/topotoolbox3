@@ -18,7 +18,7 @@ function ext = getextent(DEM,latlonout)
 %     latlonout  false (default) or true. If true, getextent will return
 %                the extent in geographical coordinates. This is, however,
 %                only possible if DEM has a known projected coordinate 
-%                system (DEM.georef.mstruct must be set), and if the
+%                system (DEM.georef.ProjectedCRS must be set), and if the
 %                mapping toolbox is available. 
 %
 % Output arguments

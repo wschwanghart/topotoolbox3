@@ -52,41 +52,24 @@ function OUT = roughness(DEM,type,ks)
 %
 % See also: stdfilt, FLOWobj/meltonruggedness
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 12. November, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 24. June, 2024
 
-narginchk(1,3)
-
-validindices = {'tpi','tri','roughness','srf'};
-defaultkernelsize = [3 3];
-
-if nargin == 1;
-    type = 'roughness';
-    ks   = defaultkernelsize;
-elseif nargin == 2;
-    type = validatestring(type,validindices,'roughness','type',2);
-    ks   = defaultkernelsize;
-elseif nargin == 3;
-    type = validatestring(type,validindices,'roughness','type',2);
-    if isempty(ks);
-        ks   = [3 3];
-    end
+arguments
+    DEM   GRIDobj
+    type  {mustBeMember(type,{'tpi','tri','roughness','srf'})}= 'roughness'
+    ks    = [3 3]
 end
+
+% Check kernel size
+if isscalar(ks)
+    ks = [ks ks];
+end
+validateattributes(ks,{'numeric'},{'odd','positive'},'GRIDobj/rougnhess','ks',3)
+
 
 % get matrix
 dem = DEM.Z;
-
-% check if kernel has right size
-if numel(ks) ~= 2;
-    error('TopoToolbox:incorrectinput',...
-        'ks must be a two element vector');
-end
-
-% check if kernel rows and cols are uneven
-if any(mod(ks,2),1) ~= 1
-    error('TopoToolbox:incorrectinput',...
-        'the kernel must have uneven number of rows and cols (e.g. [3 3] or [5 5])');
-end
 
 % pad for some roughness indices
 switch lower(type)

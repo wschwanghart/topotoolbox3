@@ -59,8 +59,8 @@ function OUT = localtopography(DEM,varargin)
 %
 % See also: IMDILATE, IMERODE
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 28. January, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 28. January, 2024
 
 
 narginchk(1,inf)
@@ -72,10 +72,10 @@ expectedTypes = {'range','max','min','mean','median','prctile','std'};
 addRequired(p,'DEM',@(x) issparse(x) || isa(x,'GRIDobj'));
 addOptional(p,'radius',5000,@(x) isscalar(x) && x>DEM.cellsize);
 
-addParamValue(p,'type','range',@(x) ischar(validatestring(x,expectedTypes)));
-addParamValue(p,'N',8,@(x) isscalar(x) && ismember(x,[0 4 6 8]));
-addParamValue(p,'thin',1,@(x) x>0.1 && x<=1);
-addParamValue(p,'prc',90,@(x) x>0 && x<100);
+addParameter(p,'type','range',@(x) ischar(validatestring(x,expectedTypes)));
+addParameter(p,'N',8,@(x) isscalar(x) && ismember(x,[0 4 6 8]));
+addParameter(p,'thin',1,@(x) x>0.1 && x<=1);
+addParameter(p,'prc',90,@(x) x>0 && x<100);
 
 parse(p,DEM,varargin{:});
 

@@ -78,7 +78,7 @@ addRequired(p,'SW',@(x) isa(x,'SWATHobj'));
 addParameter(p,'left',true,@(x) islogical(x))
 addParameter(p,'right',true,@(x) islogical(x))
 addParameter(p,'distadjust',0,@(x) isnumeric(x))
-addParameter(p,'boundedline',false,@(x) islogical(x))
+addParameter(p,'boundedline',true,@(x) islogical(x))
 addParameter(p,'facecolor',clr)
 addParameter(p,'facealpha',1)
 addParameter(p,'minmaxfacecolor',[.8 .8 .8])

@@ -28,12 +28,19 @@ function varargout = points(P,form)
 % Output
 %
 %     depending on outputtype
-% 
+%
+% Example
+%
+%     FD  = FLOWobj(DEM);
+%     S   = STREAMobj(FD,'minarea',1000);
+%     P   = PPS(S,'rpois',0.0001);
+%     [lat,lon] = points(P,'latlon');
+%     wmmarker(lat,lon)
 % 
 % See also: PPS, PPS/npoints
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. February, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 24. June, 2024
 
 
 if nargin == 1
@@ -57,7 +64,15 @@ switch lower(form)
         end
     case 'latlon'
         [x,y] = points(P);
-        [lat,lon] = minvtran(P.S.georef.mstruct,x,y);
+        if isGeographic(P.S)
+            lat = y;
+            lon = x;
+        elseif isProjected(P.S)
+            [lat,lon] = projinv(P.S.georef.ProjectedCRS,x,y);
+        else
+            error('There is no projection.')
+        end
+        
         if nargout == 1
             varargout{1} = [lat lon];
         elseif nargout > 1
