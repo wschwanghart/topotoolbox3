@@ -203,15 +203,15 @@ classdef SWATHobj
             p = inputParser;
             p.FunctionName = 'SWATHobj';
             addRequired(p,'DEM',@(x) isa(x,'GRIDobj'));
-            addParamValue(p,'width',1e3,@(x) isnumeric(x))
-            addParamValue(p,'gap',0,@(x) isnumeric(x))
-            addParamValue(p,'dx',DEM.cellsize,@(x) isnumeric(x))
-            addParamValue(p,'dy',DEM.cellsize,@(x) isnumeric(x))
-            addParamValue(p,'keepdist',true,@(x) islogical(x))
-            addParamValue(p,'keeptrace',false,@(x) islogical(x))
-            addParamValue(p,'keepnodes',false,@(x) islogical(x))
-            addParamValue(p,'smooth',0,@(x) isnumeric(x))
-            addParamValue(p,'smoothlongest',true,@(x) islogical(x))
+            addParameter(p,'width',1e3,@(x) isnumeric(x))
+            addParameter(p,'gap',0,@(x) isnumeric(x))
+            addParameter(p,'dx',DEM.cellsize,@(x) isnumeric(x))
+            addParameter(p,'dy',DEM.cellsize,@(x) isnumeric(x))
+            addParameter(p,'keepdist',true,@(x) islogical(x))
+            addParameter(p,'keeptrace',false,@(x) islogical(x))
+            addParameter(p,'keepnodes',false,@(x) islogical(x))
+            addParameter(p,'smooth',0,@(x) isnumeric(x))
+            addParameter(p,'smoothlongest',true,@(x) islogical(x))
             
             parse(p,DEM,varargin{:});
             

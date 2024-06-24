@@ -36,20 +36,15 @@ function DZ = vertdistance2stream(FD,S,DEM)
 % See also: FLOWobj, FLOWobj/flowdistance, FLOWobj/mapfromnal, GRIDobj, 
 %           STREAMobj
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 3. November, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 24. June, 2024
 
 
-% 4/3/2016: the function now makes copies of FD.ix and FD.ixc (see 
-% FLOWobj/flowacc
-
-% 11/3/2021: performance improvement by not using GRIDobj when going
-% through the loop
-
-narginchk(3,3)
-
-validatealignment(S,DEM);
-validatealignment(FD,DEM);
+arguments
+    FD   FLOWobj
+    S    STREAMobj {validatealignment(S,FD)} 
+    DEM  GRIDobj {validatealignment(S,DEM)}
+end
 
 Z = -inf(DEM.size,'like',DEM.Z);
 Z(S.IXgrid) = DEM.Z(S.IXgrid);

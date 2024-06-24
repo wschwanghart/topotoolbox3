@@ -37,17 +37,14 @@ function OUT = dependencemap(FD,varargin)
 %
 % See also: FLOWobj, FLOWobj/INFLUENCEMAP
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 24. June, 2024
 
-
-% 4/3/2016: the function now makes copies of FD.ix and FD.ixc (see 
-% FLOWobj/flowacc
 
 
 %% check input arguments
 narginchk(1,3)
-if nargin == 2;
+if nargin == 2
     % SEED pixels are either supplied as logical matrix, GRIDobj, or linear
     % index
     SEED = varargin{1};
@@ -97,7 +94,7 @@ end
 
 %% Prepare Output
 % empty GRIDobj
-OUT = copy2GRIDobj(FD);
+OUT = GRIDobj(FD,'logical');
 % write output to GRIDobj
 OUT.Z = SEED;
 OUT.zunit = 'logical';

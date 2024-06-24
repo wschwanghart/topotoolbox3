@@ -46,10 +46,10 @@ function OUT = upslopestats(FD,VAR,meth,S)
 %     network-index-based version of TOPMODEL for use with high-resolution 
 %     digital topographic data Hydrological Processes, 18, 191-201. 
 %
-% See also: FLOWobj, FLOWACC
+% See also: FLOWobj, FLOWobj/flowacc, FLOWobj/imposemin
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 4. March, 2016
+% Author: Wolfgang Schwanghart (schwanghart[at]uni-potsdam.de)
+% Date: 24. June, 2024
 
 
 % 4/3/2016: the function now makes copies of FD.ix and FD.ixc (see 
@@ -57,22 +57,25 @@ function OUT = upslopestats(FD,VAR,meth,S)
 
 % 7/3/2018: option to remove channelized part
 
+arguments
+    FD    FLOWobj
+    VAR   {validatealignment(FD,VAR)}
+    meth  = 'mean'
+    S     = [];
+end
+
 narginchk(2,4)
 
 % check alignment
-validatealignment(FD,VAR);
 if isa(VAR,'GRIDobj')
     VAR = VAR.Z;
 end
 
-if nargin == 2
-    meth = 'mean';
-else
-    meth = validatestring(meth,{'mean','std','var','min','max','sum',...
+% Check function
+meth = validatestring(meth,{'mean','std','var','min','max','sum',...
                                 'nanmean'});
-end
 
-if nargin == 4
+if ~isempty(S)
     % remove channelized part
     validatealignment(S,VAR);
     SGRID = STREAMobj2GRIDobj(S);
@@ -153,8 +156,7 @@ end
 
 %% Prepare Output
 % empty GRIDobj
-OUT = copy2GRIDobj(FD);
-% write output to GRIDobj
+OUT = GRIDobj(FD,'single');
 OUT.Z = VAR;
 OUT.zunit = '';
 OUT.name  = ['upslope statistics (' meth ')'];

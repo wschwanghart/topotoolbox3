@@ -26,8 +26,8 @@ function [ix,ixc,frac] = find(FD)
 %
 % See also: FLOWobj, FLOWobj2M
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 23. February, 2013
+% Author: Wolfgang Schwanghart (schwanghart[at]uni-potsdam.de)
+% Date: 24. June, 2024
 
 
 ix = FD.ix;

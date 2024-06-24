@@ -9,11 +9,11 @@ function Lgrid = shufflelabel(Lgrid,r)
 %
 % Description
 %
-%     shufflelabel randomly changes the order of labels in the  
-%     label matrix L. Zeros and nans are ignored. L can be every
-%     numerical data type, char or a cell array of strings.
+%     shufflelabel randomly changes the order of labels in the label
+%     GRIDobj L. Zeros and nans are ignored. The function is helpful when
+%     plotting drainage basins.
 %
-%     When called with two input arguments, reset is either true or 
+%     When called with two input arguments, reset must be either true or 
 %     false. If true, label values in L are reset to range from
 %     one to numel(unique(L(:)). Note that this only works for 
 %     numeric arrays.
@@ -37,13 +37,14 @@ function Lgrid = shufflelabel(Lgrid,r)
 %
 % See also: RANDPERM, BWLABEL, LABELMATRIX
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 18. June, 2024
 
 
-
-% essentially, error checking is not necessary
-narginchk(1,2)
+arguments
+    Lgrid  GRIDobj
+    r  = false
+end
 
 % get values in GRIDobj
 L = Lgrid.Z;
@@ -51,15 +52,9 @@ L = Lgrid.Z;
 % is L a numeric array? 
 inum = isnumeric(L);
 
-% reset labeling?
-if nargin == 1;
-    % by default no.
-    r = false;
-else
-    % applies only if L is a numeric array.
-    validateattributes(r,{'numeric','logical'},{'scalar'})
-    r = r && inum;
-end
+% applies only if L is a numeric array.
+validateattributes(r,{'numeric','logical'},{'scalar'})
+r = r && inum;
 
 % size of L
 siz = size(L);
