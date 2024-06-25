@@ -38,9 +38,10 @@ function [IX,ixcoord,res] = getix(parent,him,options)
 
 arguments
     parent = gca
-    him = findobj(parent,'type','image')
+    him = findobj(gca,'type','image')
     options.color = [0 0.4470 0.7410]
     options.showhints = true
+    options.n = inf
 end
 
 if isempty(him)
@@ -80,13 +81,15 @@ htitle.HorizontalAlignment = 'center';
 drawingarea = [min(X) min(Y) max(X)-min(X) max(Y)-min(Y)];
 
 newPos = true;
-while newPos
+n      = 1;
+while newPos && n<=options.n
     posn = getPos(parent);
     if ~isempty(posn)
         pos = [pos;posn];
     else
         newPos = false;
     end
+    n = n+1;
 end
 
 if isempty(pos)

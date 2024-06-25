@@ -36,8 +36,8 @@ function R = meltonruggedness(FD,DEM)
 %
 % See also: GRIDobj/roughness, FLOWobj/upslopestats, FLOWobj/flowacc
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 12. November, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 24. June, 2024
 
 
 % link

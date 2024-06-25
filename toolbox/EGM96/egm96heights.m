@@ -1,11 +1,10 @@
-function EGM96 = egm96heights(DEM)
+function DEM = egm96heights(DEM)
 
 %EGM96HEIGHTS read and resample EGM96 geoid heights
 %
 % Syntax
 %
 %     EGM96 = egm96heights(DEM)
-%     egm96heights
 %
 % Description
 %
@@ -29,35 +28,20 @@ function EGM96 = egm96heights(DEM)
 %     EGM96 = egm96heights(DEM);
 %     imageschs(DEM,EGM96)
 %
-%  
-% See also: GRIDobj
+% See also: GRIDobj, egm96geoid
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 8. May, 2018
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 24. June, 2024
 
-[N,globalR] = egm96geoid;
-
-[Z, refvec] = egm96geoid(1,[90 -90],[-180 180]);
-R = refvecToGeoRasterReference(refvec,size(Z));
-lat = linspace(R.LatitudeLimits(1),R.LatitudeLimits(2),size(Z,1));
-lon = linspace(R.LongitudeLimits(1),R.LongitudeLimits(2),size(Z,2));
-EGM96 = GRIDobj(lon,lat,Z);
-
-if nargin == 0 && nargout == 0
-    figure
-    imagesc(EGM96);
-    load coast
-    hold on
-    plot(long,lat,'k');
-    hold off
-    
-elseif nargin > 0
-
-        switch DEM.georef.SpatialRef.CoordinateSystemType
-            case 'geographic'
-                EGM96 = resample(EGM96,DEM);
-            otherwise
-                EGM96 = reproject2utm(EGM96,DEM);
-        end
-
+if isProjected(DEM)
+    [x,y] = getcoordinates(DEM,'mat');
+    [lat,lon] = projinv(DEM.georef.ProjectedCRS,x(:),y(:));
+    N = egm96geoid(lat,lon);
+    N = reshape(N,size(x));
+elseif isGeographic(DEM)
+    N = egm96geoid(DEM.georef);
+else
+    N = egm96geoid(DEM.georef);       
 end
+
+DEM.Z = N;
