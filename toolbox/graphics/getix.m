@@ -75,7 +75,7 @@ hold on
 hfig = gcf;
 
 htitle = title(parent,'','FontSize',8);
-htitle.HorizontalAlignment = 'center';
+parent.TitleHorizontalAlignment = 'left';
 
 % Drawing area = [x,y,w,h]
 drawingarea = [min(X) min(Y) max(X)-min(X) max(Y)-min(Y)];

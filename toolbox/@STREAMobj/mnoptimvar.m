@@ -1,6 +1,6 @@
-function [mn,cm,zm,zsd] = mnoptimvar(S,DEM,A,varargin)
+function [mn,cm,zm,zsd] = mnoptimvar(S,DEM,A,options)
 
-%MNOPTIMVAR optimize the mn ratio using minimum variance method
+%MNOPTIMVAR Optimize the mn ratio using minimum variance method
 %
 % Syntax
 %
@@ -64,24 +64,26 @@ function [mn,cm,zm,zsd] = mnoptimvar(S,DEM,A,varargin)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 17. June, 2024
 
-% parse inputs
-p = inputParser;
-addParameter(p,'varfun',@iqr,@(x) isa(x,'function_handle'));
-addParameter(p,'distbins',100,@(x) isscalar(x) && x > 1);
-addParameter(p,'minstreams',2,@(x) isscalar(x) && x > 1);
-addParameter(p,'mn0',0.5,@(x) isscalar(x) && x > 0);
-addParameter(p,'funoptim','fminsearch')
-addParameter(p,'plot',true)
-addParameter(p,'optimize',true);
-addParameter(p,'zerobaselevel',false);
-addParameter(p,'a0',1e6);
-parse(p,varargin{:});
+arguments
+    S     STREAMobj
+    DEM {mustBeGRIDobjOrNal(DEM,S)}
+    A   {mustBeGRIDobjOrNal(A,S)}
+    options.varfun = @iqr
+    options.distbins (1,1) {mustBePositive,mustBeInteger} = 100
+    options.minstreams (1,1) {mustBePositive,mustBeInteger} = 2
+    options.mn0 (1,1) {mustBePositive,mustBeNumeric} = 0.5
+    options.funoptim = 'fminsearch'
+    options.plot (1,1) = true
+    options.optimize (1,1) = true
+    options.zerobaselevel (1,1) = false
+    options.a0 (1,1) {mustBeNumeric,mustBePositive} = 1
+end
 
 % get parameters
-varfun = p.Results.varfun;
-distbins = p.Results.distbins;
-minstreams = p.Results.minstreams;
-a0 = p.Results.a0;
+varfun = options.varfun;
+distbins = options.distbins;
+minstreams = options.minstreams;
+a0 = options.a0;
     
 
 % get node attribute list with flow accumulation values
@@ -92,27 +94,27 @@ z = ezgetnal(S,DEM,'double');
 
 % z must be double precision
 z = double(z);
-if p.Results.zerobaselevel
+if options.zerobaselevel
     z = zerobaselevel(S,z);
 end
 copyz = z;
 z = z - min(z) + 1;
 
-if p.Results.optimize
+if options.optimize
 % calculate stream 
 label = labelreach(S);
 
 % choose optimizer
-switch lower(p.Results.funoptim)
+switch lower(options.funoptim)
     case 'fminsearch'
-        mn = fminsearch(@(mn) chivar(mn), log(p.Results.mn0));
+        mn = fminsearch(@(mn) chivar(mn), log(options.mn0));
         mn = exp(mn);
 end
 else 
-    mn = p.Results.mn0;
+    mn = options.mn0;
 end
 
-if nargout > 1 || p.Results.plot
+if nargout > 1 || options.plot
     c   = chitransform(S,a,'mn',mn,'a0',a0);
     [~,~,bin] = histcounts(c,distbins);
     zm  = accumarray(bin,copyz,[],@mean,0);
@@ -121,7 +123,7 @@ if nargout > 1 || p.Results.plot
     
 end
 
-if p.Results.plot
+if options.plot
     plotdz(S,copyz,'distance',c,'color',[.7 .7 .7])
     hold on
     errorbar(cm,zm,zsd,'k.')

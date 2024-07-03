@@ -29,10 +29,10 @@ function h = plot3d(S,DEM)
 %     S = klargestconncomps(S);
 %     plot3d(S,DEM)
 %
-% See also: STREAMobj, STREAMobj/plot, STREAMobj/plotdz
+% See also: STREAMobj, STREAMobj/plot, STREAMobj/plotdz, STREAMobj/plot3
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. April, 2015
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. July, 2024
 
 
 [x,y,z] = STREAMobj2XY(S,DEM);
@@ -56,6 +56,6 @@ TIN(I,:) = [];
 htemp = trisurf(TIN,x,y,z);
 shading interp
 
-if nargout == 1;
+if nargout == 1
     h = htemp;
 end

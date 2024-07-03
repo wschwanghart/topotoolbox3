@@ -20,7 +20,7 @@ function tf = isempty(S)
 %
 % See also: STREAMobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 31. March, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 2. July, 2024
 
 tf = isempty(S.x);

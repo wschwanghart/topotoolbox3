@@ -1,4 +1,4 @@
-function [k,zhat] = loessksn(S,DEM,A,varargin)
+function [k,zhat] = loessksn(S,DEM,A,options)
 
 %LOESSKSN Loess-smoothed river steepness
 %
@@ -29,7 +29,7 @@ function [k,zhat] = loessksn(S,DEM,A,varargin)
 %     'a0'          Reference area {1 m^2}
 %     'mn'          river concavity (theta) {0.45}
 %     'ws'          window size {11}
-%     'parallel'    run in parallel {true} or false
+%     'parallel'    run in parallel {false} or true
 %
 % Output arguments
 %
@@ -46,51 +46,39 @@ function [k,zhat] = loessksn(S,DEM,A,varargin)
 %     k = loessksn(S,DEM,A,'parallel',false);
 %     plotc(S,k)
 %
-% See also: chitransform, ksn, smooth
+% See also: STREAMobj/chitransform, STREAMobj/ksn, STREAMobj/smooth
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. May, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 2. July, 2024
 
-
-p = inputParser;
-addParameter(p,'mn',0.45);
-addParameter(p,'a0',1);
-addParameter(p,'ws',11,@(x) validateattributes(x,{'single','double'},{'scalar','positive','integer'}))
-addParameter(p,'parallel',true)
-parse(p,varargin{:})
+arguments
+    S   STREAMobj
+    DEM {mustBeGRIDobjOrNal(DEM,S)}
+    A   {mustBeGRIDobjOrNal(A,S)}
+    options.mn (1,1) {mustBeNumeric,mustBePositive} = 0.45
+    options.a0 (1,1) {mustBeNumeric,mustBePositive} = 1
+    options.ws (1,1) {mustBeNumeric,mustBePositive} = 11
+    options.parallel (1,1) = false
+end
 
 % get node attribute list with elevation values
-if isa(DEM,'GRIDobj')
-    validatealignment(S,DEM);
-    z = getnal(S,DEM);
-elseif isnal(S,DEM)
-    z = DEM;
-else
-    error('Imcompatible format of second input argument')
-end
-
+z = ezgetnal(S,DEM);
 % get node attribute list with upstream area values
-if isa(A,'GRIDobj')
-    validatealignment(S,A);
-    a = getnal(S,A);
-elseif isnal(S,A)
-    a = A;
-else
-    error('Imcompatible format of second input argument')
-end
+a = ezgetnal(S,A);
 
 % ------ run in parallel -------
-if p.Results.parallel
+if options.parallel
     [CS,locb] = STREAMobj2cell(S);
     Cz = cellfun(@(ix) z(ix),locb,'UniformOutput',false);
     Ca = cellfun(@(ix) a(ix),locb,'UniformOutput',false);
 
     Ck = cell(numel(CS),1);
-    params = p.Results;
+    params = options;
     params.parallel = false;
+    params = namedargs2cell(params);
 
     parfor r = 1:numel(CS)
-        Ck{r} = loessksn(CS{r},Cz{r},Ca{r},params);
+        Ck{r} = loessksn(CS{r},Cz{r},Ca{r},params{:});
     end
 
     k = getnal(S);
@@ -105,9 +93,9 @@ end
 n = numel(S.x);
 M = sparse(S.ix,S.ixc,1,n,n);
 M = M+speye(n);
-M = M^p.Results.ws;
+M = M^options.ws;
 
-d = chitransform(S,a,'a0',p.Results.a0,'mn',p.Results.mn);
+d = chitransform(S,a,'a0',options.a0,'mn',options.mn);
 % d = S.distance;
 
 [i,j]  = find(M);

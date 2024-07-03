@@ -74,10 +74,8 @@ function [S,z] = table2STREAMobj(t,DEM,varargin)
 %
 % See also: line2GRIDobj, getgriddedline
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 07. June, 2023
-
-
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 26. June, 2024
 
 % parse inputs
 varnames = t.Properties.VariableNames;
@@ -144,7 +142,7 @@ S.ix = (1:(numel(x)-1))';
 S.ixc = (2:(numel(x)))';
 
 S.size = DEM.size;
-S.refmat = DEM.refmat;
+S.wf = DEM.wf;
 S.georef = DEM.georef;
 S.cellsize = DEM.cellsize;
 

@@ -1,4 +1,4 @@
-function k = ksn(S,DEM,A,varargin)
+function k = ksn(S,DEM,A,theta,K)
 
 %KSN normalized steepness index
 %
@@ -12,7 +12,13 @@ function k = ksn(S,DEM,A,varargin)
 % Description
 %
 %     KSN returns the normalized steepness index using a default concavity
-%     index of 0.45.
+%     index of 0.45. The Ksn index, or normalized steepness index, is a
+%     metric used in topographic and tectonic analyses to quantify the
+%     steepness of river channels relative to a normalized reference
+%     concavity. Steeper and possibly more erosive segments of the river
+%     have higher Ksn values. The index helps identify areas of
+%     differential uplift, varying lithologies, or tectonic activity by
+%     comparing the steepness of river profiles across different regions.
 %
 % Input arguments
 %
@@ -53,44 +59,26 @@ function k = ksn(S,DEM,A,varargin)
 %
 % See also: STREAMobj/crs, STREAMobj/smooth, FLOWobj/flowacc
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 21. April, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 2. June, 2024
 
-
-p = inputParser;
-addOptional(p,'theta',0.45,...
-    @(x) validateattributes(x,{'double','single'},{'scalar','positive'}));
-addOptional(p,'smooth',0,...
-    @(x) validateattributes(x,{'double','single'},{'scalar','positive'}));
-parse(p,varargin{:});
-
-
-% get node attribute list with elevation values
-if isa(DEM,'GRIDobj')
-    validatealignment(S,DEM);
-    z = double(getnal(S,DEM));
-elseif isnal(S,DEM)
-    z = double(DEM);
-else
-    error('Imcompatible format of second input argument')
+arguments
+    S   STREAMobj
+    DEM {mustBeGRIDobjOrNal(DEM,S)}
+    A   {mustBeGRIDobjOrNal(A,S)}
+    theta (1,1) {mustBeNumeric,mustBePositive} = 0.45
+    K   (1,1) {mustBeNumeric,mustBeNonnegative} = 0
 end
 
-% get node attribute list with flow accumulation values
-if isa(A,'GRIDobj')
-    validatealignment(S,A);
-    a = double(getnal(S,A));
-elseif isnal(S,A)
-    a = double(A);
-else
-    error('Imcompatible format of second input argument')
-end
+z = ezgetnal(S,DEM);
+a = ezgetnal(S,A);
 
 % minima imposition to avoid negative gradients
 z = imposemin(S,z,0.00001);
 
 % Smoothing, if required
-if p.Results.smooth ~= 0
-    z = smooth(S,z,'K',p.Results.smooth);
+if K ~= 0
+    z = smooth(S,z,'K',K);
 end
 
 % calculate gradient
@@ -100,7 +88,7 @@ g = gradient(S,z);
 a = a.*S.cellsize.^2;
 % end
 
-k = g./(a.^(-p.Results.theta));
+k = g./(a.^(-theta));
 
 
 

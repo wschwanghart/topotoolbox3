@@ -1,6 +1,6 @@
-function m = meanupstream(S,val,varargin)
+function m = meanupstream(S,val,weights)
 
-%MEANUPSTREAM mean (weighted) upstream  values
+%MEANUPSTREAM Mean (weighted) upstream  values
 %
 % Syntax
 %
@@ -43,22 +43,23 @@ function m = meanupstream(S,val,varargin)
 %
 % See also: STREAMobj, STREAMobj/getnal
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 30. August, 2016
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 2. July, 2024
 
-narginchk(2,3)
+arguments
+    S    STREAMobj
+    val  {mustBeGRIDobjOrNal(val,S)}
+    weights {mustBeNumeric,mustBePositive} = 1
+end
 
-p = inputParser;
-addRequired(p,'S');
-addRequired(p,'val',@(x) isnal(S,x));
-addOptional(p,'weights',ones(size(S.x)),@(x) isnal(S,x));
-parse(p,S,val,varargin{:})
+val = ezgetnal(S,val);
+weights = ezgetnal(S,weights);
 
 nr = numel(S.x);
 M = sparse(S.ix,S.ixc,1,nr,nr);
 M = speye(nr)-M';
 
-weightsaccum = M\p.Results.weights;
-valaccum = M\(val.*p.Results.weights);
+weightsaccum = M\weights;
+valaccum = M\(val.*weights);
 
 m = valaccum./weightsaccum;

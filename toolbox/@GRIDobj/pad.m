@@ -1,4 +1,4 @@
-function DEM = pad(DEM,varargin)
+function DEM = pad(DEM,px,val)
 
 %PAD Add or remove a border of pixels around a GRIDobj
 %
@@ -44,28 +44,25 @@ function DEM = pad(DEM,varargin)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 11. June, 2024
 
+arguments
+    DEM   GRIDobj
+    px    {mustBeNumeric} = 1
+    val   {mustBeScalarOrEmpty} = 0
+end
 
-% check input arguments
-narginchk(1,3)
-p = inputParser;
-p.FunctionName = 'GRIDobj/pad';
+if px == 0
+    return
+end
 
-defaultval = 0;
-defaultpx  = 1;
-addRequired(p,'DEM')
-addOptional(p,'px',defaultpx, @(x) isnumeric(x) && isscalar(x));
-addOptional(p,'val',defaultval,@(x) isscalar(x));
-parse(p,DEM,varargin{:});
-
-px  = sign(p.Results.px)*ceil(abs(p.Results.px));
-val = p.Results.val;
+px  = sign(px)*ceil(abs(px));
 
 % new size of output grid
 newsize = DEM.size + px*2;
 
 % check if size is negative and issue an error
 if any(newsize < 0)
-    error('the number of pixels removed from the grid edges is too large')
+    error('TopoToolbox:wronginput',...
+        'The number of pixels removed from the grid edges is too large')
 end
 
 % create new array

@@ -128,19 +128,19 @@ validareabinlocs = {'center' 'median' 'mean'};
 validgradaggfun  = {'mean','median'};
 validfitmethods  = {'ls','lad','logtrls'};
 
-addParamValue(p,'streamgradient','forward',@(x) ischar(validatestring(x,validstreamgradient)));
-addParamValue(p,'drop',10,@(x) isscalar(x) && x>0);
-addParamValue(p,'imposemin',true,@(x) isscalar(x));
-addParamValue(p,'areabins',100,@(x) isscalar(x) || isempty(x));
-addParamValue(p,'areabinlocs','median',@(x) ischar(validatestring(x,validareabinlocs)));
-addParamValue(p,'gradaggfun','mean',@(x) ischar(validatestring(x,validgradaggfun)));
-addParamValue(p,'fitmethod','ls',@(x) ischar(validatestring(x,validfitmethods)));
-addParamValue(p,'fitlims',[0 inf]);
-addParamValue(p,'theta',[],@(x) isscalar(x) && x>0);
-addParamValue(p,'hist2',false,@(x) isscalar(x));
-addParamValue(p,'plot',true,@(x) isscalar(x));
-addParamValue(p,'mingradient',0.0001, @(x) isscalar(x));
-addParamValue(p,'histbins',[100 100], @(x) ismember(numel(x),[1 2]) && all(x>0));
+addParameter(p,'streamgradient','forward',@(x) ischar(validatestring(x,validstreamgradient)));
+addParameter(p,'drop',10,@(x) isscalar(x) && x>0);
+addParameter(p,'imposemin',true,@(x) isscalar(x));
+addParameter(p,'areabins',100,@(x) isscalar(x) || isempty(x));
+addParameter(p,'areabinlocs','median',@(x) ischar(validatestring(x,validareabinlocs)));
+addParameter(p,'gradaggfun','mean',@(x) ischar(validatestring(x,validgradaggfun)));
+addParameter(p,'fitmethod','ls',@(x) ischar(validatestring(x,validfitmethods)));
+addParameter(p,'fitlims',[0 inf]);
+addParameter(p,'theta',[],@(x) isscalar(x) && x>0);
+addParameter(p,'hist2',false,@(x) isscalar(x));
+addParameter(p,'plot',true,@(x) isscalar(x));
+addParameter(p,'mingradient',0.0001, @(x) isscalar(x));
+addParameter(p,'histbins',[100 100], @(x) ismember(numel(x),[1 2]) && all(x>0));
 
 parse(p,varargin{:});
 gradmeth    = validatestring(p.Results.streamgradient,validstreamgradient);
@@ -152,7 +152,7 @@ fitmethod   = validatestring(p.Results.fitmethod,validfitmethods);
 if isa(DEM,'GRIDobj')
     validatealignment(S,DEM);
     z = getnal(S,DEM);
-elseif isnal(S,DEM);
+elseif isnal(S,DEM)
     z = DEM;
 else
     error('Imcompatible format of second input argument')
@@ -162,7 +162,7 @@ end
 if isa(A,'GRIDobj')
     validatealignment(S,A);
     a = getnal(S,A);
-elseif isnal(S,A);
+elseif isnal(S,A)
     a = A;
 else
     error('Imcompatible format of second input argument')
@@ -177,13 +177,13 @@ g = gradient(S,z,'unit','tangent',...
 mina = min(a);
 maxa = max(a);
 
-if p.Results.hist2;
+if p.Results.hist2
     copya = a;
     copyg = g;
 end
 
 % bin area values
-if ~isempty(p.Results.areabins);
+if ~isempty(p.Results.areabins)
     
     edges = logspace(log10(mina-0.1),log10(maxa+1),p.Results.areabins+1);
     [~,ix] = histc(a,edges);
@@ -195,7 +195,7 @@ if ~isempty(p.Results.areabins);
             a = accumarray(ix,a,[p.Results.areabins 1],@median,nan);
         case 'center'
             a = edges(1:end-1) + diff(edges)/2;
-            if a(end) == maxa;
+            if a(end) == maxa
                 a(end) = nan;
             end
             a = a(:);
@@ -226,7 +226,7 @@ if p.Results.plot
 end
 
 % 2d Histogram
-if p.Results.hist2 && p.Results.plot;
+if p.Results.hist2 && p.Results.plot
     edgesa = logspace(floor(log10(mina)),ceil(log10(maxa)),p.Results.histbins(1));
     [~,ixa] = histc(copya,edgesa);
     

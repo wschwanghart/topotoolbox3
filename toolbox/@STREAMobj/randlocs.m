@@ -39,13 +39,13 @@ function varargout = randlocs(S,n,wr)
 %
 % See also: STREAMobj, PPS
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 26. November, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. July, 2024
 
 arguments
     S    STREAMobj
-    n    = 100
-    wr   = true
+    n    (1,1) {mustBeInteger,mustBePositive} = 100
+    wr   (1,1) = false
 end
 
 if wr

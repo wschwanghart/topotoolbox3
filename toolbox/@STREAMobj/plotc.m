@@ -1,11 +1,12 @@
-function h = plotc(S,DEM,varargin)
+function h = plotc(S,DEM,options)
 
 %PLOTC plot a colored stream network
 %
 % Syntax
 %      
 %     plotc(S,DEM)
-%     plotc(S,nal)
+%     plotc(S,z)
+%     plotc(S,z,pn,pv,...)
 %     h = plotc(...)
 %
 % Description
@@ -17,7 +18,7 @@ function h = plotc(S,DEM,varargin)
 %
 %     S      STREAMobj
 %     DEM    GRIDobj
-%     nal    node attribute list
+%     z      node attribute list
 %
 %     Parameter name value pairs
 %
@@ -54,26 +55,27 @@ function h = plotc(S,DEM,varargin)
 % See also: STREAMobj/plot, STREAMobj/plot3, STREAMobj/plot3d,
 %           STREAMobj/plotdz
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 6. November, 2015
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. July, 2024
 
-p = inputParser;         
-p.FunctionName = 'STREAMobj/plotc';
-addParameter(p,'xyscale',1,@(x) isscalar(x));
-addParameter(p,'xoffset',0,@(x) isscalar(x));
-addParameter(p,'yoffset',0,@(x) isscalar(x));
-addParameter(p,'linewidth',1.5);
-parse(p,varargin{:});
+arguments
+    S   STREAMobj
+    DEM {mustBeGRIDobjOrNal(DEM,S)}
+    options.xyscale (1,1) = 1
+    options.xoffset (1,1) = 0
+    options.yoffset (1,1) = 0
+    options.linewidth (1,1) {mustBeNumeric,mustBePositive} = 1.5
+end
 
 [x,y,c] = STREAMobj2XY(S,DEM);
-x = (x + p.Results.xoffset)*p.Results.xyscale;
-y = (y + p.Results.yoffset)*p.Results.xyscale;
+x = (x + options.xoffset)*options.xyscale;
+y = (y + options.yoffset)*options.xyscale;
 
 z = x*0;
 ht = surface([x x],[y y],[z z],[c c],...
         'facecolor','none',...
         'edgecolor','flat',...
-        'linewidth',p.Results.linewidth);
+        'linewidth',options.linewidth);
 if nargout == 1
     h = ht;
 end

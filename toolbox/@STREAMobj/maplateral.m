@@ -73,9 +73,9 @@ arguments
     A    {validatealignment(S,A)}
     dist {mustBePositive}
     aggfun = @mean
-    options.excludestream = true
-    options.inpaintnans = true
-    options.flat = false
+    options.excludestream (1,1) =true
+    options.inpaintnans (1,1) =true
+    options.flat (1,1) =false
     options.fillval = nan
 end
 

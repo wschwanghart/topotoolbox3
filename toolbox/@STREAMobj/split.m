@@ -76,7 +76,7 @@ arguments
     S     STREAMobj
     V    = streampoi(S,'confluences','logical')
     removeedge = 'incoming'
-    doclean  = true
+    doclean  (1,1) = true
 end
 
 if nargin >= 2

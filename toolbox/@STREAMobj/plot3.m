@@ -1,6 +1,6 @@
 function h = plot3(S,DEM,varargin)
 
-%PLOT3 3d-line plot of a STREAMobj
+%PLOT3 3D-line plot of a STREAMobj
 %
 % Syntax
 %
@@ -33,8 +33,8 @@ function h = plot3(S,DEM,varargin)
 %
 % See also: STREAMobj, STREAMobj/plot, STREAMobj/plot3d, STREAMobj/plotdz
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 25. June, 2015
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. July, 2024
 
 narginchk(2,inf)
 

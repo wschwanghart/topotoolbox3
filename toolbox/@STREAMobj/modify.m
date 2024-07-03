@@ -1,6 +1,6 @@
 function [Sout,nalix] = modify(S,varargin)
 
-%MODIFY modify instance of STREAMobj to meet user-defined criteria
+%MODIFY Modify instance of STREAMobj to meet user-defined criteria
 %
 % Syntax
 %
@@ -156,27 +156,27 @@ p = inputParser;
 p.FunctionName = 'modify';
 addRequired(p,'S',@(x) isa(x,'STREAMobj'));
 
-addParamValue(p,'streamorder',[]);
-addParamValue(p,'distance',[],@(x) isnumeric(x) && numel(x)<=2);
-addParamValue(p,'maxdsdistance',[],@(x) isscalar(x) && x>0);
-addParamValue(p,'interactive',[],@(x) ischar(validatestring(x,{'polyselect','reachselect',...
+addParameter(p,'streamorder',[]);
+addParameter(p,'distance',[],@(x) isnumeric(x) && numel(x)<=2);
+addParameter(p,'maxdsdistance',[],@(x) isscalar(x) && x>0);
+addParameter(p,'interactive',[],@(x) ischar(validatestring(x,{'polyselect','reachselect',...
                                                                'channelheadselect','rectselect',...
                                                                'ellipseselect','outletselect'})));
-addParamValue(p,'tributaryto',[],@(x) isa(x,'STREAMobj'));
-addParamValue(p,'tributaryto2',[],@(x) isa(x,'STREAMobj'));
-addParamValue(p,'righttrib',[],@(x) isa(x,'STREAMobj'));
-addParamValue(p,'lefttrib',[],@(x) isa(x,'STREAMobj'));
-addParamValue(p,'shrinkfromtop',[],@(x) isnumeric(x) && isscalar(x) && x>0);
-addParamValue(p,'upstreamto',[],@(x) isa(x,'GRIDobj') || isnumeric(x)  || isnal(S,x));
-addParamValue(p,'downstreamto',[],@(x) isa(x,'GRIDobj') || isnumeric(x) || isnal(S,x));
-addParamValue(p,'rmconncomps',[],@(x) isnumeric(x) && x>0 && isscalar(x));
-addParamValue(p,'rmconncomps_ch',[],@(x) isnumeric(x) && x>=0 && isscalar(x));
-addParamValue(p,'rmupstreamtoch',[],@(x) isa(x,'STREAMobj'));
-%addParamValue(p,'between',[],@(x) isnumeric(x) && size(x,2) == 2);
-addParamValue(p,'fromch2IX',[]);
-addParamValue(p,'rmnodes',[]);
-addParamValue(p,'clip',[],@(x) (isnumeric(x) && size(x,2)==2 && size(x,1)>2) || isa(x,'GRIDobj'));
-addParamValue(p,'nal',[],@(x) isnal(S,x));
+addParameter(p,'tributaryto',[],@(x) isa(x,'STREAMobj'));
+addParameter(p,'tributaryto2',[],@(x) isa(x,'STREAMobj'));
+addParameter(p,'righttrib',[],@(x) isa(x,'STREAMobj'));
+addParameter(p,'lefttrib',[],@(x) isa(x,'STREAMobj'));
+addParameter(p,'shrinkfromtop',[],@(x) isnumeric(x) && isscalar(x) && x>0);
+addParameter(p,'upstreamto',[],@(x) isa(x,'GRIDobj') || isnumeric(x)  || isnal(S,x));
+addParameter(p,'downstreamto',[],@(x) isa(x,'GRIDobj') || isnumeric(x) || isnal(S,x));
+addParameter(p,'rmconncomps',[],@(x) isnumeric(x) && x>0 && isscalar(x));
+addParameter(p,'rmconncomps_ch',[],@(x) isnumeric(x) && x>=0 && isscalar(x));
+addParameter(p,'rmupstreamtoch',[],@(x) isa(x,'STREAMobj'));
+%addParameter(p,'between',[],@(x) isnumeric(x) && size(x,2) == 2);
+addParameter(p,'fromch2IX',[]);
+addParameter(p,'rmnodes',[]);
+addParameter(p,'clip',[],@(x) (isnumeric(x) && size(x,2)==2 && size(x,1)>2) || isa(x,'GRIDobj'));
+addParameter(p,'nal',[],@(x) isnal(S,x));
 
 parse(p,S,varargin{:});
 S   = p.Results.S;

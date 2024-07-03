@@ -1,6 +1,6 @@
 function z = mincosthydrocon(S,DEM,method,fillp)
 
-%MINCOSTHYDROCON minimum cost hydrological conditioning
+%MINCOSTHYDROCON Minimum cost hydrological conditioning
 %
 % Syntax
 %
@@ -56,43 +56,30 @@ function z = mincosthydrocon(S,DEM,method,fillp)
 % Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
 % Date: 24. June, 2014
 
-
-narginchk(2,4);
-
-if nargin == 2;
-    method = 'minmax';
-elseif nargin == 3;
-    method = validatestring(method,{'minmax', 'interp'},'mincosthydrocon','method',3);
-    fillp  = .5;
-else
-    method = validatestring(method,{'minmax', 'interp'},'mincosthydrocon','method',3);
-    validateattributes(fillp,{'numeric'},{'scalar','>',0,'<=',1});
+arguments
+    S    STREAMobj
+    DEM  {mustBeGRIDobjOrNal(DEM,S)}
+    method = 'minmax'
+    fillp (1,1) {mustBeNumeric,mustBeInRange(fillp,0,1)} = 0.5
 end
+
+method = validatestring(method,{'minmax', 'interp'},'mincosthydrocon','method',3);
 
 % get node attribute list with elevation values
-if isa(DEM,'GRIDobj')
-    validatealignment(S,DEM);
-    z = getnal(S,DEM);
-elseif isnal(S,DEM);
-    z = DEM;
-else
-    error('Imcompatible format of second input argument')
-end
+z = ezgetnal(S,DEM);
 
-d      = S.distance;
 ix     = S.ix;
 ixc    = S.ixc;
 
-
 % node attribute list (nal) with filled z
 z_fill = z;
-for r = numel(ixc):-1:1;
+for r = numel(ixc):-1:1
     z_fill(ix(r)) = max(z_fill(ix(r)),z_fill(ixc(r)));
 end
 
 % nal with carved z
 z_carve = z;
-for r = 1:numel(ixc);
+for r = 1:numel(ixc)
     z_carve(ixc(r)) = min(z_carve(ix(r)),z_carve(ixc(r)));
 end
 
@@ -105,20 +92,20 @@ ixc = ixc(IEDGE);
 switch method
     case 'minmax'
         c_fill = z_fill-z;
-        for r = 1:numel(ixc);
+        for r = 1:numel(ixc)
             c_fill(ixc(r)) = c_fill(ix(r)) + c_fill(ixc(r));
         end
         
-        for r = numel(ixc):-1:1;
+        for r = numel(ixc):-1:1
             c_fill(ix(r)) = max(c_fill(ix(r)),c_fill(ixc(r)));
         end
         
         c_carve = z-z_carve;
-        for r = 1:numel(ixc);
+        for r = 1:numel(ixc)
             c_carve(ixc(r)) = c_carve(ix(r)) + c_carve(ixc(r));
         end
         
-        for r = numel(ixc):-1:1;
+        for r = numel(ixc):-1:1
             c_carve(ix(r)) = max(c_carve(ix(r)),c_carve(ixc(r)));
         end
         
@@ -126,20 +113,14 @@ switch method
         z(I) = z_fill(I);
         z(~I) = z_carve(~I);
     case 'interp'
-%         for r = 1:numel(ix);
-%             z_fill(ixc(r)) = max(z_fill(ix(r)),z_fill(ixc(r)));
-%         end
-%         for r = numel(ix):-1:1;
-%             z_carve(ix(r)) = min(z_carve(ixc(r)),z_carve(ix(r)));
-%         end
         
         d = zeros(size(z_fill));
-        for r = numel(ix):-1:1;
+        for r = numel(ix):-1:1
             d(ix(r)) = d(ixc(r))+...
                 sqrt((S.x(ixc(r))-S.x(ix(r)))^2 + (S.y(ixc(r))-S.y(ix(r)))^2);
         end
         d2 = d;
-        for r = 1:numel(ix);
+        for r = 1:numel(ix)
             d2(ixc(r)) = max(d2(ix(r)),d2(ixc(r)));
         end
         d = d./d2;

@@ -42,7 +42,7 @@ function S = klargestconncomps(S,k)
 
 arguments
     S    STREAMobj
-    k    {mustBePositive,mustBeInteger} = 1
+    k    (1,1) {mustBePositive,mustBeInteger} = 1
 end
 
 % create sparse adjacency matrix

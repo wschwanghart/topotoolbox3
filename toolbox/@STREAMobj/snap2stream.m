@@ -94,9 +94,9 @@ arguments
     y     {mustBeNumeric,mustBeEqualSize(x,y)}
     options.snapto {mustBeTextScalar} = 'all'
     options.streamorder = []
-    options.maxdist {mustBeNumeric,mustBePositive} = inf
-    options.inputislatlon = false
-    options.plot = false
+    options.maxdist (1,1) {mustBeNumeric,mustBePositive} = inf
+    options.inputislatlon (1,1) = false
+    options.plot (1,1) = false
     options.nalarea {mustBeGRIDobjOrNalOrEmpty(options.nalarea,S)} = []
     options.pointarea {mustBeEqualSizeOrEmpty(x,options.pointarea)} = []
     options.alongflow = []

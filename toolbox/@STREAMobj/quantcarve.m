@@ -1,6 +1,6 @@
 function [zs,output] = quantcarve(S,DEM,tau,varargin)
 
-%QUANTCARVE quantile carving
+%QUANTCARVE Quantile carving
 %
 % Syntax
 %

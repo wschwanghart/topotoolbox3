@@ -52,8 +52,8 @@ classdef STREAMobj
 %  
 % See also: STREAMobj/modify, FLOWobj, GRIDobj, flowpathapp
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 23. February, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 2. July, 2024
     
     
     

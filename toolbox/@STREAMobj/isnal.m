@@ -1,6 +1,6 @@
 function tf = isnal(S,nal)
 
-% test whether a vector is a node attribute list of a STREAMobj
+%ISNAL Test whether a vector is a node attribute list of a STREAMobj
 %
 % Syntax
 %
@@ -24,8 +24,8 @@ function tf = isnal(S,nal)
 %
 % See also: STREAMobj, STREAMobj/getnal
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. May, 2016
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 2. July, 2024
 
-
-tf = isequal(numel(S.IXgrid),numel(nal));
+tf = isequal(numel(S.IXgrid),numel(nal)); 
+tf = tf && iscolumn(nal);

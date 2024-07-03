@@ -28,8 +28,13 @@ function [a,D] = hillslopearea(S,FD)
 %
 % See also: FLOWobj/flowacc, FLOWobj/upslopestats
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 10. August, 2018    
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 2. July, 2024    
+
+arguments
+    S    STREAMobj
+    FD   FLOWobj
+end
 
 A = upslopestats(FD,GRIDobj(FD)+1,'sum',S);
 a = getnal(S,A);

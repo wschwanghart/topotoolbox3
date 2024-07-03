@@ -44,7 +44,7 @@ function s = sinuosity(S,seglength)
 
 arguments
     S    STREAMobj
-    seglength {mustBePositive}
+    seglength (1,1) {mustBePositive}
 end
 
 if seglength < (S.cellsize*3)

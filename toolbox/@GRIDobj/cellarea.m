@@ -20,7 +20,7 @@ function CA = cellarea(DEM)
 %
 %     CA      cell areas (GRIDobj) in m^2.
 %
-% See also: GRIDobj/isGeographic 
+% See also: GRIDobj/isGeographic, GRIDobj/isProjected 
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 3. June, 2024

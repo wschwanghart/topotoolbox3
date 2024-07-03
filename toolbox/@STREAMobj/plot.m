@@ -1,6 +1,6 @@
 function h = plot(S,varargin)
 
-%PLOT plot instance of STREAMobj
+%PLOT Plot instance of STREAMobj
 %
 % Syntax
 %
@@ -59,11 +59,10 @@ function h = plot(S,varargin)
 %
 % See also: STREAMobj, STREAMobj/plotdz
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 30. January, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. July, 2024
         
-
-% go through varargin to find 'exaggerate'
+% go through varargin to find 'cdc'
 TF = strcmpi('cdc',varargin);
 ix = find(TF);
 if ~isempty(ix)
@@ -113,7 +112,7 @@ if ~isempty(labeldist)
         xy = interp1(d(ix),[x(ix) y(ix)],labeldist,'linear',nan);
         inan = ~isnan(xy(:,1));
         if any(inan)
-            xyd = [xyd;[xy(inan,:) labeldist(inan)]];            
+            xyd = [xyd;[xy(inan,:) labeldist(inan)]];            %#ok<AGROW>
         end
     end
     ih = ishold;

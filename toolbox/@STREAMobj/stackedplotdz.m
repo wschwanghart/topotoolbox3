@@ -44,10 +44,8 @@ function s = stackedplotdz(S,C,varargin)
 %
 % See also: STREAMobj/plotdz
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. January, 2019
-
-
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. January, 2024
 
 nals = cell(1,numel(C));
 [~,~,d,nals{:}] = STREAMobj2XY(S,S.distance,C{:});

@@ -22,8 +22,12 @@ function tf = istrunk(S)
 %
 % See also: STREAMobj/streampoi
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 21. February, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. July, 2024
+
+arguments
+    S   STREAMobj
+end
 
 tf = numel(streampoi(S,'channelhead','ix')) == ...
      numel(streampoi(S,'outlets','ix'));

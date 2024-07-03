@@ -1,6 +1,6 @@
-function d = netdist(S,a,varargin)
+function d = netdist(S,a,options)
 
-%NETDIST distance transform on a stream network
+%NETDIST Distance transform on a stream network
 %
 % Syntax
 %
@@ -66,19 +66,20 @@ function d = netdist(S,a,varargin)
 % Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
 % Date: 31. March, 2022
 
-% Check input arguments
-p = inputParser;
-p.FunctionName = 'STREAMobj/netdist';
-addParameter(p,'split',false,@(x) isscalar(x));
-addParameter(p,'dir','both');
-addParameter(p,'distance',S.distance);
-parse(p,varargin{:});
+arguments
+    S  STREAMobj
+    a  
+    options.split (1,1) = false
+    options.dir  {mustBeTextScalar} = 'both'
+    options.distance = S.distance
+end
+
 
 % validate direction
-direction = validatestring(p.Results.dir,{'both','up','down'});
+direction = validatestring(options.dir,{'both','up','down'});
 
 % distance
-dist      = p.Results.distance;
+dist      = options.distance;
 
 % handle input
 if isa(a,'GRIDobj')
@@ -92,7 +93,7 @@ elseif isnal(S,a)
 end
 
 % run in parallel
-if ~p.Results.split
+if ~options.split
     % computations are done in netdistsub
     d = netdistsub(S,a,direction,dist);
 else

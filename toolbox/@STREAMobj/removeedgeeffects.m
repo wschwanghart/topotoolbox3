@@ -1,6 +1,6 @@
 function S = removeedgeeffects(S,FD,DEM)
 
-%REMOVEEDGEEFFECTS remove potential edge effects
+%REMOVEEDGEEFFECTS Remove potential edge effects due to incomplete basins
 %
 % Syntax
 %
@@ -47,7 +47,7 @@ function S = removeedgeeffects(S,FD,DEM)
 
 narginchk(2,3)
 
-if nargin == 2;
+if nargin == 2
     I  = GRIDobj(FD,'logical');
     I.Z(:,:) = true;
     I.Z(2:end-1,2:end-1) = false;

@@ -103,6 +103,7 @@ function [CS,locS,order] = STREAMobj2cell(S,ref,n)
 % Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
 % Date: 11. March, 2022
 
+
 if nargin == 1
     ref = 'outlets';
     getall = true;

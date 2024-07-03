@@ -1,6 +1,6 @@
-function theta = orientation(S,varargin)
+function theta = orientation(S,options)
 
-%ORIENTATION stream orientation
+%ORIENTATION Stream orientation
 %
 % Syntax
 %
@@ -42,18 +42,16 @@ function theta = orientation(S,varargin)
 %
 % See also: STREAMobj, SWATHobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 3. July, 2024
 
+arguments
+    S   STREAMobj
+    options.K   (1,1) {mustBeNonnegative,mustBeNumeric} = 100
+    options.unit {mustBeTextScalar} = 'deg'
+end
 
-% Input checking and parsing
-p = inputParser;
-p.FunctionName = 'STREAMobj/orientation';
-addParameter(p,'K',100,@(x) isscalar(x));
-addParameter(p,'unit','deg');
-parse(p,varargin{:});
-
-unit = validatestring(p.Results.unit,{'radians','degrees','cart','relative'},...
+unit = validatestring(options.unit,{'radians','degrees','cart','relative'},...
     'STREAMobj/orientation');
 
 switch unit
@@ -76,12 +74,12 @@ switch unit
         theta = zeros(size(S.x));
         theta(IX(:,1)) = -d;
         
-        theta = smooth(S,theta,'K',p.Results.K);
+        theta = smooth(S,theta,'K',options.K);
         
     otherwise
         
-        y = smooth(S,S.y,'K',p.Results.K);
-        x = smooth(S,S.x,'K',p.Results.K);
+        y = smooth(S,S.y,'K',options.K);
+        x = smooth(S,S.x,'K',options.K);
         
         dx = -gradient(S,x);
         dy = -gradient(S,y);

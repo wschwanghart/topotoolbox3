@@ -1,4 +1,4 @@
-function [label,varargout] = labelreach(S,varargin)
+function [label,varargout] = labelreach(S,options)
 
 %LABELREACH create node-attribute list with labelled reaches
 %
@@ -42,18 +42,18 @@ function [label,varargout] = labelreach(S,varargin)
 %
 % See also: STREAMobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 2. July, 2024
 
-p = inputParser;
-p.FunctionName = 'STREAMobj/labelreach';
-addParamValue(p,'seglength',inf,@(x) isscalar(x) && x>0);
-addParamValue(p,'shuffle',false,@(x) isscalar(x));
-addParamValue(p,'exact',false,@(x) isscalar(x));
-parse(p,varargin{:});
+arguments
+    S   STREAMobj
+    options.seglength (1,1) {mustBeNumeric,mustBePositive} = inf
+    options.shuffle (1,1) = false
+    options.exact (1,1) = false,
+end
 
 
-if ~p.Results.exact
+if ~options.exact
     % The first approach will label all nodes in the stream network.
     % It will split reaches according to segment length but also at
     % confluences. This will result in segment lengths that are not exactly
@@ -76,8 +76,8 @@ if ~p.Results.exact
     label(iszero) = (1:nnz(iszero))+maxlabel;
     
     
-    if ~isinf(p.Results.seglength)
-        maxdist   = p.Results.seglength;
+    if ~isinf(options.seglength)
+        maxdist   = options.seglength;
         cs        = S.cellsize;
         dist      = S.distance;
         label2    = accumarray(label,(1:numel(S.x))',[max(label) 1],@(x) {split(x)});
@@ -102,7 +102,7 @@ else
     
     for iter = 1:numel(CS)
         d = CS{iter}.distance;
-        d = mod(d,p.Results.seglength);
+        d = mod(d,options.seglength);
         I = double(gradient(CS{iter},d) < 0);
         I(streampoi(CS{iter},'outlet','logical')) = 1;
         
@@ -124,10 +124,8 @@ else
     
 end
     
-
-
 %% Shuffle labels
-if p.Results.shuffle
+if options.shuffle
     [uniqueL,~,ix] = unique(label);
     uniqueLS = randperm(numel(uniqueL));
     label = uniqueLS(ix);

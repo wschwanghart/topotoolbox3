@@ -9,15 +9,14 @@ function DEM = readopentopo(options)
 % Description
 %
 %     readopentopo reads DEMs from opentopography.org using the API
-%     described on:
-%     http://www.opentopography.org/developers
+%     described here: http://www.opentopography.org/developers
 %     Most of the DEMs come in geographic coordinates (WGS84) and should be
 %     projected to a projected coordinate system (use reproject2utm or 
-%     project) before analysis in TopoToolbox.     
+%     project) before further analysis in TopoToolbox.     
 %
 %     NOTE: Starting on January 1st, 2022, an API authorization key will be 
 %     required for this API. Users can request an API key via myOpenTopo in 
-%     the OpenTopography portal (https://opentopography.org/developers).
+%     the OpenTopography portal (https://opentopography.org/).
 %     See also the description below to learn how to make your API key
 %     permanently available to readopentopo.
 %

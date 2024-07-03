@@ -1,6 +1,6 @@
 function mc = mchi(S,DEM,chi)
 
-%MCHI gradient of stream profile in chi space (M_chi)
+%MCHI Gradient of stream profile in chi space (M_chi = Ksn)
 %
 % Syntax
 %
@@ -44,20 +44,17 @@ function mc = mchi(S,DEM,chi)
 %
 % See also: STREAMobj/gradient, STREAMobj/chitransform, STREAMobj/ksn
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 2. July, 2024
 
-narginchk(3,3)
+arguments
+    S  STREAMobj
+    DEM {mustBeGRIDobjOrNal(DEM,S)}
+    chi {mustBeNumeric}
+end
 
 % get node attribute list with elevation values
-if isa(DEM,'GRIDobj')
-    validatealignment(S,DEM);
-    z = getnal(S,DEM);
-elseif isnal(S,DEM)
-    z = DEM;
-else
-    error('Imcompatible format of second input argument')
-end
+z = ezgetnal(S,DEM);
 
 mc = zeros(size(z));
 mc(S.ix) = (z(S.ix)-z(S.ixc))./(chi(S.ix)-chi(S.ixc));

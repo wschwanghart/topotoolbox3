@@ -33,11 +33,11 @@ function S = removeshortstreams(S,d)
 %     plot(S2)     
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 17. August, 2017
+% Date: 3. July, 2024
 
 arguments
     S   STREAMobj
-    d   {mustBePositive}
+    d   (1,1) {mustBePositive}
 end
 
 % calculate streamorder

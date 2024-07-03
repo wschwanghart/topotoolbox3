@@ -1,4 +1,4 @@
-function [mn,results] = mnoptim(S,DEM,A,varargin)
+function [mn,results] = mnoptim(S,DEM,A,options)
 
 %MNOPTIM Bayesian optimization of the mn ratio
 %
@@ -71,28 +71,27 @@ function [mn,results] = mnoptim(S,DEM,A,varargin)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 17. June, 2024
 
-p = inputParser;         
-p.FunctionName = 'STREAMobj/mnoptim';
-addRequired(p,'S',@(x) isa(x,'STREAMobj'));
-addRequired(p,'DEM',@(x)  isa(x,'GRIDobj') || isnal(S,x));
-addRequired(p,'A', @(x) isa(x,'GRIDobj') || isnal(S,x));
+arguments
+    S     STREAMobj
+    DEM {mustBeGRIDobjOrNal(DEM,S)}
+    A   {mustBeGRIDobjOrNal(A,S)}
+    options.mnrange (1,2) {mustBeNumeric,mustBePositive} = [.1 1]
+    options.optvar {mustBeTextScalar} = 'mn'
+    options.n (1,1) {mustBeNumeric,mustBePositive} = 1
+    options.m (1,1) {mustBeNumeric,mustBePositive} = 0.5
+    options.nrange (1,2) {mustBeNumeric,mustBePositive} = [0.8 1.5]
+    options.mrange (1,2) {mustBeNumeric,mustBePositive} = [0.3 1.2]
+    options.a0 (1,1) {mustBeNumeric,mustBePositive} = 1
+    options.lossfun = 'rmse'
+    options.plot  (1,1) = false
+    options.crossval (1,1) = true
+    options.verbose (1,1) = 0
+    options.UseParallel (1,1) = true
+    options.MaxObjectiveEvaluations (1,1) {mustBeInteger,mustBePositive} = 30
+end
 
-addParameter(p,'mnrange',[.1 1],@(x) numel(x)==2);
-addParameter(p,'optvar','mn');
-addParameter(p,'n',1);
-addParameter(p,'m',0.5);
-addParameter(p,'nrange',[0.8 1.5]);
-addParameter(p,'mrange',[0.3 1]);
-addParameter(p,'a0',1e6,@(x) isscalar(x) && isnumeric(x));
-addParameter(p,'lossfun','rmse',@(x) ischar(x) || isa(x,'function_handle'));
-addParameter(p,'plot',false);
-addParameter(p,'crossval',true);
-addParameter(p,'verbose',0);
-addParameter(p,'UseParallel',true);
-addParameter(p,'MaxObjectiveEvaluations',30);
 
-parse(p,S,DEM,A,varargin{:});
-a0 = p.Results.a0;
+a0 = options.a0;
 
 % get node attribute list with elevation values
 z = ezgetnal(S,DEM);
@@ -111,7 +110,7 @@ z = z-zbase;
 
 %% -----------------------------------------------------------------------
 
-if p.Results.crossval
+if options.crossval
     [~,locb] = STREAMobj2cell(S);
     cv = true;
     % Number of connected components
@@ -127,8 +126,8 @@ else
 end
 
 % get lossfunction
-if ischar(p.Results.lossfun)
-    switch p.Results.lossfun
+if ischar(options.lossfun)
+    switch options.lossfun
         case 'rmse'
             lossfun = @(x,xhat)mean(sum((x-xhat).^2));
         case 'linear'
@@ -145,34 +144,34 @@ if ischar(p.Results.lossfun)
             error('unknown loss function')
     end
 else
-    lossfun = p.Results.lossfun;
+    lossfun = options.lossfun;
 end
 
 % Bayes
-optvar = p.Results.optvar;
+optvar = options.optvar;
 isdeterm = ~cv;
 pp   = gcp('nocreate');
 opts = {'IsObjectiveDeterministic', isdeterm, ...
-        'Verbose', p.Results.verbose,...
-        'UseParallel',~(isempty(pp) & ~p.Results.UseParallel),...
-        'MaxObjectiveEvaluations',p.Results.MaxObjectiveEvaluations,...
+        'Verbose', options.verbose,...
+        'UseParallel',~(isempty(pp) & ~options.UseParallel),...
+        'MaxObjectiveEvaluations',options.MaxObjectiveEvaluations,...
         };
         
 switch optvar
     case 'mn'
-        mn      = optimizableVariable('mn',p.Results.mnrange);    
+        mn      = optimizableVariable('mn',options.mnrange);    
         results = bayesopt(@(x) fun(x),mn,opts{:});
     case 'm'
-        m       = optimizableVariable('m',p.Results.mrange);
-        n       = p.Results.n;
+        m       = optimizableVariable('m',options.mrange);
+        n       = options.n;
         results = bayesopt(@(x) fun(x),m,opts{:});    
     case 'n'
-        n       = optimizableVariable('n',p.Results.nrange);
-        m       = p.Results.m;
+        n       = optimizableVariable('n',options.nrange);
+        m       = options.m;
         results = bayesopt(@(x) fun(x),n,opts{:});
     case 'm&n'
-        m       = optimizableVariable('m',p.Results.mrange);
-        n       = optimizableVariable('n',p.Results.nrange);
+        m       = optimizableVariable('m',options.mrange);
+        n       = optimizableVariable('n',options.nrange);
         results = bayesopt(@(x) fun(x),[m n],opts{:});
                
 end

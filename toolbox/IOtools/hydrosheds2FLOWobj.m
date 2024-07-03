@@ -37,7 +37,7 @@ end
 
 
 nr   = prod(FDIR.size);
-refm = FDIR.refmat;
+wf = FDIR.wf;
 siz  = FDIR.size;
 INAN = ~isnan(FDIR);
 
@@ -63,5 +63,5 @@ clear GC IX I
 
 M = sparse(ix,ixc,true,nr,nr);
 clear ix ixc    
-FD = FLOWobj(M,'refmat',refm,'size',siz,'algorithm','toposort','cellsize',refm(2));
+FD = FLOWobj(M,'wf',wf,'size',siz,'algorithm','toposort','cellsize',wf2cellsize(wf));
 

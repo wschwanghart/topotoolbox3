@@ -90,13 +90,13 @@ function [zs,exitflag,output] = crs(S,DEM,options)
 arguments
     S   STREAMobj
     DEM {mustBeGRIDobjOrNal(DEM,S)}
-    options.K  {mustBeNumeric,mustBePositive} = 2;
-    options.tau {mustBeInRange(options.tau,0,1,"exclusive")} = 0.5
-    options.nonstifftribs = true
-    options.mingradient   = 0
+    options.K  (1,1) {mustBeNumeric,mustBePositive} = 2;
+    options.tau (1,1)  {mustBeInRange(options.tau,0,1,"exclusive")} = 0.5
+    options.nonstifftribs (1,1) = true
+    options.mingradient   (1,1) = 0
     options.knickpoints   = []
-    options.fixedoutlet   = false
-    options.split         = 2
+    options.fixedoutlet   (1,1) = false
+    options.split         (1,1) = 2
 end
 
 

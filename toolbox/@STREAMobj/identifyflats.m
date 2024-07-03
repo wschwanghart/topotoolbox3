@@ -34,25 +34,19 @@ function [fs,s] = identifyflats(S,DEM)
 %     flat = identifyflats(S,DEM);
 %     plotdz(S,DEM,'color',+flat)
 %
+% See also: STREAMobj/gradient
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 4. March, 2016
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 2. July, 2024
 
-
-if isa(DEM,'GRIDobj')
-    validatealignment(S,DEM);
-    z = getnal(S,DEM);
-elseif isnal(S,DEM);
-    z = DEM;
-else
-    error('Imcompatible format of second input argument')
-end
+% Nal with elevation values
+z = ezgetnal(S,DEM);
 
 fs = false(size(S.IXgrid));
 s  = zeros(size(S.IXgrid));
 
-for r=1:numel(S.ix);
-    if z(S.ixc(r)) == z(S.ix(r));
+for r=1:numel(S.ix)
+    if z(S.ixc(r)) == z(S.ix(r))
 %         fs(S.ix(r)) = true;
         fs(S.ixc(r)) = true;
     elseif fs(S.ix(r)) && z(S.ixc(r))< z(S.ix(r))

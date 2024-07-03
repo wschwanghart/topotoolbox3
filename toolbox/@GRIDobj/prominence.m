@@ -1,4 +1,4 @@
-function [x,y,p] = prominence(DEM,tol,minelev)
+function [x,y,p] = prominence(DEM,tol)
 
 %PROMINENCE Calculate the prominence of mountain peaks
 %
@@ -48,17 +48,16 @@ function [x,y,p] = prominence(DEM,tol,minelev)
 %
 % See also: GRIDobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 29. June, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 25. June, 2024
 
-narginchk(2,3)
+arguments
+    DEM   GRIDobj
+    tol   {mustBePositive}
+end
 
 if any(isnan(DEM))
     DEM.Z(isnan(DEM.Z)) = 0;
-end
-
-if nargin < 3
-    minelev = -inf;
 end
 
 P = GRIDobj(DEM)+min(DEM);
@@ -73,7 +72,7 @@ f = waitbar(0,'1','Name','Calculating prominence...',...
 
 setappdata(f,'canceling',0);
 
-elev = inf;
+% elev = inf;
 
 while p(end) > tol 
      
@@ -84,7 +83,7 @@ while p(end) > tol
     P.Z(ix) = DEM.Z(ix);
     P.Z = imreconstruct(P.Z,DEM.Z);
     counter = counter + 1;
-    elev = DEM.Z(ix);
+    % elev = DEM.Z(ix);
     
     % Check for clicked Cancel button
     if getappdata(f,'canceling')

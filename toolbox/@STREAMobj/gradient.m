@@ -1,4 +1,4 @@
-function s = gradient(S,DEM,varargin)
+function s = gradient(S,DEM,options)
 
 %GRADIENT Along-stream gradient
 %
@@ -50,42 +50,42 @@ function s = gradient(S,DEM,varargin)
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     FD = FLOWobj(DEM,'preprocess','c');
-%     S  = STREAMobj(FD,A>1000);
+%     S  = STREAMobj(FD,'minarea',1000);
 %     S  = klargestconncomps(trunk(S));
 %     g  = gradient(S,DEM,'method','robust');
 %     subplot(2,1,1); plotdz(S,DEM);
 %     subplot(2,1,2); plotdz(S,g); ylabel('Gradient [-]')
 %
+% See also: STREAMobj/diff, STREAMobj/cumtrapz, STREAMobj/chitransform
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 3. May, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 2. July, 2024
 
-narginchk(2,inf)
-
-% Parse Inputs
-p = inputParser;         
-p.FunctionName = 'gradient';
+arguments
+    S    STREAMobj
+    DEM  {mustBeGRIDobjOrNal(DEM,S)}
+    options.unit {mustBeTextScalar} = 'tangent'
+    options.method {mustBeTextScalar} = 'forward'
+    options.imposemin (1,1) = false
+    options.drop (1,1) {mustBeNumeric,mustBePositive} = 10
+end
 
 validunits = {'tangent' 'degree' 'radian' 'percent' 'sine'};
 validmethods = {'forward' 'centered' 'robust'};
-
-addParameter(p,'unit','tangent',@(x) ischar(validatestring(x,validunits)));
-addParameter(p,'method','forward',@(x) ischar(validatestring(x,validmethods)));
-addParameter(p,'drop',10,@(x) isscalar(x) && x>0);
-addParameter(p,'imposemin',false,@(x) isscalar(x));
-
-parse(p,varargin{:});
 
 % get node attribute list with elevation values
 z = ezgetnal(S,DEM);
 
 % if imposemin
-z = imposemin(S,z);
+if options.imposemin
+    z = imposemin(S,z);
+end
 
 % Inter-node distances
 d = hypot(S.x(S.ix)-S.x(S.ixc),S.y(S.ix)-S.y(S.ixc));
 
-switch validatestring(p.Results.method,validmethods)
+
+switch validatestring(options.method,validmethods)
     case 'forward'
         s       = zeros(size(S.x));
         s(S.ix) = (z(S.ix)-z(S.ixc))./d;
@@ -99,7 +99,7 @@ switch validatestring(p.Results.method,validmethods)
         
         % preallocate slope
         s = nan(size(S.x));
-        drop = p.Results.drop;
+        drop = options.drop;
         
         for r = 1:numel(S.ix)
             
@@ -126,16 +126,9 @@ switch validatestring(p.Results.method,validmethods)
             end
         end
 end
-                
-                
-                
-                
-            
-            
+        
 
-
-
-switch validatestring(p.Results.unit,validunits);
+switch validatestring(options.unit,validunits)
     case 'tangent'
         % do nothing
     case 'degree'

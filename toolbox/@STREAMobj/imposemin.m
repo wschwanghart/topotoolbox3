@@ -60,7 +60,7 @@ function DEM = imposemin(S,DEM,sl)
 arguments
     S    STREAMobj
     DEM  {mustBeGRIDobjOrNal(DEM,S)}
-    sl   = 0
+    sl   (1,1) {mustBeNumeric} = 0
 end
 
 z = ezgetnal(S,DEM);
@@ -70,11 +70,11 @@ else
     inp = 'nal';
 end
      
-if nargin == 2 || sl == 0
+if sl == 0
     for r = 1:numel(S.ix)
         z(S.ixc(r)) = min(z(S.ix(r)),z(S.ixc(r)));
     end    
-elseif nargin == 3
+else
     
     d = sqrt((S.x(S.ix)-S.x(S.ixc)).^2 + (S.y(S.ix)-S.y(S.ixc)).^2); 
     d = d*sl;
