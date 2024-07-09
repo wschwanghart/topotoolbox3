@@ -37,8 +37,23 @@ function S = removeshortstreams(S,d)
 
 arguments
     S   STREAMobj
-    d   (1,1) {mustBePositive}
+    d   (1,1) {mustBePositive} = sqrt(S.cellsize^2*2)+S.cellsize*0.1
 end
+
+mind = sqrt(2*(S.cellsize^2))+S.cellsize*0.1;
+validateattributes(d,{'numeric'},{'scalar','>=',mind},'removeshortstreams','d',2);
+
+% First, remove some small dangling one-pixel long streams
+Ichan = streampoi(S,'chan','logical');
+Iconf = streampoi(S,'conf','logical');
+
+% Identify those channelheads which are immediately upstream of a
+% confluence
+I = Ichan(S.ix) & Iconf(S.ixc);
+I2 = getnal(S)==0;
+I2(S.ix(I)) = false;
+
+S = subgraph(S,I2);
 
 % calculate streamorder
 s = streamorder(S);

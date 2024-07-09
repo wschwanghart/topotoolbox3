@@ -55,8 +55,8 @@ function [P,locb] = aggregate(P,c,varargin)
 %
 % See also: PPS, PPS/cluster, PPS/convhull
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 29. June, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 5. July, 2024
 
 
 p = inputParser;

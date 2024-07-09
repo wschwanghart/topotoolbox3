@@ -1,6 +1,6 @@
-function [hl,hp] = wmplot(P,varargin)
+function [hl,hp] = wmplot(P,options)
 
-%WMPLOT plot instance of PPS in webmap browswer
+%WMPLOT Plot instance of PPS in webmap browswer
 %
 % Syntax
 %
@@ -31,22 +31,21 @@ function [hl,hp] = wmplot(P,varargin)
 %
 % See also: STREAMobj, STREAMobj/wmplot, PPS/points
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 21. May, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 5. July, 2024
 
-% Check input arguments
-p = inputParser;
-p.FunctionName = 'PPS/wmplot';
-addParameter(p,'linecolor',[]);
-addParameter(p,'pointcolor',[]);
-addParameter(p,'color','k')
-addParameter(p,'linewidth',1);
-addParameter(p,'baseLayer','World Imagery')
-addParameter(p,'add',true)
-% Parse
-parse(p,varargin{:});
+arguments
+    P  PPS
+    options.color = 'k'
+    options.linecolor = []
+    options.pointcolor = []
+    options.linewidth (1,1) {mustBePositive} = 1
+    options.baseLayer = 'World Imagery'
+    options.add = true
+end
 
-p = p.Results;
+
+p = options;
 if isempty(p.linecolor)
     p.linecolor = p.color;
 end

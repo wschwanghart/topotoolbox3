@@ -72,7 +72,7 @@ function br = sidebranching(S,outputformat)
 
 
 % check input arguments
-if nargin==1;
+if nargin==1
     outputformat = 'nalstr';
 else
     outputformat = validatestring(outputformat,{'nalstr' 'nalnum' 'mapstruct'});

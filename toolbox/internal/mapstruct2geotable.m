@@ -67,7 +67,7 @@ if any(IGeometry)
             GeometryType = 'line';
         otherwise
             GeometryType = validatestring(GeometryType,...
-                {'point','line','polyline'});
+                {'point','line','polygon'});
     end
 else
     error('TopoToolbox:input','MS must have a geometry field.')

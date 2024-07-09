@@ -1,6 +1,6 @@
-function [nearestnode,d] = voronoi(P,varargin)
+function [nearestnode,d] = voronoi(P,options)
 
-%VORONOI nearest neighbor search on a stream network
+%VORONOI Nearest neighbor search on a stream network
 %
 % Syntax
 %
@@ -18,8 +18,6 @@ function [nearestnode,d] = voronoi(P,varargin)
 %
 %     Parameter name/value pairs
 %
-%     'd3d'         calculate distances in 3d. Requires that P has a 
-%                   z-property
 %     'distance'    define custom node-attribute list with distance values
 %     'shuffle'     shuffle labels randomly. {false} or true. If shuffled,
 %                   there is no association to the points in P anymore.
@@ -46,20 +44,14 @@ function [nearestnode,d] = voronoi(P,varargin)
 % 
 % See also: PPS, PPS/npoints 
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. February, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 5. July, 2024
 
-
-
-% Check input arguments
-p = inputParser;
-p.FunctionName = 'PPS/voronoi';
-addParameter(p,'distance',[]);
-addParameter(p,'d3d',false);
-addParameter(p,'shuffle',false);
-% Parse
-parse(p,varargin{:});
-
+arguments
+    P   PPS
+    options.distance = P.S.distance
+    options.shuffle (1,1) = false
+end
 
 ix  = P.S.ix;
 ixc = P.S.ixc;
@@ -68,7 +60,7 @@ nodes = zeros(size(P.S.x));
 nodes(P.PP) = 1:npoints(P);
 
 % get inter-node distances
-dedge = nodedistance(P,'d3d',p.Results.d3d,'val',p.Results.distance);
+dedge = nodedistance(P,'val',options.distance);
     
 nearestnode = nodes;
 d           = inf(size(P.S.x));
@@ -105,7 +97,7 @@ for r = numel(ix):-1:1
         
 end        
 
-if p.Results.shuffle
+if options.shuffle
     [uniqueL,~,ix] = unique(nearestnode);
     uniqueLS = randperm(numel(uniqueL));
     nearestnode = uniqueLS(ix);
