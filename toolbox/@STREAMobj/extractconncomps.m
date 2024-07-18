@@ -25,9 +25,12 @@ function extractconncomps(S)
 %
 % See also: STREAMobj/klargestconncomps
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017 
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. July, 2024 
 
+arguments 
+    S    STREAMobj
+end
 
 CS = STREAMobj2cell(S);
 fx = figure;

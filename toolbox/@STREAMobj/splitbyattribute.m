@@ -31,7 +31,7 @@ function [CS,zagg,edges] = splitbyattribute(S,z,n)
 %     edges  bin edges (zagg is calculated by
 %            (edges(1:end-1)+edges(2:end))/2
 %     
-% Example
+% Example 1
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     FD  = FLOWobj(DEM);

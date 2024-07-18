@@ -57,14 +57,10 @@ arguments
     A   {mustBeGRIDobjOrNalOrEmpty(A,S)} = []
 end
 
-narginchk(1,2);
-
-
 if nargin == 2
     a = ezgetnal(S,A);
 end
-
-        
+   
 if nargout > 1
     % make copy
     Scopy = S;

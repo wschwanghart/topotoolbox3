@@ -89,27 +89,27 @@ function h = plotdz(S,DEM,varargin)
 %
 % Example 2 (colored plot)
 %     
-%     z = imposemin(S,DEM);
-%     g = gradient(S,z);
-%     plotdz(S,DEM,'color',g)
+%     A  = flowacc(FD);
+%     c  = chitransform(S,A);
+%     plotdz(S,DEM,'color',c,'cbarlabel','\chi [m]')
+%
+% Example 3 (adjust distance to be \chi)
+%
+%     plotdz(S,DEM,'distance',c)
+%     xlabel('\chi [m]')
 %
 % See also: STREAMobj, STREAMobj/plot, STREAMobj/smooth, PPS/plotdz
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 14. June, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 18. July, 2024
 
 nrnodes = numel(S.x);
 ax      = gca;
 
-if verLessThan('matlab','8.4')
-    % For MATLAB versions before 2014b
-    clr = 'b';
-else
-    % For MATLAB versions with the new graphics engine
-    colororderindex = mod(ax.ColorOrderIndex, size(ax.ColorOrder,1));
-    if colororderindex==0; colororderindex=size(ax.ColorOrder,1); end
-    clr = ax.ColorOrder(colororderindex,:);
-end
+% For MATLAB versions with the new graphics engine
+colororderindex = mod(ax.ColorOrderIndex, size(ax.ColorOrder,1));
+if colororderindex==0; colororderindex=size(ax.ColorOrder,1); end
+clr = ax.ColorOrder(colororderindex,:);
 
 % check input
 p = inputParser;         
@@ -137,6 +137,7 @@ addParameter(p,'EdgeAlpha',1);
 addParameter(p,'BaseValue',[]);
 
 parse(p,S,DEM,varargin{:});
+
 S   = p.Results.S;
 DEM = p.Results.DEM;
 type = validatestring(p.Results.type,{'plot','area','stairs','stairsarea'});
@@ -243,7 +244,7 @@ else
             
             if p.Results.colorbar
                 cc = colorbar(ax);
-                caxis([minc maxc]);
+                clim([minc maxc]);
             end
             
             
