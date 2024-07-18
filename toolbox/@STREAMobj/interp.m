@@ -1,6 +1,6 @@
 function zi = interp(S,d,z,varargin)
 
-%INTERP interpolate data on STREAMobj (single river only)
+%INTERP Interpolate data on STREAMobj (single river only)
 %
 % Syntax
 %

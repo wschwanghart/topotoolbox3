@@ -1,11 +1,12 @@
-function [S] = projectshape(S,GRID,varargin)
+function GT = projectshape(GT,TARGET,projsource)
 
-% PROJECTSHAPE changes the projection of a geographic data structure
+% PROJECTSHAPE Changes the projection of a geographic data structure
 %
 % Syntax
 %
-%     MS2 = projectshape(MS,GRID)
-%     MS2 = projectshape(MS,GRID,mstruct)
+%     GT2 = projectshape(MS,TARGET)
+%     GT2 = projectshape
+%     GT2 = projectshape(GT,TARGET,mstruct)
 %
 % Description
 %     
@@ -19,68 +20,111 @@ function [S] = projectshape(S,GRID,varargin)
 %     using shaperead) before converting to the x,y units of the GRIDobj 
 %     GRID.
 % 
-%     Note that projectshape requires the Mapping Toolbox
+%     Note that projectshape requires the Mapping Toolbox.
 %
 % Input arguments
 %
-%     MS      geographic data structure
+%     MS      geographic data structure or geotable
 %     GRID    GRIDobj, e.g., a DEM
 %     mstruct map projection structure
 %     
 % Output arguments
 %
-%     MS2     geographic data structure
+%     MS2     geographic data structure or geotable
 %
 %
-% Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
-% Date: 18. September, 2017
+% Author: Dirk Scherler (scherler[at]gfz-potsdam.de) and
+%         Wolfgang Schwanghart (schwangh@uni-potsdam.de)
+% Date: 16. June, 2024
 
-[r,c] = size(S(1).X);
-if r>c
-    X = vertcat(S.X);
-    Y = vertcat(S.Y);
+arguments
+    GT
+    TARGET
+    projsource = 4326
+end
+
+if isstruct(GT)
+    GT = mapstruct2geotable(GT,'CoordinateReferenceSystem',projsource);
+end
+
+% Check input geometry type
+geomType = GT.Shape.Geometry;
+
+% Get source CRS
+[CRSsource,issourceproj] = parseCRS(GT);
+% Get target CRS
+[CRStarget,istargetproj] = parseCRS(TARGET);
+
+% Are both equal?
+if isequal(CRSsource,CRStarget)
+    return
+end
+
+% Convert geotable to table
+if ~issourceproj
+    T = geotable2table(GT, ["Latitude" "Longitude"]);
+    if iscell(T.Latitude) % Input is polygon or line
+        latc = T.Latitude;
+        lonc = T.Longitude;
+        ispoint = false;
+    else % Input is point
+        latc = num2cell(T.Latitude);
+        lonc = num2cell(T.Longitude);
+        ispoint = true;
+    end
 else
-    X = horzcat(S.X);
-    Y = horzcat(S.Y);
-end
-
-if min(X)<-180 || max(X)>180 || min(Y)<-90 || max(Y)>90
-    
-    % Shapefile comes with projected coordinates
-    if nargin==3
-        mstruct = varargin{1};
-        if strcmp(mstruct.mapprojection,'utm')
-            % Convert coordinates to lat,lon
-            for i = 1 : length(S)
-                x = S(i).X;
-                y = S(i).Y;
-                [lat,lon] = minvtran(mstruct,x,y);
-                S(i).X = lon;
-                S(i).Y = lat;
-            end
-        else
-            error('Geographic data structure comes with unknown map projection')
-        end
-    else
-        error('No map projection structure found. Conversion of coordinates to lat,lon failed.')
+    T = geotable2table(GT, ["x" "y"]);
+    if iscell(T.x) % Input is polygon or line
+        xc = T.x;
+        yc = T.y;
+        ispoint = false;
+    else % Input is point
+        xc = num2cell(T.x);
+        yc = num2cell(T.y);
+        ispoint = true;
     end
-    
 end
 
+% Now, all coordinates are available as cell arrays
 
-
-try
-    
-    % GRIDobj is projected
-    p = projcrs(GRID.georef.GeoKeyDirectoryTag.ProjectedCSTypeGeoKey);
-    for i = 1 : length(S)
-        lon = S(i).X;
-        lat = S(i).Y;
-        %[x,y] = mfwdtran(GRID.georef.mstruct,lat,lon);
-        [x,y] = projfwd(p,lat,lon);
-        S(i).X = x;
-        S(i).Y = y;
-    end
-    
+if istargetproj && issourceproj
+    [latc,lonc] = cellfun(@(x,y) projinv(CRSsource,x,y),xc,yc,...
+        "UniformOutput",false);
+    [xc,yc] = cellfun(@(lat,lon) projfwd(CRStarget,lat,lon),latc,lonc,...
+        "UniformOutput",false);
+elseif istargetproj && ~issourceproj
+    [xc,yc] = cellfun(@(lat,lon) projfwd(CRStarget,lat,lon),latc,lonc,...
+        "UniformOutput",false);
+elseif issourceproj && ~istargetproj
+    [latc,lonc] = cellfun(@(x,y) projinv(CRSsource,x,y),xc,yc,...
+        "UniformOutput",false);
+else
+    error("Geocrs to geocrs is not supported.")
 end
 
+% Now create a new geotable
+% If input geometry is point, then create numeric vectors
+if ispoint && ~istargetproj
+    latc = vertcat(latc{:});
+    lonc = vertcat(lonc{:});
+elseif ispoint && istargetproj
+    xc = vertcat(xc{:});
+    yc = vertcat(yc{:});
+end
+    
+if ~istargetproj
+    T.Latitude = latc;
+    T.Longitude = lonc;
+
+    T = table2geotable(T,'geographic',["Latitude" "Longitude"],...
+        'CoordinateReferenceSystem',CRStarget,'GeometryType',geomType);
+    
+else
+    T.x = xc;
+    T.y = yc;
+
+    T = table2geotable(T,'planar',["x" "y"],...
+        'CoordinateReferenceSystem',CRStarget,'GeometryType',geomType);
+end
+
+GT.Shape = T.Shape;

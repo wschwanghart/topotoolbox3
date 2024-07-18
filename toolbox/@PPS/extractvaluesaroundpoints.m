@@ -1,4 +1,4 @@
-function [v,nIX,CP] = extractvaluesaroundpoints(P,z,varargin)
+function [v,nIX,CP] = extractvaluesaroundpoints(P,z,options)
 
 %EXTRACTVALUESAROUNDPOINTS Extract values around points 
 %
@@ -51,7 +51,7 @@ function [v,nIX,CP] = extractvaluesaroundpoints(P,z,varargin)
 %     CP      cell array of PPS objects, one for each point, with the river
 %             network extracted. 
 %    
-% Example: Extract ksn values upstream and downstream of knickpoints
+% Example 1: Extract ksn values upstream and downstream of knickpoints
 %
 %     DEM  = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     FD  = FLOWobj(DEM);
@@ -72,37 +72,43 @@ function [v,nIX,CP] = extractvaluesaroundpoints(P,z,varargin)
 %     refline(1,0)
 %     box on
 %
+% Example 2: Extract ksn values, and calculate errorbars based on the mean
+%            standard error
+%
+%     [ksd,ixd] = extractvaluesaroundpoints(P,ks,'direction','down',...
+%         'dfrompoint',200);
+%     [ksu,ixu] = extractvaluesaroundpoints(P,ks,'direction','up',...
+%         'dfrompoint',200);
+%     ksds = cellfun(@(ix) std(getvalue(P.S,ks,'IXgrid',ix))/sqrt(numel(ix)),ixd);
+%     ksus = cellfun(@(ix) std(getvalue(P.S,ks,'IXgrid',ix))/sqrt(numel(ix)),ixu);
+%     errorbar(ksd,ksu,ksus,ksus,ksds,ksds,'.')
+%     xlabel('Ksn downstream')
+%     ylabel('Ksn upstream')
+%     refline(1,0)
+%     box on
+%
 % See also: PPS, PPS/getmarks, nearest
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 20. September, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. July, 2024
 
-p = inputParser;
-p.FunctionName = 'extractvaluesaroundpoints';
-
-addParameter(p,'direction','both',@(x) ischar(validatestring(x,{'both','upstream','downstream','bothundirected'})))
-addParameter(p,'dfrompoint',10*P.S.cellsize)
-addParameter(p,'distance',P.S.distance)
-addParameter(p,'aggfun',@mean)
-
-parse(p,varargin{:})
-
-if isa(z,'GRIDobj')
-    z = double(getnal(P.S,z));
-else
-    if isnal(P.S,z)
-        z = double(z);
-    else
-        error('Cannot handle second input. It must be a GRIDobj or node-attribute list.')
-    end
+arguments
+    P  PPS
+    z  
+    options.direction = 'both'
+    options.dfrompoint = 10*P.S.cellsize
+    options.distance = P.S.distance
+    options.aggfun = @mean
 end
 
+z = ezgetnal(P.S,z);
+
 % get distance
-d = p.Results.distance;
+d = options.distance;
 % and calculate inter-node distances as weights
 w = abs(d(P.S.ix) - d(P.S.ixc));
 
-direction = validatestring(p.Results.direction,{'both','upstream','downstream'});
+direction = validatestring(options.direction,{'both','upstream','downstream'});
 switch direction
     case 'downstream'
         G = digraph(P.S.ix, P.S.ixc,w);
@@ -113,11 +119,11 @@ switch direction
     case 'both'
         % downstream
         G1 = digraph(P.S.ix, P.S.ixc,w);
-        d1 = p.Results.dfrompoint(1);   
+        d1 = options.dfrompoint(1);   
         % upstream
         G2 = digraph(P.S.ixc, P.S.ix, w);
-        if numel(p.Results.dfrompoint) == 2
-            d2 = p.Results.dfrompoint(2);
+        if numel(options.dfrompoint) == 2
+            d2 = options.dfrompoint(2);
         else
             d2 = d1;
         end
@@ -138,21 +144,21 @@ if nargout >= 2
 
 
         otherwise
-            nIX = cellfun(@(s) [nearest(G,s,p.Results.dfrompoint(1));s],pIX,'UniformOutput',false);
+            nIX = cellfun(@(s) [nearest(G,s,options.dfrompoint(1));s],pIX,'UniformOutput',false);
     end
-    v   = cellfun(@(ix) p.Results.aggfun(z(ix)),nIX);
+    v   = cellfun(@(ix) options.aggfun(z(ix)),nIX);
     
 elseif nargout == 1
     switch direction 
         case 'both'
-            v  = cellfun(@(s) p.Results.aggfun(z(...
+            v  = cellfun(@(s) options.aggfun(z(...
                 [nearest(G1,s,d1);...
                 s; ...
                 nearest(G2,s,d2)])),...
                 pIX,'UniformOutput',true);
 
         otherwise
-            v   = cellfun(@(s) p.Results.aggfun(z([nearest(G,s,p.Results.dfrompoint(1));s])),...
+            v   = cellfun(@(s) options.aggfun(z([nearest(G,s,options.dfrompoint(1));s])),...
                 pIX,'UniformOutput',true);
     end
 end

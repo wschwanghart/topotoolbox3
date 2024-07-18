@@ -1,6 +1,6 @@
 function z = fastscape(S,z,a,varargin)
 
-%FASTSCAPE  Simulation of the stream power incision model
+%FASTSCAPE  Simulate river incision using the stream power incision model
 %
 % Syntax
 %
@@ -133,7 +133,7 @@ function z = fastscape(S,z,a,varargin)
 %
 % See also: STREAMobj, gif
 %
-% Authors: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de) and
+% Authors: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de) and
 %          Benjamin Campforts.
 % Date: 12. March, 2024
 

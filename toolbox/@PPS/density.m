@@ -1,6 +1,6 @@
-function [h,bw] = density(P,varargin)
+function [h,bw] = density(P,options)
 
-%DENSITY nonparametric density estimation on network
+%DENSITY Nonparametric density estimation on network
 %
 % Syntax
 %
@@ -69,7 +69,7 @@ function [h,bw] = density(P,varargin)
 %     P = PPS(S,'runif',3,'z',DEM);
 %     d = density(P,'bw',2000);
 %     P = simulate(P,'intensity',d*15);
-%     [d,bw] = density(P,'bw',[],'bwrange',[100 4000]);
+%     [d,bw] = density(P,'bandwidth',[],'bwrange',[100 4000]);
 %     plotc(S,d)
 %     hold on
 %     plotpoints(P)
@@ -83,20 +83,20 @@ function [h,bw] = density(P,varargin)
 %
 % See also: PPS, PPS/npoints, PPS/intensity, PPS/histogram, PPS/rhohat
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 23. September, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. July, 2024
 
-p = inputParser;
-p.FunctionName = 'PPS/density';
-addParameter(p,'bandwidth',20*P.S.cellsize)
-addParameter(p,'nriter',10);
-addParameter(p,'cvsamples',100);
-addParameter(p,'useparallel',true);
-addParameter(p,'bwrange',[P.S.cellsize,P.S.cellsize*100]);
-addParameter(p,'distance',[],@(x) isnal(P.S,x));
-addParameter(p,'weights',ones(size(P.PP)),@(x) (numel(x) == npoints(P)) && all(x>=0));
-addParameter(p,'bc',0);
-parse(p,varargin{:});
+arguments
+    P PPS
+    options.bandwidth {mustBePositive} = 20*P.S.cellsize
+    options.nriter (1,1) {mustBePositive,mustBeInteger} = 10
+    options.cvsamples (1,1) {mustBePositive,mustBeInteger} = 100
+    options.useparallel (1,1) = true
+    options.distance = []
+    options.bwrange (1,2) {mustBePositive} = [P.S.cellsize,P.S.cellsize*100]
+    options.weights {mustBePositive} = ones(size(P.PP))
+    options.bc (1,1) {mustBeMember(options.bc,[0 1 2])} = 0
+end
 
 % If there are no points
 if npoints(P) == 0
@@ -107,24 +107,24 @@ end
 
 S = P.S;
 % Edge distances
-if isempty(p.Results.distance)
+if isempty(options.distance)
     d = sqrt((S.x(S.ix) - S.x(S.ixc)).^2 + (S.y(S.ix) - S.y(S.ixc)).^2);
 else
-    if ~isnal(S,p.Results.distance)
+    if ~isnal(S,options.distance)
         error('Distance is not a node-attribute list.');
     end
-    d = abs(p.Results.distance(S.ix) - p.Results.distance(S.ixc));
+    d = abs(options.distance(S.ix) - options.distance(S.ixc));
 end
 
 % Cross-validation samples
-cvsamples = min(p.Results.cvsamples,npoints(P));
+cvsamples = min(options.cvsamples,npoints(P));
 
 % Boundary conditions
-if p.Results.bc == 0
+if options.bc == 0
     endnodes  = streampoi(S,{'chan','outlet'},'logical');
-elseif p.Results.bc == 1
+elseif options.bc == 1
     endnodes  = streampoi(S,'outlet','logical');
-elseif p.Results.bc == 2
+elseif options.bc == 2
     endnodes  = streampoi(S,'chan','logical');
 else
     error('Wrong value for bc')
@@ -138,22 +138,22 @@ A = A+A';
 % Points with weights
 
 nnodes = numel(P.S.x);
-w      = p.Results.weights./sum(p.Results.weights) .* npoints(P);
+w      = options.weights./sum(options.weights) .* npoints(P);
 h      = accumarray(P.PP,w(:),[nnodes 1],@sum,0);
 
-if ~isempty(p.Results.bandwidth)
-    bw     = p.Results.bandwidth;
+if ~isempty(options.bandwidth)
+    bw     = options.bandwidth;
     t      = bw.^2;
-    nriter = p.Results.nriter;
+    nriter = options.nriter;
     dt     = t/nriter;
     A      = 1/2 * dt * A;
 else
-    vars = optimizableVariable('bw',p.Results.bwrange,'Type','real');
-    t      = bayesopt(@(x) crossvalD(x),vars,'UseParallel',p.Results.useparallel);
+    vars = optimizableVariable('bw',options.bwrange,'Type','real');
+    t      = bayesopt(@(x) crossvalD(x),vars,'UseParallel',options.useparallel);
     bP     = bestPoint(t);
     bw     = bP.bw;
     t      = bw.^2;
-    nriter = p.Results.nriter;
+    nriter = options.nriter;
     dt     = t/nriter;
     A      = 1/2 * dt * A;
     
@@ -175,7 +175,7 @@ function negll = crossvalD(vars)
     bw = vars.bw;
     
     t      = bw.^2;
-    nriter = p.Results.nriter;
+    nriter = options.nriter;
     dt     = t/nriter;
     B      = 1/2 * dt * A;
     

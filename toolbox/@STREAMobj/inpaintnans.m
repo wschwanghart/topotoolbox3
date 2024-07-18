@@ -65,9 +65,9 @@ function z = inpaintnans(S,DEM,varargin)
 if nargin > 3
     p = inputParser;
     p.FunctionName = 'STREAMobj/inpaintnans';
-    addParamValue(p,'extrapolation',true,@(x) isscalar(x));
-    addParamValue(p,'distance',S.distance);
-    addParamValue(p,'maxgapsize',inf,@(x) validateattributes(x,'numeric',{'>',S.cellsize}));
+    addParameter(p,'extrapolation',true,@(x) isscalar(x));
+    addParameter(p,'distance',S.distance);
+    addParameter(p,'maxgapsize',inf,@(x) validateattributes(x,'numeric',{'>',S.cellsize}));
     parse(p,varargin{:});
     
     extrap = p.Results.extrapolation;

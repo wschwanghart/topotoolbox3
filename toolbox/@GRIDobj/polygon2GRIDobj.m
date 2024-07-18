@@ -59,6 +59,10 @@ function P = polygon2GRIDobj(DEM,MS,varargin)
 % 2 or 3 input arguments?
 narginchk(2,inf)
 
+if isgeotable(MS)
+    MS = geotable2mapstruct(MS);
+end
+
 if nargin == 2
 
     P = GRIDobj(DEM,'logical');

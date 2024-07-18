@@ -68,9 +68,9 @@ narginchk(4,4)
 p = inputParser;         
 p.FunctionName = 'STREAMobj/getvalue';
 
-addParamValue(p,'distance',[]);
-addParamValue(p,'coordinates',[]);
-addParamValue(p,'IXgrid',[]);
+addParameter(p,'distance',[]);
+addParameter(p,'coordinates',[]);
+addParameter(p,'IXgrid',[]);
 
 parse(p,varargin{:});
 

@@ -1,4 +1,4 @@
-function ht = wmplot(S,varargin)
+function ht = wmplot(S,options)
 
 %WMPLOT plot stream network in the webmap browser
 %
@@ -12,6 +12,9 @@ function ht = wmplot(S,varargin)
 %     wmplot plots the stream network S in MATLAB's webmap browser. This
 %     requires the Mapping Toolbox and S must have a valid georeferencing.
 %
+%     Note that wmplot displays colored stream networks, but that the
+%     values are classified rather than continuous.
+%
 % Input arguments
 %
 %     S    STREAMobj
@@ -24,7 +27,8 @@ function ht = wmplot(S,varargin)
 %
 %     'color'      three element rgb vector or node attribute list
 %     'colormap'   char (default is 'jet')
-%     'nrcolors'   number of colors
+%     'nrcolors'   number of colors (only applicable, if color is a node
+%                  attribute list)
 %
 % Example 1
 %
@@ -33,37 +37,36 @@ function ht = wmplot(S,varargin)
 %     S = STREAMobj(FD,'minarea',1000);
 %     wmplot(S)
 %
-% Example 2
+% Example 2: Plot ksn in a webmap.
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     FD = FLOWobj(DEM,'preprocess','carve');
 %     S = STREAMobj(FD,'minarea',1000);
 %     A = flowacc(FD);
-%     k = ksn(S,DEM,A);
+%     k = ksn(S,DEM,A,0.45,20);
 %     wmplot(S,'color',k)
 %
 % Remark
 %
-%     Another way to quickly plot a stream object in a network is:
+%     Another way to quickly plot a stream object in a webmap is:
 %
 %     [lat,lon] = STREAMobj2latlon(S);
 %     h = wmline(lat,lon,'OverlayName','Stream network','color','k');
 %
-% See also: STREAMobj, STREAMobj/plot, STREAMobj/STREAMobj2shape, 
-%           STREAMobj/plotc
-%
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. October, 2019
+% See also: STREAMobj, STREAMobj/plot, STREAMobj/plotc,
+%           STREAMobj/splitbyattribute
+%           
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 18. July, 2024
 
+arguments
+    S  STREAMobj
+    options.color = 'k'
+    options.colormap = 'turbo'
+    options.nrcolors  = 20
+end
 
-p = inputParser;
-addParameter(p,'color','k')
-addParameter(p,'colormap','jet')
-addParameter(p,'nrcolors',20)
-parse(p,varargin{:});
-
-
-if ~isnal(S,p.Results.color) && ~isa(p.Results.color,'GRIDobj')
+if ~isnal(S,options.color) && ~isa(options.color,'GRIDobj')
     % STREAMobj to lat lon
     if isGeographic(S)
         [lon,lat] = STREAMobj2XY(S);
@@ -72,47 +75,34 @@ if ~isnal(S,p.Results.color) && ~isa(p.Results.color,'GRIDobj')
     else
         error("S has an undefined CRS.")
     end
-
-    minlat = min(lat);
-    maxlat = max(lat);
-    minlon = min(lon);
-    maxlon = max(lon);
     
-    % wm = webmap
-%     wmlimits(wm,[minlat maxlat],[minlon maxlon]);
-    
-    h = wmline(lat,lon,'OverlayName','Stream network','Color',p.Results.color);
+    h = wmline(lat,lon,'OverlayName','Stream network','Color',options.color);
     
     if nargout == 1
         ht = h;
     end
     
 else
-    
-    [GS,val] = STREAMobj2shape(S,'type','geo',...
-        'attributes',{...
-        'val' p.Results.color @mean},...
-        'summarizeby','val','by',p.Results.nrcolors);
-    
-    if ischar(p.Results.colormap)
-        cmapfun = str2func(p.Results.colormap);
-        clr = cmapfun(p.Results.nrcolors);
+
+    [CS,zagg] = splitbyattribute(S,options.color,options.nrcolors);
+
+    if ischar(options.colormap)
+        cmapfun = str2func(options.colormap);
+        clr = cmapfun(255);
     else
-        cmap = p.Results.colormap;
-        clr  = interp1(1:size(cmap,1),cmap,linspace(1,size(cmap,1),p.Results.nrcolors));
+        clr = options.colormap;
     end
+    
+    clr  = interp1(linspace(min(zagg),max(zagg),size(clr,1)),...
+        clr,zagg);
 
     counter = 0;
-    for r = 1:numel(val)
-        if ~isempty(GS{r})   
-            counter = counter + 1;
-            h{counter} = wmline(GS{r},'color',clr(r,:));
-        end
+    h = cell(1,numel(CS));
+    for r = 1:numel(CS)
+        counter = counter + 1;
+        h{counter} = wmplot(CS{r},'color',clr(r,:));
     end
     if nargout == 1
-        ht = h;
+        ht = horzcat(h{:});
     end
 end
-% wmlimits([minlat maxlat],[minlon maxlon]);
-
-
