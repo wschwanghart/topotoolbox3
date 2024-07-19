@@ -78,15 +78,15 @@ I(S.IXgrid) = true;
 
 [D,L] = bwdist(I,'e');
 
-if numel(varargin) == 1 && isscalar(varargin{1});
+if numel(varargin) == 1 && isscalar(varargin{1})
     I = D<=varargin{1};
-elseif numel(varargin) == 1 && isnal(S,varargin{1});
+elseif numel(varargin) == 1 && isnal(S,varargin{1})
     distnal = varargin{1}/DEM.cellsize;
     HG = zeros(DEM.size);
     HG(S.IXgrid) = distnal;
     I = HG(L) >= D;
 else
-    if numel(streampoi(S,'Channelheads','ix')) > 1;
+    if numel(streampoi(S,'Channelheads','ix')) > 1
         error('TopoToolbox:widenstream',...
             ['widenstream works only with a river reach, i.e., there\n'...
              'must not be more than one channel head.'])

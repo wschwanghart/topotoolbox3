@@ -34,7 +34,7 @@ function arclen = sph_distance(lat1,lon1,lat2,lon2,ellipsoid,usemap)
 %
 % See also: distance, referenceEllipsoid
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 2. March, 2020
 
 
@@ -51,7 +51,7 @@ if usemap
         arclen = distance(lat1,lon1,lat2,lon2,ellipsoid,'degrees');
     else
         chunksize = 10000;
-        chunks = [0:chunksize:numel(lat1)];
+        chunks = 0:chunksize:numel(lat1);
         if chunks(end) ~= numel(lat1)
             w = numel(lat1)-chunks(end);
             chunks = [chunks  chunks(end)+w];

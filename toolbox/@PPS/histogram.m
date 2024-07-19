@@ -1,6 +1,6 @@
-function [c,l,cc] = histogram(P,varargin)
+function [c,l,cc] = histogram(P,options)
 
-%HISTOGRAM histogram of point pattern on stream network
+%HISTOGRAM Histogram of point pattern on stream network
 %
 % Syntax
 %
@@ -39,28 +39,31 @@ function [c,l,cc] = histogram(P,varargin)
 %
 % Example
 %
-%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD  = FLOWobj(DEM);
+%     S = STREAMobj(FD,'minarea',1000);
+%     P = PPS(S,'rpois',0.0002);
+%     d = histogram(P);
+%     plotc(S,d)
 %
 % See also: PPS, PPS/density, PPS/intensity
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. February, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 18. July, 2024
 
-% Check input arguments
-p = inputParser;
-p.FunctionName = 'PPS/histogram';
-addParameter(p,'seglength',tlength(P)/npoints(P)*10);
-addParameter(p,'normalization','pdf');
-addParameter(p,'voronoi',true);
-addParameter(p,'shufflelabel',false);
-% Parse
-parse(p,varargin{:});
+arguments
+    P  PPS
+    options.seglength (1,1) {mustBePositive} = P.S.cellsize*30
+    options.normalization = 'pdf'
+    options.voronoi (1,1) = true
+    options.shufflelabel (1,1) = false
+end
 
-if ~p.Results.voronoi
-    l  = labelreach(P.S,'seglength',p.Results.seglength);
+if ~options.voronoi
+    l  = labelreach(P.S,'seglength',options.seglength);
 else
     d = P.S.distance;
-    I = gradient(P.S,mod(d,p.Results.seglength)) < 0 ...
+    I = gradient(P.S,mod(d,options.seglength)) < 0 ...
         | streampoi(P.S,'outl','logical');
     PV = PPS(P.S,'PP',I);
     l = voronoi(PV);
@@ -72,9 +75,9 @@ nal = points(P,'nal');
 
 c   = accumarray(l,nal,[numl 1],@sum);
 
-switch lower(p.Results.normalization)
+switch lower(options.normalization)
     case 'pdf'  
-        if ~p.Results.voronoi
+        if ~options.voronoi
             d   = P.S.distance;
             ld  = accumarray(l,d,[numl 1],@range);
         else
@@ -90,10 +93,11 @@ end
 
 c   = c(l);
 
-if p.Results.shufflelabel
+if options.shufflelabel
     [uniqueL,~,ix] = unique(l);
     uniqueLS = randperm(numel(uniqueL));
     l = uniqueLS(ix);
+    l = l(:);
 end
 
 

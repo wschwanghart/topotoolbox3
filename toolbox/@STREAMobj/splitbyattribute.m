@@ -41,6 +41,20 @@ function [CS,zagg,edges] = splitbyattribute(S,z,n)
 %     cellfun(@plot,CS);
 %     hold off
 %
+% Example 2: colored distance-elevation plot
+%
+%     [CS,zagg] = splitbyattribute(S,DEM,20);
+%     [clr,lims] = num2rgb(zagg,turbo);
+%     figure
+%     hold on; 
+%     cellfun(@(Ssub,col) ...
+%       plotdz(Ssub,DEM,'distance',nal2nal(Ssub,S,S.distance),'color',col),...  
+%       CS(:),num2cell(clr,2))
+%     colormap(turbo)
+%     h = colorbar;
+%     h.Label.String = "Elevation [m]";
+%     clim(lims)
+%
 % See also: STREAMobj/STREAMobj2cell, STREAMobj/wmplot, histcounts
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)

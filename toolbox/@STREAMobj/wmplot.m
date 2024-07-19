@@ -86,15 +86,8 @@ else
 
     [CS,zagg] = splitbyattribute(S,options.color,options.nrcolors);
 
-    if ischar(options.colormap)
-        cmapfun = str2func(options.colormap);
-        clr = cmapfun(255);
-    else
-        clr = options.colormap;
-    end
-    
-    clr  = interp1(linspace(min(zagg),max(zagg),size(clr,1)),...
-        clr,zagg);
+    clr = num2rgb(zagg,options.colormap);
+
 
     counter = 0;
     h = cell(1,numel(CS));

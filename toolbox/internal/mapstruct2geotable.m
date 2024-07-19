@@ -28,7 +28,10 @@ function GT = mapstruct2geotable(MS,options)
 %                            scalar that is understood by either geocrs or
 %                            projcrs. Default is geocrs(4326). This assumes
 %                            that the data is in a geographic coordinate
-%                            system of the horizontal WGS84 systm.
+%                            system of the horizontal WGS84 systm. It is
+%                            also possible to supply a GRIDobj from which
+%                            the reference system is extracted using
+%                            parseCRS.
 %
 % Output arguments
 %
@@ -43,7 +46,7 @@ function GT = mapstruct2geotable(MS,options)
 %     GT = mapstruct2geotable(MS,'CoordinateReferenceSystem',32611);
 %     geoplot(GT)
 %
-% See also: table2geotable
+% See also: table2geotable, parseCRS
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 17. June, 2024
@@ -121,14 +124,9 @@ varnames = string(varnames);
 coordinateSystemType = options.coordinateSystemType;
 
 % Obtain and check projection
-proj = options.CoordinateReferenceSystem;
-if isnumeric(proj) && isscalar(proj)
-    try
-        proj = geocrs(proj);
-    catch
-        proj = projcrs(proj);
-    end
-elseif isempty(proj)
+if ~isempty(options.CoordinateReferenceSystem)
+    proj = parseCRS(options.CoordinateReferenceSystem);
+else
     proj = [];
 end
 
