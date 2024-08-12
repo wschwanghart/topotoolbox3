@@ -1,6 +1,6 @@
 function mappingapp(DEM,S,varargin)
 
-% map knickpoints combining planform and profile view
+%MAPPINGAPP Map knickpoints combining planform and profile view
 %
 % Syntax
 %
@@ -44,6 +44,7 @@ ax.main = axes('Units','normalized', ...
                'Parent', hs.main, ...
                'Clipping', 'off', ...
                'ActivePositionProperty','position');
+ax.main.YDir = 'normal';
 
 % After adding all components make figure visible
 hs.fig.Visible = 'on';           

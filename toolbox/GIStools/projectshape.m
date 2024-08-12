@@ -5,8 +5,8 @@ function GT = projectshape(GT,TARGET,projsource)
 % Syntax
 %
 %     GT2 = projectshape(MS,TARGET)
-%     GT2 = projectshape
-%     GT2 = projectshape(GT,TARGET,mstruct)
+%     GT2 = projectshape(MS,TARGET,projsource)
+%     GT2 = projectshape(GT,TARGET)
 %
 % Description
 %     
@@ -24,17 +24,20 @@ function GT = projectshape(GT,TARGET,projsource)
 %
 % Input arguments
 %
-%     MS      geographic data structure or geotable
-%     GRID    GRIDobj, e.g., a DEM
-%     mstruct map projection structure
+%     MS            geographic data structure
+%     GT            geotable
+%     GRID          GRIDobj, e.g., a DEM
+%     projsource    projection (e.g. projcrs or geocrs) that is readable by
+%                   the function parseCRS
 %     
 % Output arguments
 %
 %     MS2     geographic data structure or geotable
 %
+% See also: parseCRS, geotable2mapstruct, mapstruct2geotable
 %
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de) and
-%         Wolfgang Schwanghart (schwangh@uni-potsdam.de)
+%         Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 16. June, 2024
 
 arguments

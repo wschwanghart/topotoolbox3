@@ -42,7 +42,7 @@ if isa(x,'GRIDobj')
 elseif isnal(S,x)
     % If x is already a node-attribute list
     x = cast(x,cl);
-elseif isnumeric(x) && isscalar(x)
+elseif isscalar(x)
     % If x is a scalar, x will be implicitly expanded.
     x = cast(getnal(S) + x,cl);
 else

@@ -30,7 +30,7 @@ function [OUT] = convert2latlon(SW)
 %
 %
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
-% Date: May, 2015
+% Date: 19 July, 2024
 
 
 OUT = SW;

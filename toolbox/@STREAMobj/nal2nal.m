@@ -64,11 +64,14 @@ if isa(nal1,'GRIDobj')
 end
 
 % Handle output nal
+% This might be a problem due to nans
 if ~islogical(nal1)
     nal2 = ezgetnal(S2,fillval,class(nal1));
 else
-    if isscalar(fillval)
+    if any(isnan(fillval))
         fillval = false;
+    end
+    if isscalar(fillval)
         nal2 = ezgetnal(S2,fillval,'logical');
     else
         nal2 = ezgetnal(S2,fillval,class(nal1));

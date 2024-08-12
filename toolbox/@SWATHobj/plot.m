@@ -107,20 +107,20 @@ cmaps = {'bone','colorcube','cool','copper','flag',...
 p = inputParser;
 p.FunctionName = 'plot';
 addRequired(p,'SW',@(x) isa(x,'SWATHobj'));
-addParamValue(p,'trace',true,@(x) islogical(x))
-addParamValue(p,'outline',true,@(x) islogical(x))
-addParamValue(p,'points',false,@(x) islogical(x))
-addParamValue(p,'left',true,@(x) islogical(x))
-addParamValue(p,'right',true,@(x) islogical(x))
-addParamValue(p,'legend',true,@(x) islogical(x))
-addParamValue(p,'labeldist',[],@(x) isnumeric(x))
-addParamValue(p,'plotmode','plot',@(x) ismember(x,{'plot','scatter'}))
-addParamValue(p,'colorz',false,@(x) islogical(x))
-addParamValue(p,'colormap','jet',@(x) ismember(x,cmaps))
-addParamValue(p,'colorrange',[-inf inf],@(x) isnumeric(x))
-addParamValue(p,'colormode','normal',@(x) ismember(x,{'normal','inverse'}))
-addParamValue(p,'colorbar',true, @(x) islogical(x))
-addParamValue(p,'markersize',2,@(x) isnumeric(x))
+addParameter(p,'trace',true,@(x) islogical(x))
+addParameter(p,'outline',true,@(x) islogical(x))
+addParameter(p,'points',false,@(x) islogical(x))
+addParameter(p,'left',true,@(x) islogical(x))
+addParameter(p,'right',true,@(x) islogical(x))
+addParameter(p,'legend',true,@(x) islogical(x))
+addParameter(p,'labeldist',[],@(x) isnumeric(x))
+addParameter(p,'plotmode','plot',@(x) ismember(x,{'plot','scatter'}))
+addParameter(p,'colorz',false,@(x) islogical(x))
+addParameter(p,'colormap','jet',@(x) ismember(x,cmaps))
+addParameter(p,'colorrange',[-inf inf],@(x) isnumeric(x))
+addParameter(p,'colormode','normal',@(x) ismember(x,{'normal','inverse'}))
+addParameter(p,'colorbar',true, @(x) islogical(x))
+addParameter(p,'markersize',2,@(x) isnumeric(x))
 
 parse(p,SW,varargin{:});
 

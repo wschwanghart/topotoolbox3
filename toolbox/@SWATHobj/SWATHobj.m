@@ -93,7 +93,7 @@ classdef SWATHobj
 %     width     - width of SWATHobj (xy-unit of DEM)
 %     gap       - central gap along SWATHobj (xy-unit of DEM)
 %     smooth    - cell with scalars corresponding to smoothing values
-%     xy        - x,y points of central ine of SWATHobj
+%     xy        - x,y points of central line of SWATHobj
 %     distx     - distance along SWATHobj
 %     disty     - distance across SWATHobj
 %     X         - X coorindates of SWATHobj data points
