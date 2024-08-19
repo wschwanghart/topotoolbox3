@@ -1,6 +1,6 @@
 function varargout = points(P,form)
 
-%POINTS extract a list of points from the point pattern
+%POINTS Extract a list of points from the point pattern
 %
 % Syntax
 %

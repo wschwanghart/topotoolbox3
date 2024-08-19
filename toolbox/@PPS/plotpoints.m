@@ -52,15 +52,13 @@ function h = plotpoints(P,varargin)
 %
 % See also: PPS/plot, PPS/plotdz, STREAMobj/plot, STREAMobj/plotc
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 26. November, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 16. August, 2024
 
 
 p = inputParser;
 p.KeepUnmatched = true;
-if verLessThan('matlab','9.9')
 addParameter(p,'Marker','o');
-end
 addParameter(p,'MarkerEdgeColor','k');
 addParameter(p,'MarkerEdgeAlpha',0.5);
 addParameter(p,'MarkerFaceAlpha',0.5);
@@ -90,33 +88,27 @@ else
     else
         Results.SizeData = getmarks(P,Results.SizeData);
     end
+    Results = rmfield(Results,'Marker');
 end
 
-if verLessThan('matlab','9.9')
-    % scale between 1 and 20
-    Results.SizeData = Results.SizeData - min(Results.SizeData);
-    Results.SizeData = Results.SizeData./max(Results.SizeData);
-    Results.SizeData = Results.SizeData*(Results.MaxSize - Results.MinSize) + Results.MinSize;
-else
-    sz = Results.SizeData;
-    Results = rmfield(Results,'SizeData');
-end
-        
+
+sz = Results.SizeData;
+Results = rmfield(Results,'SizeData');
 Results = rmfield(Results,{'MaxSize','MinSize','ColorData'});
 
 xy = P.ppxy;
 
 pnpv = expandstruct(Results);
 
-if verLessThan('matlab','9.9') || isscalar(sz)
+if isscalar(sz)
     % Use scatter
     ht = scatter(xy(:,1),xy(:,2),[],cols,'filled',pnpv{:});
 else
+    
     ht = bubblechart(xy(:,1),xy(:,2),sz,cols,pnpv{:});
     bubblesize([1 10])
 end
     
-
 if nargout == 1
     h = ht;
 end

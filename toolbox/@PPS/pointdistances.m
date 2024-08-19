@@ -1,6 +1,6 @@
-function d = pointdistances(P,varargin)
+function d = pointdistances(P,options)
 
-%POINTDISTANCE inter-point distance
+%POINTDISTANCE Inter-point distance calculated on stream network
 %
 % Syntax
 %
@@ -37,7 +37,6 @@ function d = pointdistances(P,varargin)
 %
 % Example
 %
-%
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     FD  = FLOWobj(DEM,'preprocess','c');
 %     S = STREAMobj(FD,'minarea',1000);
@@ -52,35 +51,32 @@ function d = pointdistances(P,varargin)
 %
 % See also: PPS, PPS/netdist
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 2. June, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 16. August, 2024
 
-
-% Check input arguments
-p = inputParser;
-p.FunctionName = 'PPS/pointdistances';
-addParameter(p,'output','matrix');
-addParameter(p,'type','graph');
-addParameter(p,'d3d',false);
-addParameter(p,'extendednetwork',false);
-addParameter(p,'val',[]);
-addParameter(p,'direction','down');
-addParameter(p,'sourcepoints',[]);
-addParameter(p,'targetpoints',[]);
-% Parse
-parse(p,varargin{:});
+arguments
+    P  PPS
+    options.output = 'matrix'
+    options.type   = 'graph'
+    options.d3d   (1,1) = false
+    options.extendednetwork (1,1) = false
+    options.val = []
+    options.direction = 'down'
+    options.sourcepoints = []
+    options.targetpoints = []
+end
 
 ix  = P.S.ix;
 ixc = P.S.ixc;
-d   = nodedistance(P,'d3d',p.Results.d3d,'val',p.Results.val);
+d   = nodedistance(P,'d3d',options.d3d,'val',options.val);
 
-switch lower(p.Results.type)
+switch lower(options.type)
     case {'graph','digraph'}
-        switch lower(p.Results.type)
+        switch lower(options.type)
             case 'graph'
                 G = graph(ix,ixc,d);
             case 'digraph'
-                switch p.Results.direction
+                switch options.direction
                     case 'down'
                         G = digraph(ix,ixc,d);
                     case 'up'
@@ -91,7 +87,7 @@ switch lower(p.Results.type)
         tf = hasduplicates(P);
         if tf            
             % sigh... has duplicates 
-            if ~p.Results.extendednetwork
+            if ~options.extendednetwork
                 [P2,~,locb] = unique(P.PP,'stable');
                 d2 = distances(G,P2,P2,'Method','positive');
                 d  = d2(locb,locb);
@@ -108,7 +104,7 @@ switch lower(p.Results.type)
         
     case 'nearest'
         
-        switch p.Results.direction
+        switch options.direction
             case 'down'
                 
                 dm = nan(size(P.S.IXgrid));
@@ -163,7 +159,7 @@ switch lower(p.Results.type)
         end
 end
 
-outp = validatestring(p.Results.output,{'matrix', 'vector', 'edgelist'});
+outp = validatestring(options.output,{'matrix', 'vector', 'edgelist'});
 
 switch outp
     case 'matrix'

@@ -1,6 +1,6 @@
 function FA = postprocflats(FLATS,FA,fun)
 
-%POSTPROCFLATS postprocess flat terrain for visualization purpose
+%POSTPROCFLATS Postprocess flat terrain for visualization purpose
 %
 % Syntax
 %
@@ -41,8 +41,8 @@ function FA = postprocflats(FLATS,FA,fun)
 %
 % See also: IDENTIFYFLATS, FUNCTION_HANDLE
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. August, 2024
 
 
 % check if GRIDs are aligned
@@ -58,10 +58,10 @@ end
 
 if nargin==3
     
-    if isa(fun, 'char');
+    if isa(fun, 'char')
         fun   = str2func(['@(x)' fun '(x)']);
     end
-    if isa(fun, 'numeric');
+    if isa(fun, 'numeric')
         fun   = str2func(['@(x)' num2str(fun)]);
     end
     

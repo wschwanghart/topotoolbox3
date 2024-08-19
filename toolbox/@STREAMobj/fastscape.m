@@ -1,6 +1,6 @@
 function z = fastscape(S,z,a,varargin)
 
-%FASTSCAPE  Simulate river incision using the stream power incision model
+%FASTSCAPE Simulate river incision using the stream power incision model
 %
 % Syntax
 %

@@ -1,5 +1,5 @@
 function [MS] = SWATHobj2gds(SW,type)
-%SWATHOBJ2GDS create a geographic data structure from a SWATHobj
+%SWATHOBJ2GDS Create a geographic data structure from a SWATHobj
 %
 % Syntax
 %
@@ -18,7 +18,6 @@ function [MS] = SWATHobj2gds(SW,type)
 %     structure), the smoothened line (called 'CenterFilt' in the data
 %     structure), and the outline of the swath (called 'Outline' in the data
 %     structure).
-%
 %
 % Input arguments
 %
@@ -48,7 +47,7 @@ function [MS] = SWATHobj2gds(SW,type)
 
 
 
-if ~isa(SW,'SWATHobj'); 
+if ~isa(SW,'SWATHobj')
     error('First input needs to be SWATHobj'); 
 end
 
@@ -105,14 +104,3 @@ switch type
         error('Second input needs to be either ''lines'' or ''points''');
         
 end
-
-
-
-
-
-
-
-
-
-
-

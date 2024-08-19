@@ -1,6 +1,6 @@
 function Psim = random(P,mdl,covariates)
 
-%RANDOM random realisation of a (inhomogeneous) point process
+%RANDOM Random realisation of a (inhomogeneous) point process
 %
 % Syntax
 %
@@ -37,8 +37,8 @@ function Psim = random(P,mdl,covariates)
 % 
 % See also: PPS, PPS/fitloglinear, PPS/simulate
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. February, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. August, 2024
 
 
 if nargin == 1

@@ -14,7 +14,7 @@ function l = tlength(P)
 % 
 % See also: PPS, PPS/npoints 
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 5. July, 2024
 
 arguments 
