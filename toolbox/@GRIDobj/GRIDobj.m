@@ -415,6 +415,7 @@ classdef GRIDobj
             %     tf = isgeographic(A)
             %
             tf = isprop(A.georef,"GeographicCRS");
+            tf = tf && ~isempty(A.georef.GeographicCRS);
         end
 
         function tf = isProjected(A)
@@ -425,6 +426,7 @@ classdef GRIDobj
             %     tf = isProjected(A)
             %
             tf = isprop(A.georef,"ProjectedCRS");
+            tf = tf && ~isempty(A.georef.ProjectedCRS);
         end
 
         %% Additional functions to add

@@ -1,4 +1,4 @@
-function G = gradient8(DEM,unit,varargin)
+function G = gradient8(DEM,unit,options)
 
 %GRADIENT8 8-connected neighborhood gradient of a digital elevation model
 %
@@ -56,19 +56,13 @@ function G = gradient8(DEM,unit,varargin)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 6. June, 2024
 
-if nargin == 1
-    unit = 'tangent';
-else
-    unit = validatestring(unit,{'tangent' 'degree' 'radian' 'percent' 'sine'},'gradient8','unit',2);
+arguments
+    DEM   GRIDobj
+    unit  {mustBeMember(unit,{'tangent' 'degree' 'radian' 'percent' 'sine'})} = 'tangent'
+    options.useblockproc (1,1) = false
+    options.blocksize (1,1) = 5000
+    options.useparallel (1,1) = false
 end
-
-
-p = inputParser;
-p.FunctionName = 'GRIDobj/gradient8';
-addParameter(p,'useblockproc',false,@(x) isscalar(x));
-addParameter(p,'blocksize',5000,@(x) isscalar(x));
-addParameter(p,'useparallel',false,@(x) isscalar(x));
-parse(p,varargin{:});
 
 
 % create a copy of the DEM instance
@@ -87,8 +81,8 @@ end
 % avoid calling blockproc.
 % Large matrix support. Break calculations in chunks using blockproc.
 
-if p.Results.useblockproc
-    blksiz = bestblk(size(DEM.Z),p.Results.blocksize);
+if options.useblockproc
+    blksiz = bestblk(size(DEM.Z),options.blocksize);
     c   = class(DEM.Z);
     
     switch c
@@ -104,7 +98,7 @@ if p.Results.useblockproc
     G.Z = blockproc(DEM.Z,blksiz,fun,...
            'BorderSize',[1 1],...
            'Padmethod',padval,...
-           'UseParallel',p.Results.useparallel);
+           'UseParallel',options.useparallel);
 else
     G.Z = steepestgradient(DEM.Z,G.cellsize,c);
 end

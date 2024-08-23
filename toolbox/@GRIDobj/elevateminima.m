@@ -48,9 +48,8 @@ function DEM = elevateminima(DEM,maxarea)
 
 arguments
     DEM   GRIDobj
-    maxarea {mustBePositive,mustBeInteger} = 1
+    maxarea (1,1) {mustBePositive,mustBeInteger} = 1
 end
-
 
 INAN = isnan(DEM.Z); 
 DEM.Z(INAN) = inf;

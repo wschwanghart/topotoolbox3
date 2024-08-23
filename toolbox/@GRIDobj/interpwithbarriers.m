@@ -1,4 +1,4 @@
-function ZI = interpwithbarriers(DEM,x,y,z,varargin)
+function ZI = interpwithbarriers(DEM,x,y,z,options)
 
 %INTERPWITHBARRIERS Laplace interplation with barriers
 %
@@ -59,16 +59,19 @@ function ZI = interpwithbarriers(DEM,x,y,z,varargin)
 %
 % See also: GRIDobj/resample, GRIDobj/reclabel, accumarray
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 10. March, 2023
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 10. March, 2024
 
-p = inputParser;
-p.FunctionName = 'GRIDobj/laplaceinterp';
-addParameter(p,'barriers',[]);
-addParameter(p,'ridge',0)
-addParameter(p,'lb',[])
-addParameter(p,'ub',[])
-parse(p,varargin{:});
+arguments
+    DEM   GRIDobj
+    x {mustBeVector}
+    y {mustBeVector}
+    z {mustBeVector}
+    options.barriers = []
+    options.ridge (1,1) = 0
+    options.lb = []
+    options.ub = []
+end
     
 % Ensure column vectors
 x = x(:);
@@ -82,17 +85,24 @@ z = double(z);
 assert(isequal(size(x),size(y)) & isequal(size(x), size(z)), ...
     'x, y and z must have equal size.' )
 
-ZI = aggregate(DEM,[x y z],@mean);
+% Remove nans
+I = isnan(x) | isnan(y) | isnan(z);
+I = ~I;
+x = x(I);
+y = y(I);
+z = z(I);
+
+ZI = aggregate(DEM,[x y z],'aggfun',@mean);
 
 G = ~GRIDobj(DEM,'logical');
 [ic,icd] = ixneighbors(G.Z,G.Z,4);
 
-if ~isempty(p.Results.barriers)
+if ~isempty(options.barriers)
     
-    if isstruct(p.Results.barriers)
-        F = line2GRIDobj(DEM,p.Results.barriers);
+    if isstruct(options.barriers)
+        F = line2GRIDobj(DEM,options.barriers);
     else
-        F = p.Results.barriers;
+        F = options.barriers;
         validatealignment(F,DEM)
     end
 
@@ -115,7 +125,7 @@ A = speye(n)-A;
 
 % solve
 ZI.Z(inan) = 0;
-if p.Results.ridge == 0
+if options.ridge == 0
 
     ZI.Z = reshape(A\ZI.Z(:),DEM.size);
     % ZI.Z = reshape(pcg(A,ZI.Z(:)),DEM.size);
@@ -123,19 +133,18 @@ else
 
     Asd  = sparse(ic,icd,1,n,n);
     Asd  = spdiags(sum(Asd,2),0,n,n) - Asd;
-    Asd  = p.Results.ridge*Asd;
+    Asd  = options.ridge*Asd;
     
-    if isempty(p.Results.lb) && isempty(p.Results.ub) 
+    if isempty(options.lb) && isempty(options.ub) 
 
         zi   = [A;Asd]\[ZI.Z(:);zeros(n,1)];
-
     
     else
 
         C = [A;Asd];
         d = [ZI.Z(:);zeros(n,1)];
         
-        b = p.Results.lb.Z(:);
+        b = options.lb.Z(:);
         zi = -lsqlin(C,-d,speye(n),-b);
 
     end
@@ -147,7 +156,5 @@ end
 ZI.Z(F.Z>0 | ZI.Z == 0) = nan;
 
 ZI = inpaintnans(ZI,'neighbors');
-ZI = inpaintnans(ZI);
-
-% 
+ZI = inpaintnans(ZI); 
     
