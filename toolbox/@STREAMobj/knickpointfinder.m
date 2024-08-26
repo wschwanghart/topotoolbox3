@@ -1,6 +1,6 @@
 function [zs,kp] = knickpointfinder(S,DEM,varargin)
 
-%KNICKPOINTFINDER find knickpoints in river profiles
+%KNICKPOINTFINDER Find knickpoints in river profiles
 %
 % Syntax
 %
@@ -66,7 +66,7 @@ function [zs,kp] = knickpointfinder(S,DEM,varargin)
 %
 % See also: STREAMobj/quantcarve, STREAMobj/crs
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 25. February, 2018
 
 % check and parse inputs

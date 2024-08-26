@@ -1,4 +1,4 @@
-function h = plot(SW,varargin)
+function h = plot(SW,options)
 %PLOT plot instance of SWATHobj
 %
 % Syntax
@@ -97,47 +97,40 @@ function h = plot(SW,varargin)
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
 % Date: May, 2015
 
+arguments
+    SW SWATHobj
+    options.trace (1,1) = true
+    options.tracecolor = 'k'
+    options.outline (1,1) = true
+    options.outlinecolor = 'k'
+    options.points (1,1) = false
+    options.left (1,1) = true
+    options.right (1,1) = true
+    options.legend (1,1) = true
+    options.labeldist {mustBeNumeric} = []
+    options.plotmode {mustBeMember(options.plotmode,{'plot','scatter'})} = 'plot'
+    options.colorz (1,1) = false
+    options.colormap = 'turbo'
+    options.colorrange (1,2) = [-inf inf]
+    options.colormode {mustBeMember(options.colormode,{'normal','inverse'})} = 'normal'
+    options.colorbar (1,1) = true
+    options.markersize (1,1) {mustBeNumeric,mustBePositive} = 2
+end
 
-cmaps = {'bone','colorcube','cool','copper','flag',...
-    'gray','hot','vga','hsv','jet','lines','pink','prism',...
-    'spring','summer','white','winter','parula','autumn'};
-
-
-% Parse inputs
-p = inputParser;
-p.FunctionName = 'plot';
-addRequired(p,'SW',@(x) isa(x,'SWATHobj'));
-addParameter(p,'trace',true,@(x) islogical(x))
-addParameter(p,'outline',true,@(x) islogical(x))
-addParameter(p,'points',false,@(x) islogical(x))
-addParameter(p,'left',true,@(x) islogical(x))
-addParameter(p,'right',true,@(x) islogical(x))
-addParameter(p,'legend',true,@(x) islogical(x))
-addParameter(p,'labeldist',[],@(x) isnumeric(x))
-addParameter(p,'plotmode','plot',@(x) ismember(x,{'plot','scatter'}))
-addParameter(p,'colorz',false,@(x) islogical(x))
-addParameter(p,'colormap','jet',@(x) ismember(x,cmaps))
-addParameter(p,'colorrange',[-inf inf],@(x) isnumeric(x))
-addParameter(p,'colormode','normal',@(x) ismember(x,{'normal','inverse'}))
-addParameter(p,'colorbar',true, @(x) islogical(x))
-addParameter(p,'markersize',2,@(x) isnumeric(x))
-
-parse(p,SW,varargin{:});
-
-labeldist  = p.Results.labeldist;
-colmap     = p.Results.colormap;
-colrange   = p.Results.colorrange;
-colmode    = p.Results.colormode;
-markersize = p.Results.markersize;
+labeldist  = options.labeldist;
+colmap     = options.colormap;
+colrange   = options.colorrange;
+colmode    = options.colormode;
+markersize = options.markersize;
 
 % check
-if ~p.Results.left && ~p.Results.right
+if ~options.left && ~options.right
     warning('Empty SWATHobj: nothing to plot')
     return;
 end
 
 % Create color codes
-if (p.Results.colorz)
+if (options.colorz)
     cmap = colormap(colmap)';
     if strcmp(colmode,'inverse'); cmap = flipud(cmap); end
     minz = colrange(1);
@@ -148,13 +141,13 @@ if (p.Results.colorz)
 end
 
 % Limit by side
-if ~(p.Results.left)
+if ~(options.left)
     ny = ceil(length(SW.disty)/2)+1;
     SW.X = SW.X(ny:end,:);
     SW.Y = SW.Y(ny:end,:);
     SW.Z = SW.Z(ny:end,:);
     
-elseif ~(p.Results.right)
+elseif ~(options.right)
     ny = floor(length(SW.disty)/2);
     SW.X = SW.X(1:ny,:);
     SW.Y = SW.Y(1:ny,:);
@@ -163,20 +156,20 @@ end
 
 % Plot SWATHobj data points
 ct = 1;
-if (p.Results.points)    
+if (options.points)    
     ix = find(~isnan(SW.Z));
     if~isempty(ix)
         xp = SW.X(ix);
         yp = SW.Y(ix);
         
-        if (p.Results.colorz)
+        if (options.colorz)
             
             % Color-code z values
             zp = SW.Z(ix);
             % Interpolate colors
             mfcol = [interp1(CX,cmap(1,:),zp),...
                 interp1(CX,cmap(2,:),zp),interp1(CX,cmap(3,:),zp)];
-            switch p.Results.plotmode
+            switch options.plotmode
                 case 'plot'
                     for k = 1 : length(zp)
                         ht(ct) = plot(xp(k),yp(k),'o','color',mfcol(k,:),'Markersize',markersize); hold on
@@ -189,7 +182,7 @@ if (p.Results.points)
             
             % No color-coding
             mfcol = [0 0 0];
-            switch p.Results.plotmode
+            switch options.plotmode
                 case 'plot'
                     ht(ct) = plot(xp,yp,'o','color',mfcol,'Markersize',markersize); hold on
                 case 'scatter'
@@ -202,24 +195,27 @@ if (p.Results.points)
 end
 
 % Trace of SWATHobj
-if (p.Results.trace)
-    ht(ct) = plot(SW.xy0(:,1),SW.xy0(:,2),'go','Markersize',2); hold on
+if (options.trace)
+    ht(ct) = plot(SW.xy0(:,1),SW.xy0(:,2),'o','Markersize',2,...
+        'Color',options.tracecolor); 
+    hold on
     legstr(ct) = {'Original trace'};
     ct = ct+1;
-    ht(ct) = plot(SW.xy(:,1),SW.xy(:,2),'g-','Markersize',2);
+    ht(ct) = plot(SW.xy(:,1),SW.xy(:,2),'--','Markersize',2,...
+        'Color',options.tracecolor);
     legstr(ct) = {'Resamp./interp. trace'};
     ct = ct+1;
 end
 
 % Outline of SWATHobj
-if (p.Results.outline)
+if (options.outline)
     IM = ~isnan(SW.Z);
     B = bwboundaries(IM,4);
     for k = 1 : length(B)
         ix = sub2ind(size(IM),B{k}(:,1),B{k}(:,2));
         x_outline = SW.X(ix);
         y_outline = SW.Y(ix);
-        ht(ct) = plot(x_outline,y_outline,'r-');
+        ht(ct) = plot(x_outline,y_outline,'-','Color',options.outlinecolor);
     end
     legstr(ct) = {'Outline'};
 end
@@ -246,12 +242,12 @@ end
 
 drawnow
 % Legend
-if (p.Results.legend)
+if (options.legend)
     legend(ht,legstr);
 end
 
 % Colorbar
-if (p.Results.colorz) && (p.Results.colbar)
+if (options.colorz) && (options.colbar)
     hc = colorbar;
     yt = get(hc,'YTick');
     set(hc,'YTickLabel',(yt.*(maxz-minz)+minz)');
