@@ -1,464 +1,289 @@
-function flowpathapp(FD,DEM,S)
+function crsapp(S,DEM)
 
-%FLOWPATHAPP Map, visualize and export flowpaths that start at manually set channelheads
+%CRSAPP interactive smoothing of river long profiles
 %
 % Syntax
-%     
-%     flowpathapp
-%     flowpathapp(FD,DEM)
-%     flowpathapp(FD,DEM,S)
+%
+%     crsapp(S,DEM)
 %
 % Description
 %
-%     flowpathapp provides an interactive tool to visualize and generate
-%     flow paths on a digital elevation model based on single flow direction
-%     (FLOWobj). If an instance of STREAMobj derived from FD is supplied as
-%     third argument, channelheads are automatically snapped to the
-%     existing stream network, so that a subset of the latter can be
-%     generated.
+%     CRSAPP is an interactive tool to visually assess the results of the
+%     function STREAMobj/crs. You can export the results and the parameters
+%     to the workspace.
 %
-%     The stream network constructed by manually setting channelheads can
-%     be exported to the workspace as new instance of STREAMobj. In
-%     addition, the stream network can be exported to Excel, as text file
-%     or as shapefile (requires Mapping Toolbox).
+%     The graphical user interface allows you to adjust the crs-parameter
+%     K, tau, and mingradient with a number of sliders. The K-slider
+%     adjusts the degree of smoothing and uses a logarithmic scaling.
+%     Common values range between 1 and 10. mingradient adjust the minimum
+%     gradient that a profile must go downward in downstream directions.
+%     Choose values so that they do not exceed the true downstream
+%     gradients. tau-values range between 0.0001 and 0.9999 and refer to
+%     the quantile along which the smoothed profile should run along the
+%     measured profile.
 %
-%     Tools are found in the menu bar of the main window. 
+% Input parameters
 %
+%     S      STREAMobj
+%     DEM    digital elevation model (GRIDobj)
 %
-% Notes on export to .xls or .txt
+% Example
 %
-%     The mapped stream network can be exported as xls or txt file. Note
-%     that individual streams are listed in the order at which they were
-%     mapped. Streams that are tributary to a previously mapped stream
-%     terminate at the confluence of both so it may make sense to map
-%     higher order stream first before mapping their tributaries. The data
-%     is exported in a columnar format that include following fields:
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD = FLOWobj(DEM,'preprocess','carve');
+%     S = STREAMobj(FD,'minarea',1000);
+%     S = klargestconncomps(S);
+%     crsapp(S,DEM);  
 %
-%                    ID    unique stream identifier.
-%                     X    x coordinates of the stream vertices
-%     	              Y    y coordinates
-%     upstream_distance   distance from the outlet
-%             elevation   elevation of the stream vertices
-%          upslope_area   drainage area of each stream vertice in map units 
-%                         (nr of upstream cells x cellsize^2)
-%                 slope   channel gradient in tangens [m/m]. Note that the
-%                         slope is calculated along the drainage network
-%                         and may differ from the slope returned by the
-%                         function gradient8. If the DEM was not
-%                         hydrologically conditioned, negative slope values
-%                         (upward directed) may occur. 
+% References
 %
+%     Schwanghart, W., Scherler, D., 2017. Bumps in river profiles: 
+%     uncertainty assessment and smoothing using quantile regression 
+%     techniques. Earth Surface Dynamics, 5, 821-839. 
+%     [DOI: 10.5194/esurf-5-821-2017]
 %
-% Input arguments
-%
-%     FD     FLOWobj
-%     DEM    Digital elevation model (GRIDobj)
-%     S      STREAMobj derived from FD
-%
-% 
+% See also: STREAMobj/crs, STREAMobj/quantcarve, STREAMobj/smooth
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 5. April, 2018
+% Date: 31. August, 2024
 
-
-%% include variable selection dialogue
+%% variable selection dialogue if the function is called without arguments
 if nargin == 0 
-    VARS = uigetvariables({'DEM [GRIDobj]','Flow directions [FLOWobj]','Stream network [STREAMobj] (optional)'},...
-        'ValidationFcn',{@(x) isa(x,'GRIDobj'),@(x) isa(x,'FLOWobj'),@(x) isa(x,'STREAMobj')});
+
+    % Get variables
+    VARS = uigetvariables({'S [STREAMobj]','DEM [GRIDobj or nal]'},...
+        'ValidationFcn',{@(x) isa(x,'STREAMobj'),@(x) isa(x,'GRIDobj') || (isnumeric(x) && isrow(x))});
     
     if isempty(VARS)
         disp('No variables selected.')
         return
     end
     
-    DEM  = VARS{1};
-    FD   = VARS{2};
-    if ~isempty(VARS{3})
-        % snap to streamnetwork
-        snp = true;
-        S = VARS{3};
-    else
-        snp = false;
-    end
+    S    = VARS{1};
+    z    = ezgetnal(S,VARS{2});
     
-    if isempty(DEM) || isempty(FD)
-        error('TopoToolbox:flowpathapp','DEM and flow directions must be supplied')
+    if isempty(z) || isempty(S)
+        error('TopoToolbox:crsapp','STREAMobj and elevations must be supplied')
     end
+
 elseif nargin == 2
-    snp = false;
+
+    z = ezgetnal(S,DEM);
+
 else
-    snp = true;
+    error('Wrong number of input arguments.')
 end
 
-%% Check input arguments
-validatealignment(FD,DEM);
-if snp
-    validatealignment(S,DEM);
-    if ~issubgraph(S,FD)
-        error('The STREAMobj S must have been derived from the FLOWobj.')
+%% Preallocate parameter array 
+params = struct();
+
+fhandle = figure('Name','crsapp');
+
+%% Controls
+hp  = uipanel('FontSize',12,...
+             'BackgroundColor','white',...
+             'Position',[0 0 0.3 1],'Parent',fhandle);
+mt  = uicontrol(hp,'Style','text',...
+             'String','controls',...
+             'HorizontalAlignment','left',...
+             'String','Controls',...
+             'Units','normalized',...
+             'FontWeight','bold',...
+             'Position',[0 .96 1 .04]);
+%% K         
+s = sprintf('Larger K will increasingly smooth the profiles.');      
+cKtext = uicontrol(hp,'Style','text',...
+                'HorizontalAlignment','left',...
+                'String','K = 1',...
+                'Units','normalized',...
+                'Position',[0 .85 1 .05],...
+                'TooltipString',s);
+cK = uicontrol(hp,'Style','slider',...
+                'Units','normalized',...
+                'Position',[0 .9 1 .045],...
+                'Min',-1,...
+                'Max',4,...
+                'Value',0,...
+                'SliderStep',[0.01 0.1],...
+                'Callback',@display_Kslider_value,...
+                'TooltipString',s);       
+
+%% Gradient            
+s = sprintf('Activate downstream monotonicity constraint.');              
+cng = uicontrol(hp,'Style','checkbox',...
+                'String','Activate downstream monotonicity constraint',...
+                'Units','normalized',...
+                'Position',[0 .8 1 .045],...
+                'TooltipString',s,...
+                'Value',1,...
+                'Callback',@activateGradientMonotinicity);               
+s = sprintf('Imposes a minimum downstream gradient to the profile.');               
+cmgtext = uicontrol(hp,'Style','text',...
+                'HorizontalAlignment','left',...
+                'String','Minimum gradient = 0',...
+                'Units','normalized',...                
+                'Position',[0 .7 1 .05],...
+                'TooltipString',s);
+cmg = uicontrol(hp,'Style','slider',...
+                'Units','normalized',...
+                'Min',0,...
+                'Max',0.04,...
+                'Value',0,...
+                'SliderStep',[0.0001 0.001],...
+                'Position',[0 .75 1 .045],...
+                'Callback',@display_MGslider_value,...
+                'TooltipString',s);              
+%% Tau         
+s = sprintf('Choose Tau (Quantile between 0 and 1).');      
+cTautext = uicontrol(hp,'Style','text',...
+                'HorizontalAlignment','left',...
+                'String','Tau = 0.5',...
+                'Units','normalized',...
+                'Position',[0 .6 1 .05],...
+                'TooltipString',s);
+cTau = uicontrol(hp,'Style','slider',...
+                'Units','normalized',...
+                'Position',[0 .65 1 .045],...
+                'Min',0.0001,...
+                'Max',0.9999,...
+                'Value',0.5,...
+                'SliderStep',[0.001 0.1],...
+                'Callback',@display_Tauslider_value,...
+                'TooltipString',s);            
+
+s = sprintf('Remove curvature penalty at tributary junctions.');              
+cnst = uicontrol(hp,'Style','checkbox',...
+                'String','Knicks at tributary junctions',...
+                'Units','normalized',...
+                'Position',[0 .55 1 .045],...
+                'TooltipString',s);            
+         
+%% Controls                       
+% Push button       
+s = sprintf('Push to smooth profile.');  
+pbh = uicontrol(hp,'Style','pushbutton','String','Calculate now',...
+                'Units','normalized',...
+                'Position',[0 .40 1 .05],...
+                'Callback',@smoothnetwork,...
+                'TooltipString',s);               
+%% Plot
+ha = uipanel('FontSize',12,...
+             'BackgroundColor','white',...
+             'Position',[.3 0 0.7 1]);
+ax = axes('Parent',ha);
+box(ax,'on');
+hold(ax,'on')
+hlorig = plotdz(S,z,'color',[.4 .4 .4]);
+
+hlsmooth = plot(0,min(z));
+zs = [];
+
+%% Push
+% Push button
+s = sprintf('Export smoothed elevations to the base workspace.');  
+pexp = uicontrol(hp,'Style','pushbutton','String','Export node attribute list',...
+                'Units','normalized',...
+                'Position',[0 .35 1 .05],...
+                'Callback',@exportnal,...
+                'Enable','off',...
+                'TooltipString',s);  
+% Push button            
+s = sprintf('Export parameter settings to the base workspace.'); 
+pexpp = uicontrol(hp,'Style','pushbutton','String','Export parameters',...
+                'Units','normalized',...
+                'Position',[0 .30 1 .05],...
+                'Callback',@exportparams,...
+                'Enable','off',...
+                'TooltipString',s);  
+
+function display_MGslider_value(hObject,callbackdata)
+   newval = num2str(hObject.Value);
+   set(cmgtext,'String',['Minimum gradient = ' newval]);
+end
+function display_Kslider_value(hObject,callbackdata)
+   newval = num2str(10.^(hObject.Value));
+   set(cKtext,'String',['K = ' newval]);
+end
+function display_Tauslider_value(hObject,callbackdata)
+   newval = num2str(hObject.Value);
+   set(cTautext,'String',['Tau = ' newval]);
+end
+function activateGradientMonotinicity(hObject,callbackdata)
+    newval = hObject.Value;
+    if ~newval
+        set(cmg,'Enable','off');
+    else
+        set(cmg,'Enable','on');
     end
 end
-
-%% Make sure that DEM is projected
-if isGeographic(DEM)
-    error('DEM must be projected.')
-end
-
-%%
-
-% Default line color
-props.linecolor = 'k';
-
-
-% If you set fastindexing to true then downstream processing is much faster
-% for tools that do computations along single flow paths such as
-% flowpathextract
-FD.fastindexing = true;
-
-% create figure
-scrsz = get(0,'ScreenSize');
-% pos = [left, bottom, width, height]
-hFig = figure('OuterPosition',[1/4*scrsz(3) 1/3*scrsz(4) 3/4*scrsz(3) 2/3*scrsz(4)],...
-              'MenuBar','none',...
-              'NumberTitle','off',...
-              'Name','Main');
-          
-% create menu
-hMenuView    = uimenu(hFig,'Label','View'); 
-hButtonMenuColor = uimenu(hMenuView,'Label','Line Color'); 
-colors = 'kbgyr';
-hButtonColors(1) = uimenu(hButtonMenuColor,'Label','black','Checked','on','Callback',@(src,event) changelinecolor(src,event)); 
-hButtonColors(2) = uimenu(hButtonMenuColor,'Label','blue','Checked','off','Callback',@(src,event) changelinecolor(src,event));
-hButtonColors(3) = uimenu(hButtonMenuColor,'Label','green','Checked','off','Callback',@(src,event) changelinecolor(src,event));
-hButtonColors(4) = uimenu(hButtonMenuColor,'Label','yellow','Checked','off','Callback',@(src,event) changelinecolor(src,event));
-hButtonColors(5) = uimenu(hButtonMenuColor,'Label','red','Checked','off','Callback',@(src,event) changelinecolor(src,event));
-
-
-hButtonClear = uimenu(hMenuView,'Label','Clear','Callback',@(src,event) clearvectorplots);  
-
-hMenuExport   = uimenu(hFig,'Label','Export'); 
-hButtonExport = uimenu(hMenuExport,'Label','Export STREAMobj to workspace','Callback',@(src,event) exporttoworkspace);    
-hButtonExportXLS = uimenu(hMenuExport,'Label','Export streams to Excel','Callback',@(src,event) writetoexcel); 
-hButtonExportTXT = uimenu(hMenuExport,'Label','Export streams to ASCII','Callback',@(src,event) writetotxtfile);
-hButtonExportSHP = uimenu(hMenuExport,'Label','Export streams to Shapefile','Callback',@(src,event) writetoshape);
-
-% calculate hillshade
-
-
-RGB  = imageschs(DEM,DEM,'colormap',landcolor(255));
-
-% create empty axes in figure
-% hAx = axes('parent',hFig);
-hAx = imgca(hFig);
-
-if exist('S','var')
-    WW = false(DEM.size);
-    WW(S.IXgrid) = true;
-    [rr,cc] = ind2sub(DEM.size,S.IXgrid);
-    [~,~,rr,cc] = STREAMobj2XY(S,rr,cc);
+function smoothnetwork(hObject,callbackdata)
+    set(pbh,'Enable','off','String','Please wait ...');
+    set(pexp,'Enable','off')
+    set(pexpp,'Enable','off')
+    drawnow
     
-    clrriv = uint8(ttclr('river')*255);
-    for r = 1:size(RGB,3)
-        temp = RGB(:,:,r);
-        temp(WW) = clrriv(r);
-        RGB(:,:,r) = temp;
-    end
-  
-    [~,SNAPRASTER] = bwdist(WW,'q');
+    params.nonstifftribs = get(cnst,'Value');
+    params.K             = 10.^get(cK,'Value');
+    params.mingradient   = get(cmg,'Value');
+    params.Tau           = get(cTau,'Value');
     
-    FD.ixcix(~WW) = 0;
-    snap = true;
-else
-    snap = false;
+    if ~get(cng,'Value')
+        params.mingradient = nan;
+    end
+    
+    assignin('base','params',params);
+    paramsc = namedargs2cell(params);
+    zs = crs(S,z,paramsc{:},'split',isempty(gcp('nocreate')));
+    if exist('hlsmooth','var')
+        delete(hlsmooth)
+    end
+    hlsmooth = plotdz(S,zs,'color',[1 0 0]);
+    drawnow
+    
+    set(pbh,'Enable','on','String','Calculate now');
+    set(pexp,'Enable','on')
+    set(pexpp,'Enable','on')
 end
 
-% show hillshade using imshow
-hIm = imagesc(RGB,'parent',hAx);
-% create an instance of imscrollpanel and use the API
-hPanel = imscrollpanel(hFig,hIm);
-api    = iptgetapi(hPanel);
-% set to initial magnification
-mag    = api.findFitMag();
-api.setMagnification(mag);
-
-% create magnification box in another window
-hMagBox = immagbox(hFig,hIm);
-pos     = get(hMagBox,'Position');
-set(hMagBox,'Position',[0 0 pos(3) pos(4)])
-imoverview(hIm)
-
-% create figure for profiles
-[hFigProfiles,hAxProfiles] = getprofilefig;
-
-
-%% add callbacks
-enterFcn = @(figHandle, currentPoint)...
-       set(hFig, 'Pointer','crosshair');
-iptSetPointerBehavior(hIm,enterFcn);
-iptPointerManager(hFig);
-
-xlim = get(hIm,'XData');
-ylim = get(hIm,'YData');
-X = 1:xlim(2);
-Y = 1:ylim(2);
-
-set(hFig,'WindowButtonDownFcn',@PressLeftButton);
-
-%% Predefine variables
-IXchannelhead = 0;
-counter = 0;
-LOGgrid = zeros(DEM.size,'uint16');
-IXchannel = {};
-distance  = {};
-hPlot = [];
-hPlotProfiles = [];
-
-
-
-    function PressLeftButton(src,evt)
+function exportnal(hObject,callbackdata)
         
-        % get the axis position
-        p = get(hAx,'CurrentPoint');
-        
-        % check if current point is located inside axis
-        p = p(1,1:2);
-        
-        pixelx = round(axes2pix(xlim(2), xlim, p(1)));
-        pixely = round(axes2pix(ylim(2), ylim, p(2)));
-        
-        if pixelx < xlim(1) || pixelx > xlim(2) ...
-                || pixely < ylim(1) || pixely > ylim(2)
-            % do nothing
-        else
-            % call function
-            IXchannelhead(:) = sub2ind(DEM.size,pixely,pixelx);
-            counter = counter + 1;
-            
-            % snap to stream
-            if snap
-                IXchannelhead(:) = SNAPRASTER(IXchannelhead);
-            end
-            
-            PlotProfiles
-        end
-        
-        
-    end
-
-
-
-    function PlotProfiles
-        % get coordinates of mouse click
-        
-        % get indices of flow path
-        [IXchannel{counter},distance{counter}] = flowpathextract(FD,IXchannelhead);
-        % set values in the ixcix raster (see FD.fastindexing) to zero
-        % where the channel has been identified. This will ensure that
-        % these locations are not visited again and thus for fast execution
-        if LOGgrid(IXchannel{counter}(end)) == 0;
-            LOGgrid(IXchannel{counter}) = counter;
-            distance{counter} = distance{counter}(end) - distance{counter};
-        else
-            tribIX = LOGgrid(IXchannel{counter}(end));
-            LOGgrid(IXchannel{counter}(1:end-1)) = counter;
-            I = IXchannel{tribIX} == IXchannel{counter}(end);
-            distance{counter} = distance{tribIX}(I)+(distance{counter}(end)-distance{counter});
-        end
-        
-        FD.ixcix(IXchannel{counter}) = 0;
-        % plot flow path
-        hold(hAx,'on')
-        [r,c] = ind2sub(DEM.size,IXchannel{counter});
-        hPlot(counter) = plot(hAx,X(c),Y(r),props.linecolor,'LineWidth',2);
-        hold(hAx,'off');
-        drawnow
-
-        hold(hAxProfiles,'on')
-
-        hPlotProfiles(counter) = plot(hAxProfiles,distance{counter},DEM.Z(IXchannel{counter}),props.linecolor);
-        hold(hAxProfiles,'off');
-        drawnow
-        
-    end
-
-    function clearvectorplots
-        delete(hPlot);
-        hPlot = [];
-        delete(hPlotProfiles)
-        hPlotProfiles = [];
-        counter = 0;
-        FD.fastindexing = true;
-        
-        if snap
-            FD.ixcix(~WW) = 0;
-        end
-        
-        LOGgrid = zeros(DEM.size,'uint16');
-        IXchannel = {};
-        distance  = {};
-        
-    end
-
-    function exporttoworkspace
-        W = DEM;
-        W.Z = LOGgrid>0;
-        
-        if any(W.Z(:))
-            S = STREAMobj(FD,W);
+        if ~isempty(zs)
             
             prompt = {'Enter variable name:'};
             title = 'Export';
             lines = 1;
-            def = {'S'};
+            def = {'zs'};
             answer = inputdlg(prompt, title, lines, def);
             if ~isempty(answer) && isvarname(answer{1})
-                assignin('base',answer{1},S);
+                assignin('base',answer{1},zs);
             else
                 return
             end
         else
-            warndlg('No streams available for export.');
+            warndlg('No node attribute list available for export.');
         end
-
-    end
-
-    function writetoexcel(src,event)
-        
-        
-        if isempty(IXchannel)
-            warndlg('No streams available for export.');
-        else
-            [D,header] = makedataset(IXchannel,distance);
-            D = [header; num2cell(D)];
-            
-            [FileName,PathName] = uiputfile({'*.xlsx';'*.xls'},'Write to Excel');
-            
-            if FileName == 0
-                return
-            end
-            
-            xlswrite([PathName FileName],D);
-        
-        end
-    end
-
-    function writetotxtfile(src,event)
- 
-        if isempty(IXchannel)
-            warndlg('No streams available for export.');
-           
-        else
-            [D,header] = makedataset(IXchannel,distance);            
-            [FileName,PathName] = uiputfile({'*.txt'},'Write to text file');
-            
-            if FileName == 0
-                return
-            end
-            
-            fid = fopen([PathName FileName], 'w');
-            
-            for r = 1:numel(header)
-                fprintf(fid, header{r});
-                if r < numel(header)
-                    fprintf(fid, '\t');
-                end 
-            end
-            fprintf(fid, '\n');
-
-            for row=1:size(D,1)
-                fprintf(fid, '%d\t%f\t%f\t%f\t%f\t%f\t%f\n', D(row,:));
-            end
-
-            fclose(fid);
-        
-        end
-    end
-
-    function writetoshape(src,event)
-
-        if isempty(IXchannel)
-            warndlg('No streams available for export.');
-        elseif ~(exist('shapewrite','file')==2)
-            warndlg('The function shapewrite is not available. Shapewrite is part of the Mapping Toolbox.');
-        else
-                        
-            for r = 1:numel(IXchannel)
-
-                SHP(r).Geometry = 'Line';
-                [SHP(r).X, SHP(r).Y] = ind2coord(DEM,IXchannel{r}(:)); 
-                SHP(r).X = SHP(r).X';
-                SHP(r).Y = SHP(r).Y';
-                SHP(r).ID = r;
-                SHP(r).minZ = double(min(DEM.Z(IXchannel{r})));
-                SHP(r).maxZ = double(max(DEM.Z(IXchannel{r})));
-                SHP(r).length = double(max(distance{r})-min(distance{r}));
-                SHP(r).tribtoID = double(LOGgrid(IXchannel{r}(end)));
-                if SHP(r).tribtoID == SHP(r).ID
-                    SHP(r).tribtoID = 0;
-                end
-
-            end
-            
-            SHP = mapstruct2geotable(SHP,'coordinateSystemType','planar',...
-                'CoordinateReferenceSystem',DEM.georef.ProjectedCRS);
-
-            [FileName,PathName] = uiputfile('*.shp','Write to Shapefile');
-            
-            if FileName == 0
-                return
-            end
-            
-            shapewrite(SHP,[PathName FileName]);
-        end
-  
-    end
-
-    function changelinecolor(src,event)
-        
-        
-        I = src == hButtonColors;
-
-        props.linecolor = colors(I);
-
-        
-        h = findobj(hButtonColors,'Checked','on');
-        set(h,'Checked','off');
-        set(src,'Checked','on');
-    end
-  
-
-    function [D,header] = makedataset(IXchannel,distance)
-                
-        A = flowacc(FD);
-        G = gradient(FD,DEM);
-        D = cell(numel(IXchannel),1);
-        for r = 1:numel(IXchannel)
-            D{r}(1:numel(IXchannel{r}),1) = repmat(r,numel(IXchannel{r}),1);
-            [D{r}(:,2), D{r}(:,3)] = ind2coord(DEM,IXchannel{r}(:));            
-            D{r}(:,4) = distance{r}(:);
-            D{r}(:,5) = DEM.Z(IXchannel{r}(:));
-            D{r}(:,6) = A.Z(IXchannel{r}(:)).*(DEM.cellsize).^2;
-            D{r}(:,7) = G.Z(IXchannel{r}(:));
-        end
-        
-        D = cell2mat(D);
-        header = {'ID' 'X' 'Y' 'upstream_distance' 'elevation' 'upslope_area' 'slope'};
-   
-    end
-    
-    function [hFigProfiles,hAxProfiles] = getprofilefig
-        % create figure for profiles
-        hFigProfiles = figure('OuterPosition',[1/4*scrsz(3) 50 3/4*scrsz(3) 1/3*scrsz(4)-50],...
-                      'NumberTitle','off',...
-                      'Name','Profiles') ;
-        hAxProfiles = axes('Parent',hFigProfiles,'Xscale','linear','Yscale','linear','box','on');
-        xlabel(hAxProfiles,'distance from outlet');
-        ylabel(hAxProfiles,'elevation');
-    end    
-
-        
 end
-        
+
+function exportparams(hObject,callbackdata)
+        if isfield(params,'Tau')
+            
+            
+            prompt = {'Enter variable name:'};
+            title = 'Export';
+            lines = 1;
+            def = {'p'};
+            answer = inputdlg(prompt, title, lines, def);
+            if ~isempty(answer) && isvarname(answer{1})
+                assignin('base',answer{1},params);
+            else
+                return
+            end
+        else
+            warndlg('No node parameters available for export.');
+        end
+end
+end
+
 
 
 %% -----------------------------------------------------

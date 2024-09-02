@@ -1,6 +1,6 @@
 function FD = randomize(FD)
 
-%RANDOMIZE randomize multiple flow directions
+%RANDOMIZE Randomize multiple flow directions
 %
 % Syntax
 %
@@ -42,8 +42,8 @@ function FD = randomize(FD)
 %
 % See also: FLOWobj, FLOWobj/multi2single, FLOWobj/flowconvergence
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 23. May, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 1. September, 2024
 
 % If FD has single flow directions, do nothing
 if ~ismulti(FD)
@@ -56,8 +56,3 @@ FD.fraction = rand(size(FD.fraction));
 % normalize so that the sum in each fraction is one
 FD = multi_normalize(FD);
 
-% Normalize code
-% [~,~,ix] = unique(FD.ix);
-% s = accumarray(ix,FD.fraction);
-% s = s(ix);
-% FD.fraction = FD.fraction./s;

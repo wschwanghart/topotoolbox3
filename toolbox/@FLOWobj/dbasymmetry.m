@@ -1,4 +1,4 @@
-function [D,AS,ST] = dbasymmetry(FD,S,varargin)
+function [D,AS,ST] = dbasymmetry(FD,S,options)
 
 %DBASYMMETRY Drainage basin asymmetry
 %
@@ -13,6 +13,13 @@ function [D,AS,ST] = dbasymmetry(FD,S,varargin)
 %     derives the longest flow path within each drainage basin based on the
 %     stream network S. The function then calculates the part of each
 %     drainage basin that is hydrologically right to the longest flowpath.
+%
+%     Drainage basin asymmetry is a metric used in geomorphology and
+%     hydrology to understand the underlying tectonic, geological, and
+%     climatic factors that influence the development of river basins.
+%     Specifically, it measures the degree to which a drainage basin is
+%     skewed or asymmetrical, which can reveal valuable information about
+%     the landscape's evolution.
 %
 % Input arguments
 %
@@ -57,18 +64,20 @@ function [D,AS,ST] = dbasymmetry(FD,S,varargin)
 %  
 % See also: STREAMobj, FLOWobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 6. December, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
-p = inputParser;         
-p.FunctionName = 'dbasymmetry';
-addParameter(p,'side','right',@(x) ischar(validatestring(x,{'right','left'})));
-addParameter(p,'extractlongest',true);
-parse(p,varargin{:});
+arguments
+    FD  FLOWobj
+    S   STREAMobj
+    options.side = 'right'
+    options.extractlongest (1,1) = true
+end
 
+options.side = validatestring(options.side,{'right','left'});
 [DB,ixoutlet] = drainagebasins(FD,S);
 
-if p.Results.extractlongest
+if options.extractlongest
     S   = extend2divide(S,FD);
     S   = trunk(S);
 
@@ -116,7 +125,7 @@ ANG   = GRIDobj(FD,'single')*nan(1,'single');
 % Write back to GRIDobj
 ANG.Z(S.IXgrid(S.ixc)) = s_ang;
 
-switch lower(p.Results.side)
+switch lower(options.side)
     case 'right'
         I = ang <= ANG.Z(ixc);    
     case 'left'

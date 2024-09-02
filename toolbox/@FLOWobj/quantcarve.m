@@ -1,10 +1,10 @@
 function DEM = quantcarve(FD,DEM,tau)
 
-%QUANTCARVE quantile carving
+%QUANTCARVE Quantile carving
 %
 % Syntax
 %
-%     DEMc = quantcarve(S,DEM,tau)
+%     DEMc = quantcarve(FD,DEM,tau)
 %
 % Description
 %
@@ -56,8 +56,8 @@ function DEM = quantcarve(FD,DEM,tau)
 %
 % See also: STREAMobj/quantcarve, FLOWobj/imposemin, STREAMobj/crs
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. July, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
 
 % check input arguments

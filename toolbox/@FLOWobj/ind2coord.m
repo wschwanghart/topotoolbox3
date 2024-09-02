@@ -1,6 +1,6 @@
 function [x,y] = ind2coord(FD,ix)
 
-%IND2COORD convert linear index to x and y coordinates
+%IND2COORD Convert linear index to x and y coordinates
 %
 % Syntax
 %

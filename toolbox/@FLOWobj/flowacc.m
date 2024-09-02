@@ -44,8 +44,8 @@ function OUT = flowacc(FD,W0,RR)
 % 
 % See also: FLOWobj, GRIDobj, FLOWobj/drainagebasins
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 4. March, 2016
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
   
 
 % 4/3/2016: the function now makes copies of FD.ix and FD.ixc (see 
@@ -147,10 +147,7 @@ end
 
 
 %% Prepare Output
-% empty GRIDobj
-OUT = copy2GRIDobj(FD);
-% write output to GRIDobj
-OUT.Z = A;
+OUT = GRIDobj(FD,A);
 OUT.zunit = 'nr of cells';
 OUT.name  = 'flow accumulation';
 

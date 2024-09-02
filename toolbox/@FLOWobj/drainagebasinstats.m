@@ -1,6 +1,6 @@
 function stats = drainagebasinstats(FD,L,varargin)
 
-%DRAINAGEBASINSTATS zonal statistics on drainage basins
+%DRAINAGEBASINSTATS Zonal statistics on drainage basins
 % 
 % Syntax
 %
@@ -24,6 +24,12 @@ function stats = drainagebasinstats(FD,L,varargin)
 %     L          label grid (GRIDobj). 
 %     MS         polygon mapping structure array
 %
+%     Additional parameter name/value pairs
+%
+%     'waitbar'               {false} or true
+%     'geotable'              {true} or false. If true, the function
+%                             returns a geotable. Otherwise, a mapping 
+%                             structure will be returned.
 %     'name1',GRIDobj1,...    Concatenate pairs of grid names and GRIDobj
 %                             that shall be used to calculate statistics.
 %                             'name1' will be used as prefix in the output
@@ -42,21 +48,25 @@ function stats = drainagebasinstats(FD,L,varargin)
 %     ix = streampoi(S,'channelheads','ix');
 %     G  = gradient8(DEM);
 %     stats = drainagebasinstats(FD,ix,'grad',G);
-%     histogram([stats.grad_mean])
+%     histogram(stats.grad_mean)
 %
 % See also: FLOWobj, drainagebasins
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
+
+p = inputParser;
+p.FunctionName = 'FLOWobj/drainagebasinstats';
+p.KeepUnmatched = true;
+
+addParameter(p,'waitbar',false)
+addParameter(p,'geotable',true)
+parse(p,varargin{:});
 
 % check additional input grids
-narg = numel(varargin);
-if mod(narg,2)~=0
-    error('TopoToolbox:WrongInput',...
-        ['additional grids must come as two input argument \newline'...
-         'pairs (name1, GRIDobj1,name2,GRIDobj2,...)'])
-end
-narg = narg/2;
+C = namedargs2cell(p.Unmatched);
+narg = numel(C)/2;
+
 
 if isa(L,'GRIDobj')
     % get unique labels in L
@@ -78,7 +88,7 @@ else
     l   = 1:nrlabels;
 end
 
-wb = nrlabels > 2;
+wb = nrlabels > 2 && p.Results.waitbar;
 if wb
     h = waitbar(0,'please wait');
 end
@@ -138,39 +148,46 @@ for r=1:nrlabels
     
     if narg > 0
         for r2 = 1:narg
-            v = varargin{(r2-1)*2 +2}.Z(I.Z);
+            v = C{(r2-1)*2 +2}.Z(I.Z);
             v = v(:);
             v = v(~isnan(v));
             
             if islogical(v)
-                stats(r).([varargin{(r2-1)*2 +1} '_mean']) = mean(double(v));
+                stats(r).([C{(r2-1)*2 +1} '_mean']) = mean(double(v));
             else
             v = double(v);
-            stats(r).([varargin{(r2-1)*2 +1} '_mean']) = mean(v);
-            stats(r).([varargin{(r2-1)*2 +1} '_std']) = std(v);
+            stats(r).([C{(r2-1)*2 +1} '_mean']) = mean(v);
+            stats(r).([C{(r2-1)*2 +1} '_std']) = std(v);
             prc = prctile(v,[1 5 33 50 66 95 99]);
-            stats(r).([varargin{(r2-1)*2 +1} '_prc01']) = prc(1);
-            stats(r).([varargin{(r2-1)*2 +1} '_prc05']) = prc(2);
-            stats(r).([varargin{(r2-1)*2 +1} '_prc33']) = prc(3);
-            stats(r).([varargin{(r2-1)*2 +1} '_median']) = prc(4);
-            stats(r).([varargin{(r2-1)*2 +1} '_prc66']) = prc(5);
-            stats(r).([varargin{(r2-1)*2 +1} '_prc95']) = prc(6);
-            stats(r).([varargin{(r2-1)*2 +1} '_prc99']) = prc(7);
+            stats(r).([C{(r2-1)*2 +1} '_prc01']) = prc(1);
+            stats(r).([C{(r2-1)*2 +1} '_prc05']) = prc(2);
+            stats(r).([C{(r2-1)*2 +1} '_prc33']) = prc(3);
+            stats(r).([C{(r2-1)*2 +1} '_median']) = prc(4);
+            stats(r).([C{(r2-1)*2 +1} '_prc66']) = prc(5);
+            stats(r).([C{(r2-1)*2 +1} '_prc95']) = prc(6);
+            stats(r).([C{(r2-1)*2 +1} '_prc99']) = prc(7);
             
             minv = min(v); if isempty(minv); minv = nan; end
             maxv = max(v); if isempty(maxv); maxv = nan; end
-            stats(r).([varargin{(r2-1)*2 +1} '_min']) = minv;
-            stats(r).([varargin{(r2-1)*2 +1} '_max']) = maxv;
-            stats(r).([varargin{(r2-1)*2 +1} '_range']) = maxv-minv;
-            stats(r).([varargin{(r2-1)*2 +1} '_kurtosis']) = kurtosis(v);
-            stats(r).([varargin{(r2-1)*2 +1} '_skewness']) = skewness(v);
+            stats(r).([C{(r2-1)*2 +1} '_min']) = minv;
+            stats(r).([C{(r2-1)*2 +1} '_max']) = maxv;
+            stats(r).([C{(r2-1)*2 +1} '_range']) = maxv-minv;
+            stats(r).([C{(r2-1)*2 +1} '_kurtosis']) = kurtosis(v);
+            stats(r).([C{(r2-1)*2 +1} '_skewness']) = skewness(v);
            
             
             end
         end
     end
 end
+
+% Save as geotable, if required.
+if p.Results.geotable
+    stats = mapstruct2geotable(stats,'coordinateSystemType','planar',...
+        'CoordinateReferenceSystem',FD.georef.ProjectedCRS);
+end
+
 if wb
-close(h);
+    close(h);
 end
 

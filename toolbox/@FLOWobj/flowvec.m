@@ -1,6 +1,6 @@
 function [U,V] = flowvec(FD,L)
 
-%FLOWVEC velocity vectors from FLOWobj
+%FLOWVEC Velocity vectors from FLOWobj
 %
 % Syntax
 %
@@ -12,7 +12,34 @@ function [U,V] = flowvec(FD,L)
 %     flowvec returns the velocity components of the flow network in FD.
 %     The components are normalized so that vector length is one. The
 %     vector
+%
+% Input arguments
+%
+%     FD    FLOWobj
+%     L     GRIDobj with length of vectors (e.g. L = flowacc(FD))
+%
+% Output arguments
+%
+%     U,V   GRIDobjs with x and y components of velocity vectors
+%
+% Example
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD = FLOWobj(fillsinks(DEM),'multi');
+%     A = flowacc(FD);
+%     [U,V] = flowvec(FD,sqrt(A));
+%     [X,Y] = getcoordinates(DEM,'mat');
+%     quiver(X,Y,U.Z,V.Z)
+%
+% See also: FLOWobj, FLOWobj/INFLUENCEMAP, FLOWobj/FLOWobj2M
+%
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
+arguments
+    FD FLOWobj
+    L  GRIDobj
+end
 
 U = GRIDobj(FD);
 [X,Y] = getcoordinates(U);

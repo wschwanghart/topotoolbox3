@@ -1,6 +1,6 @@
 function DEM = imposemin(FD,DEM,sl)
 
-%IMPOSEMIN minima imposition (carving) along drainage network
+%IMPOSEMIN Minima imposition (carving) along drainage network
 %
 % Syntax
 %
@@ -43,30 +43,31 @@ function DEM = imposemin(FD,DEM,sl)
 %
 % See also: STREAMobj/imposemin
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
+arguments
+    FD   FLOWobj
+    DEM  GRIDobj
+    sl (1,1) {mustBeNumeric} = 0
+end
 
-% 4/3/2016: the function now makes copies of FD.ix and FD.ixc (see 
-% FLOWobj/flowacc
-
-
-narginchk(2,3)
 validatealignment(FD,DEM);
 dem = DEM.Z;
 
 ix = FD.ix;
 ixc = FD.ixc;
 
-if nargin == 2;    
-    for r = 1:numel(ix);
+if nargin == 2    
+    for r = 1:numel(ix)
         dem(ixc(r)) = min(dem(ix(r)),dem(ixc(r)));
     end
     
-elseif nargin == 3;
+elseif nargin == 3
+    
     d = getdistance(FD.ix,FD.ixc,FD.size,FD.cellsize);
     d = d*sl;
-    for r = 1:numel(ix);
+    for r = 1:numel(ix)
         dem(ixc(r)) = min(dem(ix(r))-d(r),dem(ixc(r)));
     end
 end

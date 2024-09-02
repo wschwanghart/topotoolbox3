@@ -1,6 +1,6 @@
 function G = gradient(FD,DEM)
 
-%GRADIENT gradient along flow direction
+%GRADIENT Gradient along flow direction
 %
 % Syntax 
 %
@@ -34,8 +34,13 @@ function G = gradient(FD,DEM)
 %
 % See also: GRIDobj/gradient8, GRIDobj/arcslope, STREAMobj/gradient
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 27. March, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
+
+arguments
+    FD    FLOWobj
+    DEM   GRIDobj
+end
 
 validatealignment(FD,DEM)
 d = getdistance(FD.ix,FD.ixc,FD.size,FD.cellsize);

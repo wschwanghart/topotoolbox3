@@ -84,9 +84,8 @@ function [OUT,varargout] = drainagebasins(FD,varargin)
 % See also: FLOWobj, GRIDobj/snap2stream, FLOWobj/streamorder,
 %           GRIDobj/shufflelabel
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 3. December, 2018
-
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
 
 % 4/3/2016: the function now makes copies of FD.ix and FD.ixc (see 
@@ -173,9 +172,8 @@ elseif nargin > 1
 end
 
 %% Prepare Output
-OUT = copy2GRIDobj(FD);
 % write output to GRIDobj
-OUT.Z = D;
+OUT = GRIDobj(FD,D);
 OUT.zunit = '';
 OUT.name  = 'drainage basins';
 

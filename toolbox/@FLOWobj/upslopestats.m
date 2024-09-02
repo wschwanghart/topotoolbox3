@@ -1,6 +1,6 @@
 function OUT = upslopestats(FD,VAR,meth,S)
 
-%UPSLOPESTATS upslope statistics computed in flow directions
+%UPSLOPESTATS Upslope statistics computed in flow directions
 %
 % Syntax
 %
@@ -11,9 +11,9 @@ function OUT = upslopestats(FD,VAR,meth,S)
 % Description
 %
 %     upslopestats returns various statistical parameters such as mean and
-%     standard deviation of each cell's upslope located cells in VAR based on
-%     the flow direction matrix M. Note that while mean and standard 
-%     deviation are calculated fairly fast, the calculation of minimum and 
+%     standard deviation of each cell's upslope located cells in VAR based
+%     on the flow direction matrix M. Note that while mean and standard
+%     deviation are calculated fairly fast, the calculation of minimum and
 %     maximum is non-vectorized and usually takes longer to evaluate.
 %
 % Input
@@ -156,8 +156,7 @@ end
 
 %% Prepare Output
 % empty GRIDobj
-OUT = GRIDobj(FD,'single');
-OUT.Z = VAR;
+OUT = GRIDobj(FD,VAR);
 OUT.zunit = '';
 OUT.name  = ['upslope statistics (' meth ')'];
 

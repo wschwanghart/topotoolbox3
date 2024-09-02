@@ -40,8 +40,8 @@ function [CFD,D,A,cfix] = FLOWobj2cell(FD,IX)
 %
 % See also: FLOWobj, STREAMobj/STREAMobj2cell
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 9. January, 2015
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
 D   = drainagebasins(FD);
 nrd = max(D);
@@ -53,10 +53,8 @@ if nargin == 2
 end
 
 if nargin == 1 && nargout == 4
-    error('a forth output argument is only allowed for two input arguments');
+    error('A forth output argument is only allowed for two input arguments');
 end
-
-
 
 FDcopy = FD;
 FDcopy.ix = [];

@@ -1,6 +1,6 @@
 function [ix,ixc,frac] = find(FD)
 
-%FIND find indices and values of edges in the flow direction graph
+%FIND Find indices and values of edges in the flow direction graph
 %
 % Syntax
 %
@@ -26,9 +26,12 @@ function [ix,ixc,frac] = find(FD)
 %
 % See also: FLOWobj, FLOWobj2M
 %
-% Author: Wolfgang Schwanghart (schwanghart[at]uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 24. June, 2024
 
+arguments
+    FD   FLOWobj
+end
 
 ix = FD.ix;
 ixc = FD.ixc;

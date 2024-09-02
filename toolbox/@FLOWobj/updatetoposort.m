@@ -1,6 +1,6 @@
 function FD = updatetoposort(FD)
 
-%UPDATETOPOSORT update topological sorting
+%UPDATETOPOSORT Update topological sorting
 %
 % Syntax
 %
@@ -20,8 +20,8 @@ function FD = updatetoposort(FD)
 %     FDu  updated FLOWobj
 %
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 21. March, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 21. March, 2024
 
 switch FD.type
     case 'single'
@@ -54,6 +54,4 @@ switch FD.type
         FD.ix  = uint32(p(FD.ix));
         
 end
-
-
 

@@ -9,7 +9,7 @@ function [MS,CCL] = tfactor(FD,S,varargin)
 % Description
 %
 %     tfactor calculates the transverse topographic symmetry factor also
-%     called T-factor.  the T-factor quantifies the drainage basin
+%     called T-factor.  The T-factor quantifies the drainage basin
 %     asymmetry and is calculated from the distance of the main river of a
 %     drainage basin to the basin midline normalized by the distance of the
 %     basin midline to the divide. The algorithm is explained in this blog
@@ -69,7 +69,7 @@ function [MS,CCL] = tfactor(FD,S,varargin)
 %
 % See also: dbasymmetry, STREAMobj/removeedgeeffects, STREAMobj/smooth
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 5. July, 2022
 
 

@@ -1,6 +1,6 @@
 function [OUT,Pc] = dbentropy(FD,ix)
 
-%DBENTROPY entropy of drainage basin delineation
+%DBENTROPY Entropy of drainage basin delineation
 %
 % Syntax
 %
@@ -52,8 +52,8 @@ function [OUT,Pc] = dbentropy(FD,ix)
 %
 % See also: drainagebasins, FLOWobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 21. March, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
 M = FLOWobj2M(FD);
 siz = FD.size;

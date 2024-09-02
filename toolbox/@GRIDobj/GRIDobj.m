@@ -12,6 +12,7 @@ classdef GRIDobj
 %     DEM = GRIDobj();
 %     DEM = GRIDobj([]);
 %     DEM = GRIDobj(FLOWobj or GRIDobj or STREAMobj or PPS,class)
+%     DEM = GRIDobj(FLOWobj or GRIDobj or STREAMobj or PPS, Z)
 %
 %
 % Description
@@ -61,6 +62,11 @@ classdef GRIDobj
 %     or STREAMobj class. DEM.Z is set to all zeros where class can be
 %     integer classes or double or single. By default, class is double.
 %
+%     DEM = GRIDobj(FLOWobj or GRIDobj or STREAMobj, Z) creates an
+%     instance of GRIDobj with all common properties (e.g., spatial
+%     referencing) inherited from another instance of a FLOWobj, GRIDobj 
+%     or STREAMobj class. The second input argument Z is written to DEM.Z.
+%
 % Example
 %
 %     % Load DEM
@@ -71,7 +77,7 @@ classdef GRIDobj
 % See also: FLOWobj, STREAMobj, GRIDobj/info, readgeoraster.
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 1. June, 2024
+% Date: 31. August, 2024
 
     
     properties
@@ -250,7 +256,13 @@ classdef GRIDobj
                     cl = varargin{2};
                 end
 
-                if strcmp(cl,'logical')
+                if ~(ischar(cl) || isstring(cl))
+                    if ~isequal(varargin{1}.size,size(cl))
+                        error('TopoToolbox:wrongInput',...
+                            'Size of TopoToolbox object and input matrix does not match.')
+                    end
+                    Z = cl;
+                elseif strcmp(cl,'logical')
                     Z = false(varargin{1}.size);
                 else
                     Z = zeros(varargin{1}.size,cl);

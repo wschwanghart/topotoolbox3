@@ -34,8 +34,8 @@ function FD = flipdir(FD,varargin)
 %
 % See also: FLOWobj, FLOWobj/multi2single
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 24. December, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 24. December, 2024
 
 A = flowacc(FD);
 

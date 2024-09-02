@@ -1,6 +1,6 @@
 function G = FLOWobj2GRIDobj(F)
 
-%FLOWOBJ2GRIDOBJ create ESRI ArcGIS flow direction grid from FLOWobj
+%FLOWOBJ2GRIDOBJ Create ESRI ArcGIS flow direction grid from FLOWobj
 %
 % Syntax
 %
@@ -32,8 +32,8 @@ function G = FLOWobj2GRIDobj(F)
 % 
 % See also: GRIDobj, GRIDobj2geotiff
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 5. October, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
 switch lower(F.type)
     case {'multi' 'dinf'}

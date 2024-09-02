@@ -41,17 +41,24 @@ function OUT = flowdistance(FD,varargin)
 %
 %     D           distance grid (GRIDobj)
 %
-% Example
+% Example 1: Flow distance in upstream direction
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     FD  = FLOWobj(DEM);
 %     D = flowdistance(FD);
 %     imageschs(DEM,D)
 %
+% Example 2: Maximum downstream distance from random locations
+%
+%     [x,y] = randomsample(DEM,100);
+%     D = flowdistance(FD,x,y,'maxdownstream');
+%     imageschs(DEM,D)
+%
+%
 % See also: FLOWobj, FLOWobj/flowacc, GRIDobj
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 30. November, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
 
 % 4/3/2016: the function now makes copies of FD.ix and FD.ixc (see 
@@ -170,9 +177,7 @@ end
 
 
 %% Prepare Output
-OUT = GRIDobj(FD);
-% write output to GRIDobj
-OUT.Z = D;
+OUT = GRIDobj(FD,D);
 OUT.zunit = '';
 OUT.name  = [direction ' flow distance'];
 

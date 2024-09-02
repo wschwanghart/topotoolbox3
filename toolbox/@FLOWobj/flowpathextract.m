@@ -59,14 +59,14 @@ function [ixchannel,d,x,y] = flowpathextract(FD,ixchannel,A,stopcrit)
 %
 % See also: FlowDirObj, GRIDobj/coord2ind
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 26. January, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
 
 narginchk(2,4)
 validateattributes(ixchannel,{'numeric'},{'scalar','integer'},'flowpathextract','channelstart',2)
 
-if nargin == 2;
+if nargin == 2
     type = 'downstream';
 else
     type = 'upstream';
@@ -79,7 +79,7 @@ switch type
     case 'downstream'
         
         
-        if ~FD.fastindexing;
+        if ~FD.fastindexing
             FD.fastindexing = true;
         end
         
@@ -154,12 +154,12 @@ end
 
 ixchannel = ixchannel(:);
 
-if nargout > 1;
+if nargout > 1
     d = getdistance(ixchannel(1:end-1),ixchannel(2:end),FD.size,FD.cellsize);
     d = [0; cumsum(d)];
 end
 
-if nargout > 2;
+if nargout > 2
     C = copy2GRIDobj(FD);
     [x,y] = ind2coord(C,ixchannel);
 end

@@ -1,6 +1,6 @@
 function OUT = influencemap(FD,varargin)
 
-%INFLUENCEMAP downslope area for specific locations in a digital elevation model
+%INFLUENCEMAP Downslope area for specific locations in a digital elevation model
 %
 % Syntax
 %
@@ -34,26 +34,20 @@ function OUT = influencemap(FD,varargin)
 %
 % See also: FLOWobj, FLOWobj/DEPENDENCEMAP
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 4. March, 2016
-
-
-% 4/3/2016: the function now makes copies of FD.ix and FD.ixc (see 
-% FLOWobj/flowacc
-
-
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
 
 %% check input arguments
 narginchk(1,3)
-if nargin == 2;
+if nargin == 2
     % SEED pixels are either supplied as logical matrix, GRIDobj, or linear
     % index
     SEED = varargin{1};
     isGRIDobj = isa(SEED,'GRIDobj');   
     if (islogical(SEED) || isGRIDobj)
         validatealignment(FD,SEED);
-        if isGRIDobj;
+        if isGRIDobj
             SEED = SEED.Z;
         end
     else
@@ -62,7 +56,7 @@ if nargin == 2;
         SEED = false(FD.size);
         SEED(ix) = true;
     end
-elseif nargin == 3;
+elseif nargin == 3
     % SEED pixels are supplied as coordinate pairs
     ix   = coord2ind(FD,varargin{1},varargin{2});
     SEED = false(FD.size);
@@ -72,14 +66,12 @@ end
 %% Do calculation
 ixtemp  = FD.ix;
 ixctemp = FD.ixc;
-for r = 1:numel(FD.ix);
+for r = 1:numel(FD.ix)
     SEED(ixctemp(r)) = SEED(ixtemp(r)) || SEED(ixctemp(r));
 end
 
 %% Prepare Output
 % empty GRIDobj
-OUT = copy2GRIDobj(FD);
-% write output to GRIDobj
-OUT.Z = SEED;
+OUT = GRIDobj(FD,SEED);
 OUT.zunit = 'logical';
 OUT.name  = 'influence map';

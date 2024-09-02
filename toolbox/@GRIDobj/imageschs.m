@@ -1,4 +1,4 @@
-function rgb = imageschs(DEM,A,varargin)
+function rgb = imageschs(DEM,A,options)
 
 %IMAGESCHS plot hillshade image with overlay
 %
@@ -40,8 +40,8 @@ function rgb = imageschs(DEM,A,varargin)
 %
 % Parameter name/value pairs
 %
-%     caxis            two element vector defining the value range. Default 
-%                      is [min(A) max(A)].  
+%     caxis or clim    two element vector defining the value range. Default 
+%                      is [min(A) max(A)]. clim has precedence over caxis.  
 %     colorbar         false or true (default)
 %     colorbarlabel    string. Title for the colorbar
 %     colorbarylabel   string. Label for the y-axis of the colorbar
@@ -152,10 +152,10 @@ function rgb = imageschs(DEM,A,varargin)
 %     to shaded relief representation. Computers & Geosciences, 29,
 %     1137-1142.
 %
-% See also: HILLSHADE
+% See also: GRIDobj/hillshade, imagesc
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 4. June, 2024
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 30. August, 2024
 
 
 % Change log
@@ -170,106 +170,97 @@ function rgb = imageschs(DEM,A,varargin)
 % 14.6.2016: added options 
 % 06.4.2018: new example
 % 04.6.2024: changed to be fit for TopoToolbox 3
+% 30.8.2024: arguments block
 
+
+%% Input argument parsing
+arguments
+    DEM     GRIDobj
+    A       = DEM
+    options.colormap = parula(255)
+    options.caxis    = []
+    options.clim     = []
+    options.percentclip = []
+    options.truecolor   = [0 1 0]
+    options.falsecolor  = [1 1 1]
+    options.nancolor    = [1 1 1]
+    options.exaggerate  (1,1) {mustBePositive} = 1
+    options.azimuth     (1,1) {mustBeNumeric} = 315
+    options.altitude    (1,1) {mustBeNumeric,mustBePositive} = 60
+    options.colorbar    (1,1) = true
+    options.medfilt     (1,1) = false
+    options.ticklabels  = 'default'
+    options.gridmarkers = []
+    options.gridmarkercolor = 'k'
+    options.useparallel (1,1) = true
+    options.usepermanent (1,1) = true
+    options.colorbarlabel = []
+    options.colorbarylabel = []
+    options.tickstokm (1,1) = false
+    options.method = 'surfnorm'
+    options.brighten {mustBeInRange(options.brighten,-1,1)} = 0
+    options.gcsadjust = true
+
+end
+
+% If the option usepermanent = true, then the function will use the
+% precomputed hillshade
 persistent H
 
-narginchk(1,inf);
-nargoutchk(0,1);
-
-% if A is not supplied to the function, coloring will be according to
-% values in DEM
-if nargin == 1 || (nargin>=2 && isempty(A))
+% If second argument is supplied as empty array, then the DEM will be used
+% to colorize the hillshade.
+if isempty(A)
     A = DEM;
 end
 
-%% Default values can be changed here
-% -----------------------------------
-defaultcolormap = 'parula';
-defaulttruecolor = [0 1 0]; 
-defaultfalsecolor = [1 1 1]; 
-defaultnancolor = [1 1 1];
-defaultexaggerate = 1;
-defaultazimuth  = 315;
-defaultaltitude = 60;
-defaultcolorbar = true;
-defaultmedfilt  = false;
-% -----------------------------------
-%%
+colmapfun  = options.colormap;
+cbar       = options.colorbar;
+truecol    = options.truecolor;
+falsecol   = options.falsecolor;
+exag       = options.exaggerate;
+azi        = options.azimuth;
+alti       = options.altitude;
+nancolor   = options.nancolor;
+usepermanent  = options.usepermanent;
+tokm           = options.tickstokm ~= 0;
+colorBarLabel  =options.colorbarlabel;
+colorBarYLabel =options.colorbarylabel;
+meth       = validatestring(options.method,{'default','surfnorm','mdow'});
+ticklabels = validatestring(options.ticklabels,{'default','none','nice'});
+gridmarkers= options.gridmarkers;
+gridmarkercolor = options.gridmarkercolor;
+clims      = options.caxis;
+if ~isempty(options.clim)
+    clims      = options.clim;
+end
 
-% Parse inputs
-p = inputParser;
-p.FunctionName = 'GRIDobj/imageschs';
-% required
-addRequired(p,'DEM',@(x) isa(x,'GRIDobj'));
-addRequired(p,'A',@(x) isa(x,'GRIDobj') || ismatrix(A));
-% optional
-addParameter(p,'colormap',defaultcolormap,@(x)(ischar(x) || size(x,2)==3));
-addParameter(p,'caxis',[],@(x) numel(x) == 2);
-addParameter(p,'percentclip',[],@(x) isscalar(x) && x>=0 && x<50);
-addParameter(p,'truecolor',defaulttruecolor,@(x) isequal(size(x),[1 3]) && (max(x)<=1) && (min(x) >= 0));
-addParameter(p,'falsecolor',defaultfalsecolor,@(x) isequal(size(x),[1 3]) && (max(x(:))<=1) && (min(x(:)) >= 0));
-addParameter(p,'nancolor',defaultnancolor,@(x) isequal(size(x),[1 3]) && (max(x(:))<=1) && (min(x(:)) >= 0));
-addParameter(p,'exaggerate',defaultexaggerate,@(x) isscalar(x) && x>0);
-addParameter(p,'azimuth',defaultazimuth ,@(x) isscalar(x) && x>0);
-addParameter(p,'altitude',defaultaltitude,@(x) isscalar(x) && x>0);
-addParameter(p,'colorbar',defaultcolorbar,@(x) isscalar(x));
-addParameter(p,'medfilt',defaultmedfilt,@(x) isscalar(x));
-addParameter(p,'ticklabels','default',@(x) ischar(x));
-addParameter(p,'gridmarkers',[],@(x) numel(x) == 1 || numel(x) == 2);
-addParameter(p,'gridmarkercolor','k');
-addParameter(p,'useparallel',true);
-addParameter(p,'usepermanent',false);
-addParameter(p,'colorbarlabel',[],@(x) ischar(x));
-addParameter(p,'colorbarylabel',[],@(x) ischar(x));
-addParameter(p,'tickstokm',false,@(x) isscalar(x));
-addParameter(p,'method','surfnorm');
-addParameter(p,'brighten',0,@(x) x>=-1 & x <= 1);
-addParameter(p,'gcsadjust',true)
-parse(p,DEM,A,varargin{:});
-
-% required
-DEM        = p.Results.DEM;
-A          = p.Results.A;
-colmapfun  = p.Results.colormap;
-cbar       = p.Results.colorbar;
-truecol    = p.Results.truecolor;
-falsecol   = p.Results.falsecolor;
-exag       = p.Results.exaggerate;
-azi        = p.Results.azimuth;
-alti       = p.Results.altitude;
-nancolor   = p.Results.nancolor;
-usepermanent  = p.Results.usepermanent;
-tokm           = p.Results.tickstokm > 0;
-colorBarLabel  =p.Results.colorbarlabel;
-colorBarYLabel =p.Results.colorbarylabel;
-meth       = validatestring(p.Results.method,{'default','surfnorm','mdow'});
-
+%% Adjust pixelsize if DEM has a geographic coordinate system
 % If the DEM is in a geographic coordinate system, adjust exaggeration
 % according to the pixel width in the center of the DEM.
-if isGeographic(DEM) && p.Results.gcsadjust
+if isGeographic(DEM) && options.gcsadjust
     [lon,lat] = getcoordinates(DEM);
     mlat = mean(lat);
     dlon = distance(mlat,lon(1),mlat,lon(2),DEM.georef.GeographicCRS.Spheroid);
     exag = exag*(DEM.cellsize)/dlon;
 end
     
-ticklabels = validatestring(p.Results.ticklabels,{'default','none','nice'});
-gridmarkers= p.Results.gridmarkers;
-gridmarkercolor = p.Results.gridmarkercolor;
-
+%% 
 % check if input matrices align
 validatealignment(DEM,A)
 
 if isa(A,'GRIDobj')
     A = A.Z;
 end
-
+    
 % constrain color range to values given in caxis
-if ~isempty(p.Results.caxis)
-    A(A<p.Results.caxis(1)) = p.Results.caxis(1);
-    A(A>p.Results.caxis(2)) = p.Results.caxis(2);
-elseif ~isempty(p.Results.percentclip)
-    qclip = p.Results.percentclip/100;
+if ~clims
+    A(A<clims(1)) = clims(1);
+    A(A>clims(2)) = clims(2);
+end
+
+% percentile clipping
+if ~isempty(options.percentclip)
+    qclip = options.percentclip/100;
     [n,edges] = histcounts(A(~isnan(A(:))),'Normalization','cdf');
     lval = edges(find(n>=qclip,1,'first'));
     uval = edges(find(n<(1-qclip),1,'last'));
@@ -279,11 +270,10 @@ elseif ~isempty(p.Results.percentclip)
     else
         A = max(A,lval);
         A = min(A,uval);
-    end
-        
+    end      
 end
 
-% coordinate matrices
+% coordinate vector
 [x,y] = getcoordinates(DEM);
 
 % convert coordinates to km if wanted
@@ -300,7 +290,7 @@ if usepermanent && isequal(size(H),DEM.size)
 
 else
     H = hillshade(DEM,'exaggerate',exag,'azimuth',azi,'altitude',alti,...
-        'useparallel',p.Results.useparallel,'method',meth);
+        'useparallel',options.useparallel,'method',meth);
 
     H = H.Z;
     Inan = isnan(H);
@@ -312,7 +302,7 @@ else
     end
     
     % median filtering, if required
-    if p.Results.medfilt
+    if options.medfilt
         H = medfilt2(H,[3 3],'symmetric');
     end
     
@@ -344,10 +334,10 @@ if ~isa(A,'logical')
         end        
     end
     
-    if cbar && isempty(p.Results.caxis)
+    if cbar && isempty(clims)
         alims = [min(A(:)) max(A(:))];
-    elseif cbar && ~isempty(p.Results.caxis)
-        alims = sort(p.Results.caxis,'ascend');
+    elseif cbar && ~isempty(clims)
+        alims = sort(clims,'ascend');
     else
         alims = [min(A(:)) max(A(:))];
     end
@@ -368,8 +358,8 @@ cmap = reshape(cmap,[ncolors 3 nhs]);
 cmap = permute(cmap,[3 1 2]);
 cmap = reshape(cmap,[ncolors*nhs 3]);
 
-if p.Results.brighten
-    cmap = brighten(cmap,p.Results.brighten);
+if options.brighten
+    cmap = brighten(cmap,options.brighten);
 end
 
 % create image that indexes into the new colormap
@@ -402,7 +392,7 @@ if nargout == 0
     % add colorbar if needed
     if cbar
         if alims(1) ~= alims(2) 
-            caxis(alims);
+            clim(alims);
         end
         colormap(gca,cmap(nhs:nhs:nhs*ncolors,:));
         cc = colorbar;%('location','south');
@@ -419,20 +409,8 @@ if nargout == 0
         case 'none'
             set(gca,'XTickLabel',{},'YTickLabel',{});
         case 'nice'
-            xticklocs = get(gca,'XTick');
-            yticklocs = get(gca,'YTick');
             
-            set(gca,'XTick',xticklocs([1 end]))
-            set(gca,'YTick',yticklocs([1 end]))
-            
-            set(gca,'XTickLabel',num2str(xticklocs([1 end])','%d'));
-            set(gca,'YTickLabel',num2str(yticklocs([1 end])','%d'));
-            
-            % rotate tick labels if matlab 2014b or newer available
-            if ~verLessThan('matlab','8.4')
-                set(gca,'YTickLabelRotation',90);
-            end
-                       
+            niceticks(gca);
     end
     
     % plot grid

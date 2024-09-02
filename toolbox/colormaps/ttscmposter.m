@@ -39,7 +39,7 @@ U.Z = cart2pol(U.Z,V.Z);
 
 cmaps = ttscm;
 cmaps = cmaps';
-ixx   = [2:4];
+ixx   = 2:4;
 cmaps(1,ixx) = {flowdistance(FD) 'flowdistance (up)' []};
 cmaps(2,ixx) = {vertdistance2stream(FD,S,DEM) 'vertdistancetostream' []};
 cmaps(3,ixx) = {excesstopography(DEM,'maxgradient',20,'kernelsize',31) 'excesstopography' []};

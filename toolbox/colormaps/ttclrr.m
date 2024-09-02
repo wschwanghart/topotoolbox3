@@ -49,8 +49,8 @@ function clr = ttclrr(name)
 %
 % See also: ttclr, ttscm, ttcmap
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 14. November, 2023 
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 14. November, 2024 
 
 persistent dict
 

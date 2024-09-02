@@ -1,5 +1,5 @@
 function tf = ismulti(FD,typetest)
-%ISMULTI check if FD is multi or single flow direction
+%ISMULTI Determine whether FD is multi or single flow direction
 %
 % Syntax
 %
@@ -31,15 +31,15 @@ function tf = ismulti(FD,typetest)
 %
 % See also: FLOWobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 4. March, 2016
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
 if nargin == 1
     typetest = true;
 end
 
 if typetest
-tf = strcmp(FD.type,'multi');
+    tf = strcmp(FD.type,'multi');
 else 
-tf = any(histcounts(FD.ix,1:(prod(FD.size)+1))>1);
+    tf = any(histcounts(FD.ix,1:(prod(FD.size)+1))>1);
 end

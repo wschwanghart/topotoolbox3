@@ -1,6 +1,6 @@
 function [V,IX] = mapfromnal(FD,S,nal,cl)
 
-%MAPFROMNAL map values from node-attribute list to nearest upstream grid
+%MAPFROMNAL Map values from node-attribute list to nearest upstream grid
 %
 % Syntax
 %
@@ -27,30 +27,35 @@ function [V,IX] = mapfromnal(FD,S,nal,cl)
 %             node-attributes of S. Elements in IX with no downstream
 %             stream pixel are zero.
 %
+% Example
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD = FLOWobj(DEM);
+%     S = STREAMobj(FD,'minarea',1000);
+%     A = flowacc(FD);
+%     V = mapfromnal(FD,S,A);
+%     imagesc(V)
+%
 % See also: FLOWobj, STREAMobj, flowdistance, vertdistance2stream
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 6. November, 2018
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
-narginchk(3,4)
+arguments
+    FD    FLOWobj
+    S     STREAMobj
+    nal   
+    cl = 'single'
+end
 
 % If the variable nal is a GRIDobj than extract the nal
-if isa(nal,'GRIDobj')
-    nal = getnal(S,nal);
-else
-    tf = isnal(S,nal);
-    if ~tf
-        error('3rd input argument is not a node-attribute list')
-    end
-end
+nal = ezgetnal(S,nal);
 
 % check class
 if nargin == 3
     cl = 'single';
 end
     
-
-
 nrnal = numel(S.x);
 nalix = (1:nrnal)';
 
@@ -77,6 +82,4 @@ if isfloat(V.Z)
 end
 I   = IX~=0;
 V.Z(I) = cast(nal(IX(I)),cl);
-
-
 

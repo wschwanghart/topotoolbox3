@@ -1,6 +1,6 @@
 function tf = validatealignment(FD,G)
 
-%VALIDATEALIGNMENT validates whether instances of FLOWobj and GRIDobj are spatially aligned
+%VALIDATEALIGNMENT Validates whether instances of FLOWobj and GRIDobj are spatially aligned
 %
 % Syntax
 %

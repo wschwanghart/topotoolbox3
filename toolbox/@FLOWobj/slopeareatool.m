@@ -52,11 +52,11 @@ addRequired(p,'FD',@(x) isa(x,'FLOWobj'));
 addRequired(p,'DEM',@(x) isa(x,'GRIDobj'));
 
 validfitmethods  = {'ls','lad'};
-addParamValue(p,'minarea',0,@(x) isscalar(x));
-addParamValue(p,'maxarea',inf,@(x) isscalar(x));
-addParamValue(p,'nrbins',50,@(x) isscalar(x));
-addParamValue(p,'mingradient',0.0001,@(x) isscalar(x) && x>0);
-addParamValue(p,'fitmethod','ls');
+addParameter(p,'minarea',0,@(x) isscalar(x));
+addParameter(p,'maxarea',inf,@(x) isscalar(x));
+addParameter(p,'nrbins',50,@(x) isscalar(x));
+addParameter(p,'mingradient',0.0001,@(x) isscalar(x) && x>0);
+addParameter(p,'fitmethod','ls');
 
 parse(p,FD,DEM,varargin{:});
 

@@ -1,4 +1,4 @@
-function varargout = plotdbfringe(FD,varargin)
+function varargout = plotdbfringe(FD,S,options)
 
 %PLOTDBFRINGE Plot semitransparent fringe around each drainage basin
 %
@@ -58,38 +58,34 @@ function varargout = plotdbfringe(FD,varargin)
 % See also: FLOWobj/drainagebasins, GRIDobj/imageschs
 % 
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 20. December, 2021
+% Date: 31. August, 2024
     
-% parse inputs
-p = inputParser;
-p.FunctionName = 'plotdbfringe';
-addRequired(p,'FD')
-addOptional(p,'S',[])
-addParameter(p,'colormap',parula)
-addParameter(p,'shuffle',false)
-addParameter(p,'width',10)
-addParameter(p,'maxalpha',0.9,@(x) x> 0 && x <= 1);
-addParameter(p,'type','linearinward')
-addParameter(p,'complementalpha',false)
-parse(p,FD,varargin{:})
+arguments
+    FD FLOWobj
+    S = []
+    options.colormap = parula
+    options.shuffle (1,1) = false
+    options.width (1,1) = 10
+    options.maxalpha (1,1) {mustBeInRange(options.maxalpha,0,1)} = 0.9
+    options.type = 'linearinward'
+    options.complementalpha (1,1) = false
 
-
-FD = p.Results.FD;
+end
 
 % calculate drainage basins 
-if isempty(p.Results.S)
+if isempty(S)
     D = drainagebasins(FD);
 else
-    D = drainagebasins(FD,p.Results.S);
+    D = drainagebasins(FD,S);
 end
 
 % shuffle labels, if required
-if p.Results.shuffle
+if options.shuffle
     D = shufflelabel(D);
 end
 
 % create colors and RGB image
-clr    = p.Results.colormap;
+clr    = options.colormap;
 clr    = clr*255;
 maxD   = double(max(D));
 
@@ -116,27 +112,27 @@ RGB    = reshape(RGB,[FD.size 3]);
 BDS    = imerode(D.Z,ones(3)) ~= D.Z | imdilate(D.Z,ones(3)) ~= D.Z; 
 DIST   = bwdist(BDS,'quasi-euclidean');
 
-fringetype = validatestring(p.Results.type,{'linearinward','uniform','sine','cosine','exp'});
+fringetype = validatestring(options.type,{'linearinward','uniform','sine','cosine','exp'});
 switch lower(fringetype)
     case 'linearinward'
-        ALPHA    = 1 - min(DIST*1/p.Results.width,1);
+        ALPHA    = 1 - min(DIST*1/options.width,1);
         ALPHA(iszero) = 0;
     case 'uniform'
-        ALPHA = DIST <= p.Results.width;
+        ALPHA = DIST <= options.width;
     case 'sine'
-        ALPHA = sin(DIST/p.Results.width * pi);
-        ALPHA(DIST > p.Results.width) = 0;      
+        ALPHA = sin(DIST/options.width * pi);
+        ALPHA(DIST > options.width) = 0;      
     case 'cosine'
-        ALPHA = (cos(DIST/(p.Results.width) * pi) + 1)*0.5;
-        ALPHA(DIST > p.Results.width) = 0;
+        ALPHA = (cos(DIST/(options.width) * pi) + 1)*0.5;
+        ALPHA(DIST > options.width) = 0;
     case 'exp'
-        ALPHA = exp(-DIST/p.Results.width);
+        ALPHA = exp(-DIST/options.width);
 end
 
-if p.Results.complementalpha
+if options.complementalpha
     ALPHA = 1-ALPHA;
 end
-ALPHA = ALPHA*p.Results.maxalpha;
+ALPHA = ALPHA*options.maxalpha;
 
 if nargout <= 1
 % Plot the RGB image

@@ -1,6 +1,6 @@
 function OUT = dependencemap(FD,varargin)
 
-%DEPENDENCEMAP upslope area for specific locations in a DEM
+%DEPENDENCEMAP Delineate upslope area for specific locations in a DEM
 %
 % Syntax
 %
@@ -93,10 +93,8 @@ end
 
 
 %% Prepare Output
-% empty GRIDobj
-OUT = GRIDobj(FD,'logical');
 % write output to GRIDobj
-OUT.Z = SEED;
+OUT = GRIDobj(FD,SEED);
 OUT.zunit = 'logical';
 OUT.name  = 'dependence map';
 

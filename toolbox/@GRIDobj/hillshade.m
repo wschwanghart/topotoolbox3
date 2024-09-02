@@ -1,4 +1,4 @@
-function OUT2 = hillshade(DEM,varargin)
+function OUT2 = hillshade(DEM,options)
 
 %HILLSHADE Calculate hillshading from a digital elevation model
 %
@@ -52,37 +52,31 @@ function OUT2 = hillshade(DEM,varargin)
 %
 % See also: SURFNORM, IMAGESCHS
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
-
-
-% Parse inputs
-p = inputParser;
-p.StructExpand  = true;
-p.KeepUnmatched = false;
-p.FunctionName = 'hillshade'; 
-addParameter(p,'azimuth',315,@(x) isscalar(x) && x>= 0 && x<=360);
-addParameter(p,'altitude',60,@(x) isscalar(x) && x>= 0 && x<=90);
-addParameter(p,'exaggerate',1,@(x) isscalar(x) && x>0);
-addParameter(p,'useparallel',true);
-addParameter(p,'blocksize',2000);
-addParameter(p,'useblockproc',true,@(x) isscalar(x));
-addParameter(p,'method','default');
-parse(p,varargin{:});
+arguments
+    DEM  GRIDobj
+    options.azimuth (1,1) {mustBeNumeric,mustBeInRange(options.azimuth,0,360)} = 315
+    options.altitude (1,1) {mustBeNumeric,mustBeInRange(options.altitude,0,90)} = 60
+    options.exaggerate (1,1) {mustBeNumeric,mustBePositive} = 1
+    options.useparallel (1,1) = true
+    options.blocksize  (1,1) {mustBeNumeric,mustBePositive} = 2000
+    options.useblockproc (1,1) = true
+    options.method = 'default'
+end
 
 OUT     = DEM;
-OUT.Z   = [];
 
 cs      = DEM.cellsize;
-azimuth = p.Results.azimuth;
-altitude = p.Results.altitude;
-exaggerate = p.Results.exaggerate;
-method   = validatestring(p.Results.method,{'default','surfnorm','mdow'});
+azimuth = options.azimuth;
+altitude = options.altitude;
+exaggerate = options.exaggerate;
+method   = validatestring(options.method,{'default','surfnorm','mdow'});
 
 % Large matrix support. Break calculations in chunks using blockproc
-if numel(DEM.Z)>(10001*10001) && p.Results.useblockproc
-    blksiz = bestblk(size(DEM.Z),p.Results.blocksize);    
+if numel(DEM.Z)>(10001*10001) && options.useblockproc
+    blksiz = bestblk(size(DEM.Z),options.blocksize);    
     padval = 'symmetric';
     Z      = DEM.Z;
     % The anonymous function must be defined as a variable: see bug 1157095
@@ -90,7 +84,7 @@ if numel(DEM.Z)>(10001*10001) && p.Results.useblockproc
     HS = blockproc(Z,blksiz,fun,...
                 'BorderSize',[1 1],...
                 'padmethod',padval,...
-                'UseParallel',p.Results.useparallel);
+                'UseParallel',options.useparallel);
     OUT.Z = HS;
 else
     OUT.Z = hsfun(DEM.Z,cs,azimuth,altitude,exaggerate,method);

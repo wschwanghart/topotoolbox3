@@ -53,7 +53,7 @@ function OUT = streamorder(FD,WW,type)
 % 
 % See also: FLOWobj, FLOWobj/flowacc, STREAMobj/streamorder
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 9. April, 2024
 
 
@@ -113,11 +113,7 @@ switch lower(type)
         S(~W) = 0;
 end
 
-
-
 %% Prepare Output
-OUT = copy2GRIDobj(FD);
-% write output to GRIDobj
-OUT.Z = S;
+OUT = GRIDobj(FD,S);
 OUT.zunit = '';
 OUT.name  = [type ' stream order'];

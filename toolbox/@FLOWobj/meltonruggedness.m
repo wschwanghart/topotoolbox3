@@ -16,7 +16,6 @@ function R = meltonruggedness(FD,DEM)
 %     simply done with the D8 flow direction.
 %     (Description from SAGA GIS, see link in source)
 %     
-%
 % Input arguments
 %
 %     FD   FLOWobj
@@ -43,9 +42,14 @@ function R = meltonruggedness(FD,DEM)
 % link
 % https://sourceforge.net/p/saga-gis/code/ci/master/tree/saga-gis/src/tools/terrain_analysis/ta_hydrology/melton_ruggedness.cpp
 
+arguments 
+    FD FLOWobj
+    DEM GRIDobj
+end
+validatealignment(FD,DEM)
+
 A = flowacc(FD)*DEM.cellsize^2;
 M = upslopestats(FD,DEM,'max');
-
 R = (M-DEM)/sqrt(A);
 
 

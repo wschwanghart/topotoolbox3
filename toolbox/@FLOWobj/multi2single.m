@@ -1,5 +1,5 @@
-function [FD,S] = multi2single(FD,varargin)
-%MULTI2SINGLE converts multiple to single flow direction
+function [FD,S] = multi2single(FD,options)
+%MULTI2SINGLE Converts multiple to single flow direction
 %
 % Syntax
 %
@@ -52,22 +52,20 @@ function [FD,S] = multi2single(FD,varargin)
 %     plot(S,'k')
 %     hold off
 %
-% See also: FLOWobj
+% See also: FLOWobj, FLOWobj/ismulti
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. January, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
-p = inputParser;
-p.FunctionName = 'FLOWobj/multi2single';
-addParameter(p,'minarea',0,@(x) isscalar(x));
-addParameter(p,'unit','pixels',@(x) ischar(validatestring(x, ...
-                            {'pixels', 'mapunits'})));
-addParameter(p,'channelheads',[])
-addParameter(p,'probability',false)
-addParameter(p,'randomize',false)
-addParameter(p,'W',GRIDobj(FD)+1,@(x) validatealignment(FD,x));
-                        
-parse(p,varargin{:});
+arguments
+    FD
+    options.minarea (1,1) {mustBeNumeric,mustBeNonnegative} = 0
+    options.unit {mustBeMember(options.unit,{'pixels','mapunits'})} = 'pixels'
+    options.channelheads = []
+    options.probability (1,1) = false
+    options.randomize (1,1) = false
+    options.W = GRIDobj(FD)+1
+end
 
 switch FD.type
     case 'single'
@@ -76,20 +74,20 @@ switch FD.type
         
     otherwise
         
-        if p.Results.randomize
+        if options.randomize
             FD = randomize(FD);
         end
         
-        if p.Results.minarea > 0 || ~isempty(p.Results.channelheads)
+        if options.minarea > 0 || ~isempty(options.channelheads)
             
-            if isempty(p.Results.channelheads)
+            if isempty(options.channelheads)
                 
-                unit    = validatestring(p.Results.unit,{'pixels', 'mapunits'});
+                unit    = validatestring(options.unit,{'pixels', 'mapunits'});
                 switch unit
                     case 'mapunits'
-                        minarea = p.Results.minarea/(FD.cellsize.^2);
+                        minarea = options.minarea/(FD.cellsize.^2);
                     otherwise
-                        minarea = p.Results.minarea;
+                        minarea = options.minarea;
                 end
                 
                 % Find stream network initiation points. This should not be
@@ -100,7 +98,7 @@ switch FD.type
                 ix  = FD.ix;
                 ixc = FD.ixc;
                 fr  = FD.fraction;
-                A   = p.Results.W.Z;
+                A   = options.W.Z;
                 ini = false(FD.size);
                 for r = 1:numel(ix)
                     if A(ix(r)) < minarea
@@ -111,11 +109,11 @@ switch FD.type
                 end
                 
             else
-                if isa(p.Results.channelheads,'GRIDobj')
-                    ini = p.Results.channelheads.Z > 0;
+                if isa(options.channelheads,'GRIDobj')
+                    ini = options.channelheads.Z > 0;
                 else
                     ini = false(FD.size);
-                    ini(p.Results.channelheads) = true;
+                    ini(options.channelheads) = true;
                 end
             end
             
@@ -127,7 +125,8 @@ switch FD.type
         
         RR = (1:numel(FD.ix))';
         IX = double(FD.ix);
-        if ~p.Results.probability
+        if ~options.probability
+            % Incidence matrix
             S  = sparse(RR,IX,FD.fraction,max(RR),max(IX));
             [~,ii] = max(S,[],1);
         else
@@ -164,7 +163,7 @@ switch FD.type
         I  = false(size(RR));
         I(ii) = true;
         
-        if p.Results.minarea <= 0 && isempty(p.Results.channelheads)
+        if options.minarea <= 0 && isempty(options.channelheads)
         
             FD.ix  = FD.ix(I);
             FD.ixc = FD.ixc(I);

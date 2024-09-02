@@ -1,6 +1,6 @@
 function M = FLOWobj2M(FD)
 
-%FLOWOBJ2M convert instance of FLOWobj to flow direction matrix 
+%FLOWOBJ2M Convert instance of FLOWobj to flow direction matrix 
 %
 % Syntax
 %
@@ -29,9 +29,12 @@ function M = FLOWobj2M(FD)
 %     gplot(M,[x(:) y(:)]) 
 %
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 31. August, 2024
 
+arguments 
+    FD   FLOWobj
+end
 
 nrc = prod(FD.size);
 switch lower(FD.type)
