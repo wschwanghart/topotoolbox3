@@ -26,7 +26,7 @@ function GT = STREAMobj2geotable(S,varargin)
 %
 %     'seglength'   length of line features
 %     'type'        'geo' or 'map'. Determines whether the function returns
-%                   a geoshape or mapshape object.
+%                   geometries as geoshape or mapshape objects.
 %     'attributes'  cell array with attribute data (see STREAMobj2mapstruct
 %                   for details). These data will be aggregated to feature
 %                   properties. 
@@ -84,3 +84,7 @@ end
 
 GT = mapstruct2geotable(GT,'CoordinateReferenceSystem',proj,...
     'coordinateSystemType',t);
+
+if isProjected(S) & strcmp(p.Results.type,'geo')
+    GT = projectshape(GT,4326);
+end

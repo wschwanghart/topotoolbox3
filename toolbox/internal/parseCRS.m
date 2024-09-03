@@ -10,12 +10,17 @@ function [CRS,isproj] = parseCRS(A)
 %
 %     The function takes the input A and returns the coordinate reference
 %     system and whether the CRS is projected or not. A can be a EPSG ID, a
-%     geotable, a GRIDobj, a projcrs or geocrs.
+%     geotable, a GRIDobj or other TopoToolbox object, a projcrs or geocrs.
+%
+%     If A is a TT object (GRIDobj, FLOWobj, ...), then following 
+%     
+%     
+%     
 %
 % See also: table2geotable
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 9. July, 2024
+% Date: 2. September, 2024
 
 if isgeotable(A)
     try
@@ -28,7 +33,12 @@ if isgeotable(A)
         return
     end
 
-elseif isa(A,'GRIDobj') 
+elseif isTTObject(A)
+    
+    if isa(A,'PPS')
+        A = A.S;
+    end
+
     if isProjected(A)
         CRS = A.georef.ProjectedCRS;
         isproj = true;
@@ -38,7 +48,11 @@ elseif isa(A,'GRIDobj')
         isproj = false;
         return
     else
-        error('GRIDobj does not have a defined coordinate reference system.')
+        CRS = [];
+        isproj = nan;
+        % [~,classstr] = isTTObject(A);
+        % error([ classstr ' does not have a defined coordinate reference system.'])
+        return
     end
 
 elseif isnumeric(A)

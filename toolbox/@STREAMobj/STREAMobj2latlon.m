@@ -41,16 +41,20 @@ function [lat,lon,varargout] = STREAMobj2latlon(S,varargin)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 12. June, 2024
 
-if isProjected(S)
-elseif isGeographic(S)
+[CRS,isproj] = parseCRS(S);
+if isnan(isproj)
+    error("S has an undefined CRS.")
+end
+
+if ~isproj 
     error("S already has a geographic CRS.")
 else
-    error("S has an undefined CRS.")
+    
 end
     
 nr = numel(varargin);
 c  = cell(1,nr);
 [x,y,c{:}] = STREAMobj2XY(S,varargin{:});
 
-[lat,lon] = projinv(S.georef.ProjectedCRS,x,y);
+[lat,lon] = projinv(CRS,x,y);
 varargout = c;

@@ -377,69 +377,6 @@ classdef GRIDobj
             end
         end
 
-        function tf = isEqualGeoreference(A,B)
-            %ISEQUALGEOREFERENCE Determines whether two GRIDobjs have the same georeferencing
-            %
-            % Syntax
-            %
-            %     tf = isEqualGeoreference(A,B)
-            %
-            % If A and B have no referencing objects, their reference is
-            % assumed to be the same.
-
-            % Both GRIDobjs do not have referencing objects
-            if isempty(isGeographic(A)) && isempty(isGeographic(B))
-                tf = true;
-                return
-            end
-
-            % One of both GRIDobj does not have a referencing object
-            if xor(isempty(isGeographic(A)),isempty(isGeographic(B)))
-                tf = false;
-                return
-            end
-
-            % Both have different types of referencing objects
-            if xor(isGeographic(A),isGeographic(B))
-                tf = false;
-            end
-
-            % They have geographic referencing objects
-            if isGeographic(A)
-                tf = isequal(A.georef.GeographicCRS,...
-                             B.georef.GeographicCRS);
-                return
-            end
-
-            % They have projected referencing objects
-            if isProjected(A)
-                tf = isequal(A.georef.ProjectedCRS,...
-                             B.georef.ProjectedCRS);
-                return
-            end
-        end
-
-        function tf = isGeographic(A)
-            %ISGEOGRAPHIC Determines whether GRIDobj has a geographic coordinate system
-            % 
-            % Syntax
-            %
-            %     tf = isgeographic(A)
-            %
-            tf = isprop(A.georef,"GeographicCRS");
-            tf = tf && ~isempty(A.georef.GeographicCRS);
-        end
-
-        function tf = isProjected(A)
-            %ISPROJECTED Determines whether GRIDobj has a projected coordinate system
-            % 
-            % Syntax
-            %
-            %     tf = isProjected(A)
-            %
-            tf = isprop(A.georef,"ProjectedCRS");
-            tf = tf && ~isempty(A.georef.ProjectedCRS);
-        end
 
         %% Additional functions to add
         % hasReference Determines whether GRIDobj has a map or geo
