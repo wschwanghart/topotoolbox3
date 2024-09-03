@@ -12,16 +12,16 @@ of GIS-specific and other quantitative methods.
 
 If you have any questions or remarks, please contact the authors:
 
-[Wolfgang Schwanghart](https://www.uni-potsdam.de/de/umwelt/institut/alle-mitarbeiterinnen/schwanghart-wolfgang.html)
-w.schwanghart[at]geo.uni-potsdam.de
+* [Wolfgang Schwanghart](https://github.com/wschwanghart)
 
-[Dirk Scherler](https://sites.google.com/site/scherlerdirk/home)
-scherler[at]gfz-potsdam.de
+* [Dirk Scherler](https://sites.google.com/site/scherlerdirk/home)
+
+* [Will Kearney] (https://github.com/wkearn) 
 
 ## Requirements
 
-TopoToolbox is plat-form independent and requires
-Matlab 2016b or higher and the Image Processing Toolbox. The Mapping
+TopoToolbox v3 is plat-form independent and requires
+Matlab 2023b or higher and the Image Processing Toolbox. The Mapping
 Toolbox is not mandatory, but good to have to facilitate easy data
 exchange with GIS software. Some functions support parallelisation using the 
 Parallel Toolbox. Few functions require the Optimization or Statistics
@@ -85,18 +85,18 @@ Earth Surface Dynamics, 8, 261-274. [DOI: 10.5194/esurf-8-261-2020](http://dx.do
 ### Point patterns on stream networks
 
 - Schwanghart, W., Molkenthin, C., & Scherler, D. (2020). A systematic approach and software for the analysis 
-of point patterns on river networks. Earth Surface Processes and Landforms, accepted. [DOI: 10.1002/esp.5127](http://dx.doi.org/10.1002/esp.5127)
+of point patterns on river networks. Earth Surface Processes and Landforms, 46, 9, 1847-1862. [DOI: 10.1002/esp.5127](http://dx.doi.org/10.1002/esp.5127)
 
 ## Getting started
 
 Before working with TopoToolbox the directories and functions must be on the search 
 path of Matlab. Enter following code into the command line:
 
-        addpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox-2'))
+        addpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox'))
 		
 To remove .git-folders from the path, run
 
-        rmpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox-2\.git'));
+        rmpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox\.git'));
 		
 To make these paths permanent, use the command
 
@@ -113,7 +113,7 @@ resource for code and examples is the [TopoToolbox blog](http://topotoolbox.word
 ***
 ## Version History
 
-### pre 2.5
+### 3
 
 - new function: GRIDobj/randomsample - Create a spatially uniform sample based on a GRIDobj
 - new function: tthelp - Search for keywords on the TopoToolbox blog
@@ -125,6 +125,8 @@ resource for code and examples is the [TopoToolbox blog](http://topotoolbox.word
 - new function: table2STREAMobj (see IOtools)
 - new function: STREAMobj/bifurcationratio
 - new function: GRIDobj/createrectmask
+- STREAMobj2kml does not require the kml toolbox anymore.
+
 
 ### 2.4
 
