@@ -16,7 +16,7 @@ If you have any questions or remarks, please contact the authors:
 
 * [Dirk Scherler](https://sites.google.com/site/scherlerdirk/home)
 
-* [Will Kearney] (https://github.com/wkearn) 
+* [Will Kearney](https://github.com/wkearn) 
 
 ## Requirements
 
