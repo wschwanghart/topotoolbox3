@@ -65,19 +65,19 @@ classdef SWATHobj
 %            trace of input data. If activated (true) but the trace of the
 %            profile has been resampled and/or smoothed, ...
 %
-%     'smooth'    scalar {0}
-%            optional smoothing of profile trace in x,y space. Number
-%            corresponds to the length of the filter in map units along the
-%            swath profile. Numbers greater than dx will result in
-%            progressive smoothing up to the point that the function, which
-%            is used for the smoothing (filtfilt) reports an error.
+%     'smooth'    {false}, true
+%            optional smoothing of profile trace in x,y space. The function
+%            uses smoothdata to smooth the profile trace
 %
-%     'smoothlongest'     false,{true}
-%            If the filter length (parameter 'smooth') is too long with
-%            respect to the swath profile's length, this parameter
-%            determines if the smoothing is skipped (false) or performed
-%            with the longest filter length possible (true).
+%     'smoothmethod' {'sgolay'}
+%            method to smooth the profile trace. See smoothdata for more
+%            options.
 %
+%     'smoothingfactor' value between 0 and 1 (default = 0.25)
+%            see smoothdata for explanation of the smoothing factor
+%
+%     'hillshade' {false},true
+%            use hillshade when interactively drawing the profile trace.
 %
 % Output
 %
@@ -125,7 +125,8 @@ classdef SWATHobj
 %
 %
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
-% Date: May, 2015
+%         Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: May, 2024
     
     
     properties
@@ -150,86 +151,85 @@ classdef SWATHobj
     
     methods
         
-        function SW = SWATHobj(DEM,varargin)
-            
-            
-            if nargin>1 % SWATHobj created from x,y data
-                
-                if isa(varargin{1},'STREAMobj')
-                    error(['STREAMobj as input in standard call to SWATHobj ' ...
+        function SW = SWATHobj(DEM,x,y,d,options)
+
+            arguments
+                DEM   GRIDobj
+                x = []
+                y = []
+                d = []
+                options.width (1,1) = 1e4
+                options.dx (1,1) = DEM.cellsize
+                options.dy (1,1) = DEM.cellsize
+                options.gap (1,1) = 0
+                options.keepdist (1,1) = true
+                options.keeptrace (1,1) = false
+                options.keepnodes (1,1) = false
+                options.smooth (1,1) = false
+                options.smoothmethod = 'sgolay'
+                options.hillshade (1,1) = false
+                options.smoothingfactor (1,1) = .25
+            end
+
+            if isa(x,'STREAMobj')
+                error(['STREAMobj as input in standard call to SWATHobj ' ...
                         'not supported. Use STREAMobj2SWATHobj instead.'])
-                end
-                
-                ct = zeros(size(varargin));
-                for k = 1:length(varargin)
-                    ct(k) = isnumeric(varargin{k});
-                    if ischar(varargin{k}); break; end
-                end
-                ct = sum(ct);
-                
-                if ct==1
-                    error('Need at least two additional inputs: x,y.')
-                elseif ct>3
-                    error('Too many inputs.')
-                elseif ct>1
-                    x0 = varargin{1};
-                    y0 = varargin{2};
-                    hfig=[];
-                    if ct>2
-                        d0 = varargin{3};
-                    else
-                        d0 = getdistance(x0,y0);
-                    end
-                    varargin(1:ct) = [];
-                end
-                
             end
             
-            if ~exist('x0','var') % SWATHobj is created interactively
+            drawtrace = false;
+            if isempty(x) % SWATHobj is created interactively
+                drawtrace = true;
                 hfig = figure;
-                imagesc(DEM), axis image
+                ax   = axes(hfig);
+                if options.hillshade
+                    imageschs(DEM,[],'colorbar',false)
+                else
+                    imagesc(DEM,'parent',ax)
+                end
                 title('Draw a line (double-click to end)')
                 [XY] = getline;
                 x0 = XY(:,1);
                 y0 = XY(:,2);
                 d0 = getdistance(x0,y0);
-                hold on, plot(x0,y0,'k-'), hold off
+                hold on; 
+                plot(x0,y0,'k-'); 
+                plot(x0,y0,'w--');
+                hold off
+            elseif ~isempty(x) && isempty(y)
+                validateattributes(x,{'numeric'},{'2d','ncols',2})
+                x0 = x(:,1);
+                y0 = x(:,2);
+                d0 = getdistance(x0,y0);
+            elseif ~isempty(x) && ~isempty(y)
+                validateattributes(x,{'numeric'},{'vector'});
+                validateattributes(y,{'numeric'},{'vector','size',size(x)});
+                x0 = x(:);
+                y0 = y(:);
+                if isempty(d)
+                    d0 = getdistance(x0,y0);
+                else
+                    validateattributes(d,{'numeric'},{'vector','size',size(x)});
+                    if ~all(diff(d)>0) || ~all(diff(d)<0)
+                        error('Distances (3rd input variable) must be increasing or decreasing')
+                    end
+                    d0 = d;
+                end
             end
-            
-            
-            
-            
-            %% Parse inputs
-            p = inputParser;
-            p.FunctionName = 'SWATHobj';
-            addRequired(p,'DEM',@(x) isa(x,'GRIDobj'));
-            addParameter(p,'width',1e3,@(x) isnumeric(x))
-            addParameter(p,'gap',0,@(x) isnumeric(x))
-            addParameter(p,'dx',DEM.cellsize,@(x) isnumeric(x))
-            addParameter(p,'dy',DEM.cellsize,@(x) isnumeric(x))
-            addParameter(p,'keepdist',true,@(x) islogical(x))
-            addParameter(p,'keeptrace',false,@(x) islogical(x))
-            addParameter(p,'keepnodes',false,@(x) islogical(x))
-            addParameter(p,'smooth',0,@(x) isnumeric(x))
-            addParameter(p,'smoothlongest',true,@(x) islogical(x))
-            
-            parse(p,DEM,varargin{:});
-            
+
             % construct SWATHobj
-            SW.width    = p.Results.width;
-            SW.gap      = p.Results.gap;
-            SW.dx       = p.Results.dx;
-            SW.dy       = p.Results.dy;
+            SW.width    = options.width;
+            SW.gap      = options.gap;
+            SW.dx       = options.dx;
+            SW.dy       = options.dy;
             SW.georef   = DEM.georef;
             SW.name     = ['SWATHobj created from GRIDobj ',DEM.name];
             SW.zunit    = DEM.zunit;
             SW.xyunit   = DEM.xyunit;
             
-            keepdist    = p.Results.keepdist;
-            keepnodes   = p.Results.keepnodes;
-            keeptrace   = p.Results.keeptrace;
-            smoothing   = p.Results.smooth;
-            smoothlong  = p.Results.smoothlongest;
+            keepdist    = options.keepdist;
+            keepnodes   = options.keepnodes;
+            keeptrace   = options.keeptrace;
+            smoothing   = options.smooth;
             
             
             %% Create SWATHobj
@@ -255,40 +255,21 @@ classdef SWATHobj
             if length(this_x)>1
                 SW.xy0 = [x0(:),y0(:)];
                 SW.zd0 = [z0(:),d0(:)];
+
                 if smoothing>0 % use moving average?
-                    sm = round(smoothing/SW.dx);
-                    if sm>0
-                        try
-                            b = ones(1,sm)./sm;
-                            this_xf = filtfilt(b,1,this_x);
-                            this_yf = filtfilt(b,1,this_y);
-                            smovalue = smoothing;
-                        catch ME
-                            if smoothlong
-                                fprintf(1,'Smoothing length reduced: not enough points.\n');
-                                sm = round((length(this_x)/3)-1);
-                                b = ones(1,sm)./sm;
-                                this_xf = filtfilt(b,1,this_x);
-                                this_yf = filtfilt(b,1,this_y);
-                                smovalue = sm*SW.dx;
-                            else
-                                fprintf(1,'Line smoothing skipped: not enough points.\n');
-                                this_xf = this_x;
-                                this_yf = this_y;
-                                smovalue = 0;
-                            end
-                        end
-                        SW.smooth = smovalue;
-                    else
-                        fprintf(1,'Bad smoothing length: filter is zero.\n');
-                        this_xf = this_x;
-                        this_yf = this_y;
-                    end
+
+                    temp = smoothdata([this_x(:) this_y(:)],...
+                        options.smoothmethod,...
+                        'SmoothingFactor',options.smoothingfactor);
+                    this_xf = temp(:,1);
+                    this_yf = temp(:,2);
+                    SW.smooth = options.smoothingfactor;
+
                 else
                     this_xf = this_x;
                     this_yf = this_y;
                 end
-                
+
                 dX = diff(this_xf); % dx between points along profile
                 dY = diff(this_yf); % dy between points along profile
                 
@@ -334,9 +315,12 @@ classdef SWATHobj
                 error('Too few points to create SWATHobj.')
             end
             
-            
-            
-            
+            if drawtrace
+                hold on
+                plot(this_xf,this_yf,'b-')
+                plot(this_xf,this_yf,'w--')
+                hold off
+            end
         end
         
     end % methods
