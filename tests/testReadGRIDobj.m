@@ -37,8 +37,12 @@ classdef testReadGRIDobj < matlab.unittest.TestCase
         end
     end
 
+    methods(TestClassTeardown)
+        function goBack(testCase)
+            cd(testCase.currentFolder)
+        end
+    end
 
-       
     methods (Test, ParameterCombination = 'sequential')
         % Test methods
 
