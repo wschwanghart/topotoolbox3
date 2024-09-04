@@ -1,5 +1,5 @@
 function [OUT] = swath2latlon(SW)
-% convert spatial fields in SWATHobj to geographic coordinates
+%SWATH2LATLON Convert spatial fields in SWATHobj to geographic coordinates
 %
 % Syntax
 %
