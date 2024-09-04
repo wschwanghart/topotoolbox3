@@ -1,5 +1,5 @@
 function h = plot(SW,options)
-%PLOT plot instance of SWATHobj
+%PLOT Plot instance of SWATHobj
 %
 % Syntax
 %
@@ -49,7 +49,7 @@ function h = plot(SW,options)
 %
 %     'plotmode'   {'plot'}, 'scatter'
 %     switches between Matlab's 'plot' and 'scatter' function for making
-%     the plot. The scatter command is uduslly faster when 'colorz' is set
+%     the plot. The scatter command is usually faster when 'colorz' is set
 %     to true
 %
 %     'colorz'   true, {false}
@@ -166,16 +166,31 @@ if (options.points)
             
             % Color-code z values
             zp = SW.Z(ix);
-            % Interpolate colors
-            mfcol = [interp1(CX,cmap(1,:),zp),...
-                interp1(CX,cmap(2,:),zp),interp1(CX,cmap(3,:),zp)];
+            
             switch options.plotmode
                 case 'plot'
-                    for k = 1 : length(zp)
-                        ht(ct) = plot(xp(k),yp(k),'o','color',mfcol(k,:),'Markersize',markersize); hold on
+                    [N,edges,bins] = histcounts(zp,20);
+                    bincenters = (edges(1:end-1)+edges(2:end))/2;
+
+                    clr = num2rgb(bincenters,cmap');
+
+                    for r = 1:numel(N)
+
+                        I = bins == r;
+                        hh = plot(xp(I),yp(I),'.',...
+                            'Color',clr(r,:),'MarkerSize',markersize);
+                        hold on
+                        if r == 1
+                            ht(ct) = hh;
+                        end
                     end
+
                 case 'scatter'
+                    % Interpolate colors
+                    mfcol = [interp1(CX,cmap(1,:),zp),...
+                            interp1(CX,cmap(2,:),zp),interp1(CX,cmap(3,:),zp)];
                     ht(ct) = scatter(xp,yp,markersize,mfcol);
+                    hold on
             end
             
         else
@@ -184,9 +199,11 @@ if (options.points)
             mfcol = [0 0 0];
             switch options.plotmode
                 case 'plot'
-                    ht(ct) = plot(xp,yp,'o','color',mfcol,'Markersize',markersize); hold on
+                    ht(ct) = plot(xp,yp,'.','color',mfcol,'Markersize',markersize); 
+                    hold on
                 case 'scatter'
-                    ht(ct) = scatter(xp,yp,markersize,mfcol);
+                    ht(ct) = scatter(xp,yp,markersize,mfcol,'filled');
+                    hold on
             end
         end
     end
@@ -247,7 +264,7 @@ if (options.legend)
 end
 
 % Colorbar
-if (options.colorz) && (options.colbar)
+if (options.colorz) && (options.colorbar)
     hc = colorbar;
     yt = get(hc,'YTick');
     set(hc,'YTickLabel',(yt.*(maxz-minz)+minz)');
