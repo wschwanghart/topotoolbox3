@@ -1,5 +1,5 @@
 function h = plotdz(SW,varargin)
-%PLOTDZ creates distance-elevation plot of SWATHobj
+%PLOTDZ Creates distance-elevation plot of a SWATHobj
 %
 % Syntax
 %
@@ -68,8 +68,16 @@ function h = plotdz(SW,varargin)
 %         Wolfgang Schwanghart 
 % Date: 11. December, 2022
 
-% default patch color
-clr = [0.5059 0.8471 0.8157];
+arguments
+    SW  SWATHobj
+    options.left (1,1) = true
+    options.right (1,1) = true
+    options.distadjust (1,1) = false
+    options.boundedline (1,1) = true
+    options.facecolor = [0.5059 0.8471 0.8157]
+    options.facealpha = 1
+    options.minmax
+
 
 % Parse inputs
 p = inputParser;

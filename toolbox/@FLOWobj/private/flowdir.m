@@ -1,4 +1,4 @@
-function M = flowdir(DEM,varargin)
+function M = flowdir(DEM,options)
 
 % multiple and single flow direction algorithm for Digital Elevation Models
 %
@@ -47,20 +47,15 @@ function M = flowdir(DEM,varargin)
 % See also: FLOWobj
 %
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 15. March, 2009
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 5. September, 2024
 
-
-
-p = inputParser;
-p.FunctionName = 'flowdir';
-
-
-addParameter(p,'exponent',1.1,@(x) isscalar(x));
-addParameter(p,'routeflats','geodesic'); %{'route','geodesic','none'};
-addParameter(p,'type','multi');
-
-parse(p,varargin{:});
+arguments
+    DEM
+    options.exponent (1,1) {mustBeNumeric,mustBeNonnegative} = 1.1
+    options.routeflats = 'geodesic'
+    options.type = 'multi'
+end
 
 
 % *********************************************************************
@@ -68,10 +63,8 @@ parse(p,varargin{:});
 
 % calculate maximum slope and slope direction
 % find neighbors of cells
-[ic,icd] = ixneighbors(DEM.Z);
-I = (DEM.Z(icd)-DEM.Z(ic)) > 0;
-ic(I) = [];
-icd(I) = [];
+[ic,icd] = ixdsneighbors(DEM.Z);
+
 e = (DEM.Z(ic)-DEM.Z(icd))./getdistance(ic,icd,DEM.size,DEM.cellsize);
 nrc = numel(DEM.Z);
 % *********************************************************************
@@ -88,19 +81,19 @@ M = sparse(ic,icd,double(e),nrc,nrc);
 % The subsequent code first identifies flats and then iteratively removes
 % them.
 
-switch p.Results.routeflats
+switch options.routeflats
     case 'route'
-        [icf,icn] = routeflats(DEM.Z,p.Results.type);
+        [icf,icn] = routeflats(DEM.Z,options.type);
         M = sparse(icf,icn,1,nrc,nrc)+M;        
     case 'geodesic'
-        [icf,icn] = routegeodesic(DEM,p.Results.type);
+        [icf,icn] = routegeodesic(DEM,options.type);
         M = sparse(icf,icn,1,nrc,nrc)+M;
     case 'none'
 end
 
 % ******************************************************************
 % single flow direction, flow concentration
-switch p.Results.type
+switch options.type
     case 'single'
         [m,IX2] = max(M,[],2);
         i = m==0;
@@ -109,14 +102,14 @@ switch p.Results.type
         IX2(i) = [];
         M = sparse(IX1,IX2,1,nrc,nrc);
     otherwise
-        if p.Results.exponent ~= 1;
-            M = spfun(@(x) x.^p.Results.exponent,M);
+        if options.exponent ~= 1
+            M = spfun(@(x) x.^options.exponent,M);
         end
 end
 
 % ******************************************************************
 % Row standardization of M only necessary when multiple flow dir
-switch p.Results.type
+switch options.type
     case 'multi'
         M = spdiags(spfun(@(x) 1./x,sum(M,2)),0,nrc,nrc) * M;
 end

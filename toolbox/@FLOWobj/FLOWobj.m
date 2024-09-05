@@ -577,9 +577,49 @@ methods
             FD.size     = DEM.size;
             
             switch lower(varargin{1})
-                case 'multi'           
-                    M = flowdir(DEM,'type','multi');                  
+                case 'multi'         
+                    [Iobj,SILLSobj] = identifyflats(DEM);
+                    I = Iobj.Z;
+                    SILLS = SILLSobj.Z;
+
+
+                    % establish the connectivity between sills and flats
+                    dem = DEM.Z;
+                    [row,col] = find(SILLS);
+                    IXsill    = sub2ind(FD.size,row,col);
+                    rowadd = [-1 -1 0 1 1  1  0 -1];
+                    coladd = [ 0  1 1 1 0 -1 -1 -1];
+                    PreSillPixel = [];
+                    for r = 1:8
+                        rowp = row + rowadd(r);
+                        colp = col + coladd(r);
+
+                        ValidRowColPair    = rowp>0 & colp>0 & rowp<=FD.size(1) & colp<=FD.size(2);
+                        IXPreSill = sub2ind(FD.size,rowp(ValidRowColPair),colp(ValidRowColPair));
+
+                        PreSillPixel = [PreSillPixel;...
+                            IXPreSill((dem(IXsill(ValidRowColPair)) == dem(IXPreSill)) & I(IXPreSill))];   %#ok<AGROW>
+
+                    end
+
+                    D = bwdistgeodesic(I,PreSillPixel,'q') + 1;
+                    D(SILLS) = 0.5;
+
+                    [ix,ixc]=ixdsneighbors(DEM.Z,D,'keepequal',false);
+
+                    FD.ix = ix;
+                    FD.ixc = ixc;
+                    FD.fraction = double((DEM.Z(ix)-DEM.Z(ix))./ ...
+                            getdistance(ix,ixc,DEM.size,DEM.cellsize,'single'));
+                    FD.fraction(FD.fraction == 0) = 1;
+                    FD.cellsize = DEM.cellsize;
+                    FD.wf = DEM.wf;
+                    FD.georef = DEM.georef;
                     FD.type = 'multi';
+                    FD = updatetoposort(FD);
+                    FD = multi_normalize(FD);
+                    return
+     
                 case 'dinf'
                     R = dem_flow(DEM.Z);
                     M = flow_matrix(DEM.Z,R,DEM.cellsize,DEM.cellsize);
