@@ -1,4 +1,4 @@
-function varargout = ixdsneighbors(A,D,options)
+function varargout = ixdsneighbors_steepest(A,D,cs)
 
 %IXDSNEIGHBORS Return list of edges connecting pixels to downstream neighbors
 %
@@ -36,26 +36,31 @@ function varargout = ixdsneighbors(A,D,options)
 % 128      8
 % 64  32  16
 
+% 1   2   3
+% 8       4
+% 7   6   5
+
 arguments
     A 
-    D = []
-    options.keepequal = false
+    D 
+    cs
 end
-keepequal  = options.keepequal;
 useauxtopo = ~isempty(D);
 
-roff = [-1 0 1 1];
-coff = [1 1 1 0];
-bpf = uint8([4 8 16 32]);
-bpi = uint8([64 128 1 2]);
+roff = [0 1 -1 1];
+coff = [1 0 1  1];
+
+bpf = uint8([4 6 3 5]);
+bpi = uint8([8 2 7 1]);
+cs2 = sqrt(2*cs);
+dx  = [cs cs cs2 cs2];
 
 siz = size(A);
-
+G   = zeros(siz,'single');
 B   = zeros(siz,'uint8');
 
 for r = 1:siz(1)
-    for c = 1:siz(2)
-
+    for c = 1:siz(2)   
         P = A(r,c);
         if isnan(P)
             continue
@@ -72,17 +77,26 @@ for r = 1:siz(1)
             end
 
             N = A(rn,cn);
-
             if isnan(N)
                 continue
             end
+               
+            % Calculate slope
+            s = (P-N)/dx(n);
 
-            if P > N
-                B(r,c)   = B(r,c)+bpf(n);
+            if s > 0
+                if s > G(r,c)
+                    G(r,c) = s;
+                    B(r,c) = bpf(n);
+                end
                 continue
             end
-            if P < N
-                B(rn,cn) = B(rn,cn) + bpi(n);
+            if s < 0
+                s = -s;
+                if s > G(rn,cn)
+                    G(rn,cn) = s;
+                    B(rn,cn) = bpi(n);
+                end
                 continue
             end
             
@@ -91,62 +105,38 @@ for r = 1:siz(1)
                 AP = (D(r,c));
                 AN = (D(rn,cn));
                 if isinf(AP)
-                    % do nothing
-                elseif isinf(AN)
-                    % do nothing
-                else
-                    if AP > AN
-                        B(r,c) = B(r,c)+bpf(n);
-                        continue
-                    end
-                    if AP < AN
-                        B(rn,cn) = B(rn,cn) + bpi(n);
-                        continue
-                    end
-                end
-            end
-
-            if keepequal && N == P
-                    B(r,c)   = B(r,c)+bpf(n);
-                    B(rn,cn) = B(rn,cn) + bpi(n);
                     continue
-            end       
+                elseif isinf(AN)
+                    continue
+                else
+                    s = (AP-AN)/dx(n);
+
+                    if s > 0
+                        if s > G(r,c)
+                            G(r,c) = s;
+                            B(r,c) = bpf(n);
+                        end
+                        continue
+                    end
+                    if s < 0
+                        s = -s;
+                        if s > G(rn,cn)
+                            G(rn,cn) = s;
+                            B(rn,cn) = bpi(n);
+                        end
+                        continue
+                    end
+                    
+                end
+            end     
         end
     end
 end
 
-
-% Now get the number of downstream neighbors in each cell
-N = zeros(size(B),'uint8');
-for r=1:8
-    N = N+bitget(B,r,"uint8");
-end
-N = sum(N(:),'double');
-
-if nargout == 1
-    varargout{1} = N;
-    return
-end
-
-% Now preallocate vectors
-ix = zeros(N,1);
-ixc = zeros(N,1);
-clear N
-
 stride = size(B,1);
 offset = [-stride-1 -1 stride-1 stride stride+1 1 -stride+1 -stride];
-pos1 = 1;
-
-for r = 1:8
-    pix = find(bitget(B,r,'uint8'));
-    n   = numel(pix);
-    pos2 = pos1 + n - 1;
-
-    ix(pos1:pos2)  = pix;
-    ixc(pos1:pos2) = pix+offset(r);
-    pos1 = pos2+1;
-end
-
-varargout{1} = ix;
-varargout{2} = ixc;
+ix  = find(B);
+ixc = ix + double(offset(B(ix)))';
+varargout{1} = uint32(ix);
+varargout{2} = uint32(ixc);
 
