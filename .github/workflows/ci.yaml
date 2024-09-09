@@ -21,7 +21,8 @@ jobs:
           products: >
             Mapping_Toolbox
             Image_Processing_Toolbox
+            MATLAB_Coder
       - name: Run checks and tests
         uses: matlab-actions/run-build@v2
         with:
-          tasks: check test
+          tasks: compile check test
