@@ -307,7 +307,6 @@ methods
         
     end
 
-
     function FD = saveobj(FD)
         FD.fastindexing = false;
     end
@@ -317,6 +316,11 @@ methods
         % starting from a single pixel. It is used when deriving flow 
         % paths, e.g., flowpathextract.
         
+        switch lower(FD.type)
+            case {'multi','dinf'}
+                error('Fast indexing only possible for single flow directions.')
+        end
+
         validateattributes(val,{'numeric','logical'},{'scalar'})
         
         if val
@@ -340,27 +344,7 @@ methods
         s = accumarray(FD.ix,FD.fraction,[prod(FD.size) 1],@sum);
         FD.fraction = FD.fraction./s(FD.ix);
     end
-    
-    function FD = multi_weights(FD,varargin)
-        
-        p = inputParser;
-        addParameter(p,'DEM',[],@(x) isa(x,'GRIDobj'));
-        addParameter(p,'type','random')
-        addParameter(p,'beta',1)
-        parse(p,varargin{:});
-        
-        switch p.Results.type
-            case 'random'
-                FD.fraction = rand(size(FD.fraction));
-        end
-        FD = multi_normalize(FD);
-        
-        
-        
-    end
-    
-            
-
+             
 end
 end
 

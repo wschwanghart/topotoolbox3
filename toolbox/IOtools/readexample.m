@@ -1,4 +1,4 @@
-function DEM = readexample(example,varargin)
+function DEM = readexample(example,options)
 
 %READEXAMPLE read DEM from TopoToolbox DEM github repository
 %
@@ -31,21 +31,20 @@ function DEM = readexample(example,varargin)
 %     
 % See also: GRIDobj, websave, readopentopo
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 27. January, 2023
 
-
+arguments
+    example
+    options.filename = [tempname '.tif']
+    options.deletefile (1,1) = true
+    options.verbose (1,1) = true
+end
 
 example = lower(example);
 
-p = inputParser;
-addParameter(p,'filename',[tempname '.tif']);
-addParameter(p,'deletefile',true);
-addParameter(p,'verbose',true);
-parse(p,varargin{:});
-
-% create output file
-f = fullfile(p.Results.filename);
+% create file to which the data will be saved
+f = fullfile(options.filename);
 
 switch example
     case 'taiwan'
@@ -70,17 +69,15 @@ switch example
         error('There is no such example file.')
 end
       
-    
-
 % save to drive
-options = weboptions('Timeout',100000);
+webopts = weboptions('Timeout',100000);
 
 % Download with websave
-if p.Results.verbose
+if options.verbose
     disp([datestr(now) ' -- Downloading...'])
 end
-outfile = websave(f,url,options);
-if p.Results.verbose
+outfile = websave(f,url,webopts);
+if options.verbose
     disp([datestr(now) ' -- Download finished...'])
 end
 
@@ -92,9 +89,9 @@ else
     DEM = load(f); 
 end
 
-if p.Results.deletefile
+if options.deletefile
     delete(f);
-    if p.Results.verbose
+    if options.verbose
         disp([datestr(now) ' -- Temporary file deleted'])
     end
 end

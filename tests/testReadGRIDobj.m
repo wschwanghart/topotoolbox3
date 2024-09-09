@@ -1,5 +1,6 @@
 classdef testReadGRIDobj < matlab.unittest.TestCase
-
+%TESTREADGRIDobj Tests GRIDobj read functions
+   
     properties      
         url = 'https://raw.githubusercontent.com/TopoToolbox/DEMs/master/';
         currentFolder = pwd
@@ -43,6 +44,7 @@ classdef testReadGRIDobj < matlab.unittest.TestCase
         end
     end
 
+    % Tests start here ---------------------------------------------------
     methods (Test, ParameterCombination = 'sequential')
         % Test methods
 

@@ -1,4 +1,4 @@
-# TopoToolbox v3 - a set of Matlab functions for topographic analysis
+# TopoToolbox v3 - a set of MATLAB functions for topographic analysis
 
 <img src="https://github.com/wschwanghart/topotoolbox/blob/master/topotoolbox.jpg" align="center" height="100">
 
