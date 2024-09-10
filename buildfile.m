@@ -1,13 +1,33 @@
 function plan = buildfile
     plan = buildplan(localfunctions);
     
-    plan("check") = matlab.buildtool.tasks.CodeIssuesTask("toolbox");
     plan("package") = matlab.buildtool.Task( ...
         Description = "Package toolbox", ...
         Dependencies = ["check" "test"], ...
         Actions = @packageToolbox);
 
     plan.DefaultTasks = ["check" "test" "package"];
+end
+
+function checkTask(~)
+    issues = codeIssues("toolbox");
+
+    errors = issues.Issues(issues.Issues.Severity=="error",:);
+    warnings = issues.Issues(issues.Issues.Severity=="warning",:);
+
+    if ~isempty(errors)
+        disp("Errors");
+        disp("======")
+        disp(errors);
+    end
+
+    if ~isempty(warnings)
+        disp("Warnings");
+        disp("========")
+        disp(warnings);
+    end
+
+    assert(isempty(errors));
 end
 
 function testTask(~)
