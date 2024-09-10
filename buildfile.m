@@ -12,8 +12,10 @@ end
 function checkTask(~)
     issues = codeIssues("toolbox");
 
-    errors = issues.Issues(issues.Issues.Severity=="error",:);
-    warnings = issues.Issues(issues.Issues.Severity=="warning",:);
+    errors = issues.Issues(issues.Issues.Severity=="error", ...
+        ["FullFilename", "LineStart", "Description"]);
+    warnings = issues.Issues(issues.Issues.Severity=="warning", ...
+        ["FullFilename", "LineStart", "Description"]);
 
     if ~isempty(errors)
         disp("Errors");
