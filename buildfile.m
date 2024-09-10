@@ -20,13 +20,21 @@ function checkTask(~)
     if ~isempty(errors)
         disp("Errors");
         disp("======")
-        disp(errors);
+        for i = 1:height(errors)
+            fprintf("%s:%d\n",errors{i,"FullFilename"}, ...
+                errors{i,"LineStart"});
+            fprintf("  %s\n",errors{i,"Description"});
+        end
     end
 
     if ~isempty(warnings)
         disp("Warnings");
         disp("========")
-        disp(warnings);
+        for i = 1:height(warnings)
+            fprintf("%s:%d\n",warnings{i,"FullFilename"}, ...
+                warnings{i,"LineStart"});
+            fprintf("  %s\n",warnings{i,"Description"});
+        end
     end
 
     assert(isempty(errors));
