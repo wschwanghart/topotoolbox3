@@ -1,6 +1,6 @@
 function P = polygon2GRIDobj(DEM,MS,varargin)
 
-%POLYGON2GRIDobj convert polygon to a grid
+%POLYGON2GRIDobj Convert polygon to a grid
 %
 % Syntax
 %
@@ -52,14 +52,16 @@ function P = polygon2GRIDobj(DEM,MS,varargin)
 % See also: GRIDobj/coord2ind, GRIDobj/sub2coord, GRIDobj/getcoordinates,
 %           GRIDobj/createmask, line2GRIDobj, GRIDobj2polygon
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 22. September, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 22. September, 2024
 
 
 % 2 or 3 input arguments?
 narginchk(2,inf)
 
 if isgeotable(MS)
+    % We can do some reprojection, if required
+    MS = projectshape(MS,DEM);
     MS = geotable2mapstruct(MS);
 end
 

@@ -1,4 +1,4 @@
-function MS = zonalstats(MS,attributes,varargin)
+function MS = zonalstats(MS,attributes,options)
 
 %ZONALSTATS Zonal statistics
 %
@@ -76,15 +76,48 @@ function MS = zonalstats(MS,attributes,varargin)
 %
 %      MS            mapping structure with zonal statistics
 %
-% 
 % See also: polygon2GRIDobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 22. September, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 9. September, 2024
 
+arguments
+    MS
+    attributes = {}
+    options.overlapping (1,1) = false
+    options.centroid (1,1) = false
+    options.area (1,1) = false
+    options.perimeter (1,1) = false
+    options.bbox (1,1) = false
+    options.lucorner (1,1) = false
+    options.llcorner (1,1) = false
+    options.rucorner (1,1) = false
+    options.rlcorner (1,1) = false
+    options.waitbar (1,1) = false
+end
+
+% MS can be either a Geotable or a Mapping structure
+if ~isstruct(MS)
+    [CRS,isproj] = parseCRS(MS);
+    inputisgeotable = true;
+    MS = geotable2mapstruct(MS);
+else
+    inputisgeotable = false;
+end
+
+% If there is only one input, then calculate only area as an attribute
 if nargin == 1
     a = cellfun(@(x,y) getarea(x,y),{MS.X},{MS.Y},'UniformOutput',false);
     [MS.area] = a{:};
+    if inputisgeotable
+        if isproj
+            cstype = 'planar';
+        else
+            cstype = 'geographic';
+        end
+        MS = mapstruct2geotable(MS,'coordinateSystemType',cstype,...
+            'CoordinateReferenceSystem',CRS);
+    end
     return
 end
 
@@ -99,19 +132,7 @@ attgrid      = attributes(2:3:end);
 attfun       = attributes(3:3:end);
 nrattributes = numel(attributes)/3;
 
-p = inputParser;
-addParameter(p,'overlapping',false)
-addParameter(p,'centroid',false)
-addParameter(p,'area',false)
-addParameter(p,'perimeter',false)
-addParameter(p,'bbox',false);
-addParameter(p,'lucorner',false);
-addParameter(p,'llcorner',false);
-addParameter(p,'rucorner',false);
-addParameter(p,'rlcorner',false);
-addParameter(p,'waitbar',false)
 
-parse(p,varargin{:});
     
 % convert strings to functions, if necessary
 for r = 1:nrattributes
@@ -127,49 +148,49 @@ for r = 1:nrattributes
     
 end
 
-if p.Results.area
+if options.area
     a = cellfun(@(x,y) getarea(x,y),{MS.X},{MS.Y},'UniformOutput',false);
     [MS.area] = a{:};
 end
-if p.Results.centroid
+if options.centroid
     [xc,yc] = cellfun(@(x,y) getcentroid(x,y),{MS.X},{MS.Y},'UniformOutput',false);
     [MS.xc] = xc{:};
     [MS.yc] = yc{:};
 end
-if p.Results.perimeter
+if options.perimeter
     per = cellfun(@(x,y) getperimeter(x,y),{MS.X},{MS.Y},'UniformOutput',false);
     [MS.perimeter] = per{:};
 end
 
-if p.Results.lucorner  || p.Results.bbox
+if options.lucorner  || options.bbox
     xc = cellfun(@(x) min(x),{MS.X},'UniformOutput',false);
     yc = cellfun(@(y) max(y),{MS.Y},'UniformOutput',false);
     [MS.lucornerx] = xc{:};
     [MS.lucornery] = yc{:};
 end
 
-if p.Results.rucorner  || p.Results.bbox
+if options.rucorner  || options.bbox
     xc = cellfun(@(x) max(x),{MS.X},'UniformOutput',false);
     yc = cellfun(@(y) max(y),{MS.Y},'UniformOutput',false);
     [MS.rucornerx] = xc{:};
     [MS.rucornery] = yc{:};
 end
     
-if p.Results.llcorner  || p.Results.bbox
+if options.llcorner  || options.bbox
     xc = cellfun(@(x) min(x),{MS.X},'UniformOutput',false);
     yc = cellfun(@(y) min(y),{MS.Y},'UniformOutput',false);
     [MS.llcornerx] = xc{:};
     [MS.llcornery] = yc{:};
 end
 
-if p.Results.rlcorner  || p.Results.bbox
+if options.rlcorner  || options.bbox
     xc = cellfun(@(x) max(x),{MS.X},'UniformOutput',false);
     yc = cellfun(@(y) min(y),{MS.Y},'UniformOutput',false);
     [MS.rlcornerx] = xc{:};
     [MS.rlcornery] = yc{:};
 end
 
-if ~p.Results.overlapping
+if ~options.overlapping
     TTID = num2cell(uint32(1:numel(MS)));
     [MS.TTID] = TTID{:};
     label = polygon2GRIDobj(attributes{2},MS,'field','TTID','waitbar',false);
@@ -182,7 +203,7 @@ end
 
 nr = numel(MS);
 
-if nr >= 2 && p.Results.waitbar
+if nr >= 2 && options.waitbar
 h = waitbar(0,['0 processed, ' num2str(nr) ' remaining']);
 wb = true;
 else
@@ -190,7 +211,7 @@ wb = false;
 end
 for r = 1:nr
     
-    if p.Results.overlapping
+    if options.overlapping
         II = polygon2GRIDobj(attgrid{1},MS(r),'waitbar',false);
         I  = II.Z;
     else
@@ -233,11 +254,19 @@ if wb
 close(h)
 end
 
-
-
+if inputisgeotable
+    if isproj
+        cstype = 'planar';
+    else
+        cstype = 'geographic';
+    end
+    MS = mapstruct2geotable(MS,'coordinateSystemType',cstype,...
+        'CoordinateReferenceSystem',CRS);
+end
 
 end
 
+%% Subfunctions
 function a = getarea(x,y)
 I = ~isnan(x);
 a = double(polyarea(x(I),y(I)));

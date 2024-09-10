@@ -1,6 +1,6 @@
 function geotiffextent(filename)
 
-%GEOTIFFEXTENT plot extent of geotiffs in a folder
+%GEOTIFFEXTENT Plot extent of geotiffs in a folder
 %
 % Syntax
 %
@@ -25,7 +25,7 @@ function geotiffextent(filename)
 %
 % See also: GRIDobj, geotiffinfo
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 11. February, 2019
 
 if isfolder(filename)

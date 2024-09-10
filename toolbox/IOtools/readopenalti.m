@@ -1,6 +1,6 @@
 function data = readopenalti(varargin)
 
-%READOPENALTI read altimetry data using the openaltimetry.org API
+%READOPENALTI Read altimetry data using the openaltimetry.org API
 %
 % Syntax
 %
@@ -100,11 +100,11 @@ validproducts = {'atl03','atl10','atl12',...
                  'atl08'};
 
 product = validatestring(p.Results.product,validproducts,'readopenalti');
-urltracks = 'https://openaltimetry.org/data/api/icesat2/getTracks?';
+urltracks = 'https://openaltimetry.earthdatacloud.nasa.gov/data/api/icesat2/getTracks?';
 if ~p.Results.level3a
-    url = ['https://openaltimetry.org/data/api/icesat2/' product '?'];
+    url = ['https://openaltimetry.earthdatacloud.nasa.gov/data/api/icesat2/' product '?'];
 else
-    url = 'https://openaltimetry.org/data/api/icesat2/level3a?';
+    url = 'https://openaltimetry.earthdatacloud.nasa.gov/data/api/icesat2/level3a?';
 end
 % Example call
 % https://openaltimetry.org/data/api/icesat2/atl08?date=2020-05-13&minx=55&miny=46&maxx=57&maxy=48&trackId=730&client=portal&outputFormat=csv
@@ -144,17 +144,13 @@ end
 % now we have an extent. Or did the user request interactively choosing
 % the extent.
 if any([isempty(west) isempty(east) isempty(south) isempty(north)]) || p.Results.interactive
-    wm = webmap;
-    % get dialog box
-    messagetext = ['Zoom and resize the webmap window to choose DEM extent. ' ...
-                         'Click the close button when you''re done.'];
-    d = waitdialog(messagetext);
-    uiwait(d);    
-    [latlim,lonlim] = wmlimits(wm);
-    west = lonlim(1);
-    east = lonlim(2);
-    south = latlim(1);
-    north = latlim(2);
+    
+    ext = roipicker();
+   
+    west = ext(2);
+    east = ext(4);
+    south = ext(1);
+    north = ext(3);
 end
     
 if p.Results.verbose
@@ -168,7 +164,7 @@ if p.Results.verbose
     disp(['Local file name: ' f])
     disp(['Area: ' num2str(a,2) ' sqkm'])
     disp('-------------------------------------')
-    disp(['Starting download: ' datestr(now)])
+    disp(['Starting download: ' char(datetime('now'))])
 end
 
 % get date
@@ -181,13 +177,13 @@ else
 end
 
 if p.Results.verbose
-    disp(['Get tracks: ' datestr(now)])
+    disp(['Get tracks: ' char(datetime('now'))])
 end
 
 % Download tracks with websave
 tracktable = table([],[],'VariableNames',{'track','date'});
 if p.Results.verbose
-    disp(['Identifying tracks: ' datestr(now)])
+    disp(['Identifying tracks: ' char(datetime('now'))])
 end
 
 for r=1:numel(dt)
@@ -218,7 +214,7 @@ totaltracksfound = size(tracktable,1);
 
 if p.Results.verbose
     disp([num2str(totaltracksfound) ' tracks found.'])
-    disp(['Data download starts: ' datestr(now)])
+    disp(['Data download starts: ' char(datetime('now'))])
 end
 
 % Download data
@@ -231,7 +227,7 @@ if p.Results.level3a
     for r = 1:numel(trackIds)
         trackId = trackIds(r);
         if p.Results.verbose
-            disp(['Download trackId ' num2str(trackId) ': ' datestr(now)])
+            disp(['Download trackId ' num2str(trackId) ': ' char(datetime('now'))])
         end
         try
             outfile = websave(f,url,...
@@ -253,7 +249,7 @@ if p.Results.level3a
             end
             counter = counter + 1;
         catch
-            disp(['Download failed: ' datestr(now)])
+            disp(['Download failed: ' char(datetime('now'))])
         end
         delete(f);
     end
@@ -265,7 +261,7 @@ else
         dd = string(tracktable.date(r),'yyyy-MM-dd');
         trackId = num2str(tracktable.track(r));
         if p.Results.verbose
-            disp(['Download ' char(dd) ',' num2str(trackId) ': ' datestr(now)])
+            disp(['Download ' char(dd) ',' num2str(trackId) ': ' char(datetime('now'))])
         end
         try
             outfile = websave(f,url,...
@@ -285,43 +281,29 @@ else
             end
             counter = counter + 1;
         catch
-            disp(['Download failed: ' datestr(now)])
+            disp(['Download failed: ' char(datetime('now'))])
         end
         delete(f);
     end
 end
 
 if p.Results.verbose
-    disp(['Total of ' num2str(size(data,1)) ' points downloaded: ' datestr(now)])
+    disp(['Total of ' num2str(size(data,1)) ' points downloaded: ' char(datetime('now'))])
 
 end
 
 if p.Results.verbose
-    disp(['Adding EGM96 heights: ' datestr(now)]);
+    disp(['Adding EGM96 heights: ' char(datetime('now'))]);
 end
 
 data.egm96geoid = egm96geoid(data.latitude,data.longitude);
 
 if p.Results.verbose
-    disp(['Done: ' datestr(now)])
+    disp(['Done: ' char(datetime('now'))])
     disp('-------------------------------------')
 end
 end
 
-function d = waitdialog(messagetext)
-    d = dialog('Position',[300 300 250 150],'Name','Choose rectangle region',...
-        'WindowStyle','normal');
-
-    txt = uicontrol('Parent',d,...
-               'Style','text',...
-               'Position',[20 80 210 40],...
-               'String',messagetext);
-
-    btn = uicontrol('Parent',d,...
-               'Position',[85 20 70 25],...
-               'String','Close',...
-               'Callback','delete(gcf)');
-end
 
 function textwaitbar(i, n, msg)
 % A command line version of waitbar.
