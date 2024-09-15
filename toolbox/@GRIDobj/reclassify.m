@@ -62,7 +62,7 @@ allowedmethods = {'equalintervals',...
                  };
 % nr of classes
 if nargin == 1
-    method = 'equalinterval';
+    method = 'equalintervals';
     num = 10;
 else
     method = validatestring(varargin{1},allowedmethods);

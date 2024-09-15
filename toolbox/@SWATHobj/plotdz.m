@@ -1,5 +1,5 @@
-function h = plotdz(SW,varargin)
-%PLOTDZ creates distance-elevation plot of SWATHobj
+function h = plotdz(SW,options)
+%PLOTDZ Creates distance-elevation plot of a SWATHobj
 %
 % Syntax
 %
@@ -68,34 +68,28 @@ function h = plotdz(SW,varargin)
 %         Wolfgang Schwanghart 
 % Date: 11. December, 2022
 
-% default patch color
-clr = [0.5059 0.8471 0.8157];
-
-% Parse inputs
-p = inputParser;
-p.FunctionName = 'plotdz';
-addRequired(p,'SW',@(x) isa(x,'SWATHobj'));
-addParameter(p,'left',true,@(x) islogical(x))
-addParameter(p,'right',true,@(x) islogical(x))
-addParameter(p,'distadjust',0,@(x) isnumeric(x))
-addParameter(p,'boundedline',true,@(x) islogical(x))
-addParameter(p,'facecolor',clr)
-addParameter(p,'facealpha',1)
-addParameter(p,'minmaxfacecolor',[.8 .8 .8])
-addParameter(p,'edgecolor','none')
-addParameter(p,'meancolor','k')
-addParameter(p,'plotminmax',true)
-addParameter(p,'minmaxcolor',[.7 .7 .7])
-addParameter(p,'minmaxedgecolor','none')
-addParameter(p,'minmaxfacealpha',1)
-
-parse(p,SW,varargin{:});
+arguments
+    SW  SWATHobj
+    options.left (1,1) = true
+    options.right (1,1) = true
+    options.distadjust (1,1) = 0
+    options.boundedline (1,1) = true
+    options.facecolor = [0.5059 0.8471 0.8157]
+    options.facealpha = 1
+    options.minmaxfacecolor = [.8 .8 .8]
+    options.edgecolor = 'none'
+    options.meancolor = 'k'
+    options.plotminmax (1,1) = true
+    options.minmaxcolor = [.7 .7 .7]
+    options.minmaxedgecolor = 'none'
+    options.minmaxfacealpha = 1
+end
 
 % parameters
-distadjust = p.Results.distadjust;
-left       = p.Results.left;
-right      = p.Results.right;
-boundedl   = p.Results.boundedline;
+distadjust = options.distadjust;
+left       = options.left;
+right      = options.right;
+boundedl   = options.boundedline;
 
 if ~left && ~right
     warning('Empty SWATHobj: nothing to plot')
@@ -111,11 +105,12 @@ elseif ~right
     SW.Z = SW.Z(1:ny,:);
 end
 
-z_min  = min(SW.Z,[],1);
-z_max  = max(SW.Z,[],1);
-z_mean = mean(SW.Z,1,'omitnan')';
-z_std  = std(SW.Z,0,1,'omitnan')';
-dist   = SW.distx+distadjust;
+[z_min,dist]  = stat(SW,@min);
+dist   = dist + distadjust;
+
+z_max  = stat(SW,@max);
+z_mean = stat(SW,@(x) mean(x,'omitmissing'));
+z_std = stat(SW,@(x) std(x,'omitmissing'));
 
 % draw SWATHobj
 ax = gca;
@@ -130,26 +125,26 @@ end
 
 
 if (boundedl) %exist('boundedline','file') && 
-    if p.Results.plotminmax
+    if options.plotminmax
     hp(3) = patch([dist(:); flipud(dist(:))],...
                   [z_min(:); flipud(z_max(:))],...
-                  p.Results.minmaxfacecolor,...
-                  'EdgeColor',p.Results.minmaxedgecolor,...
-                  'FaceAlpha',p.Results.minmaxfacealpha);
+                  options.minmaxfacecolor,...
+                  'EdgeColor',options.minmaxedgecolor,...
+                  'FaceAlpha',options.minmaxfacealpha);
     end
     hp(2) = patch([dist(:); flipud(dist(:))],...
                   [z_mean(:)-z_std(:); flipud(z_mean(:)+z_std(:))],...
-                  p.Results.facecolor,...
-                  'EdgeColor',p.Results.edgecolor,...
-                  'FaceAlpha',p.Results.facealpha);
+                  options.facecolor,...
+                  'EdgeColor',options.edgecolor,...
+                  'FaceAlpha',options.facealpha);
     
 
-    hp(1) = plot(dist,z_mean,'color',p.Results.meancolor);
+    hp(1) = plot(dist,z_mean,'color',options.meancolor);
 
 else
-    hp(1) = plot(dist,z_mean,'-','Color',p.Results.meancolor); 
+    hp(1) = plot(dist,z_mean,'-','Color',options.meancolor); 
     hp(2) = plot([dist;nan;dist],[z_mean-z_std;nan;z_mean+z_std],'-','color',clr);
-    if p.Results.plotminmax
+    if options.plotminmax
         hp(3) = plot([dist;nan;dist],[z_min nan z_max],':',...
             'color',clr);
     end
@@ -158,7 +153,7 @@ end
 drawnow
 xlabel(sprintf('Distance along profile (%s)',SW.xyunit))
 ylabel(sprintf('Z (%s)',SW.zunit))
-if p.Results.plotminmax
+if options.plotminmax
     legend(hp,{'Mean','+/- St.Dev.','Min/Max'})
 else
     legend(hp,{'Mean','+/- St.Dev.'})
