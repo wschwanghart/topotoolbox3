@@ -1,13 +1,43 @@
 function plan = buildfile
     plan = buildplan(localfunctions);
     
-    plan("check") = matlab.buildtool.tasks.CodeIssuesTask("toolbox");
     plan("package") = matlab.buildtool.Task( ...
         Description = "Package toolbox", ...
         Dependencies = ["check" "test"], ...
         Actions = @packageToolbox);
 
     plan.DefaultTasks = ["check" "test" "package"];
+end
+
+function checkTask(~)
+    issues = codeIssues("toolbox");
+
+    errors = issues.Issues(issues.Issues.Severity=="error", ...
+        ["FullFilename", "LineStart", "Description"]);
+    warnings = issues.Issues(issues.Issues.Severity=="warning", ...
+        ["FullFilename", "LineStart", "Description"]);
+
+    if ~isempty(errors)
+        disp("Errors");
+        disp("======")
+        for i = 1:height(errors)
+            fprintf("%s:%d\n",errors{i,"FullFilename"}, ...
+                errors{i,"LineStart"});
+            fprintf("  %s\n",errors{i,"Description"});
+        end
+    end
+
+    if ~isempty(warnings)
+        disp("Warnings");
+        disp("========")
+        for i = 1:height(warnings)
+            fprintf("%s:%d\n",warnings{i,"FullFilename"}, ...
+                warnings{i,"LineStart"});
+            fprintf("  %s\n",warnings{i,"Description"});
+        end
+    end
+
+    assert(isempty(errors));
 end
 
 function testTask(~)
