@@ -72,7 +72,7 @@ arguments
     SW  SWATHobj
     options.left (1,1) = true
     options.right (1,1) = true
-    options.distadjust (1,1) = false
+    options.distadjust (1,1) = 0
     options.boundedline (1,1) = true
     options.facecolor = [0.5059 0.8471 0.8157]
     options.facealpha = 1
@@ -105,11 +105,12 @@ elseif ~right
     SW.Z = SW.Z(1:ny,:);
 end
 
-z_min  = min(SW.Z,[],1);
-z_max  = max(SW.Z,[],1);
-z_mean = mean(SW.Z,1,'omitnan')';
-z_std  = std(SW.Z,0,1,'omitnan')';
-dist   = SW.distx+distadjust;
+[z_min,dist]  = stat(SW,@min);
+dist   = dist + distadjust;
+
+z_max  = stat(SW,@max);
+z_mean = stat(SW,@(x) mean(x,'omitmissing'));
+z_std = stat(SW,@(x) std(x,'omitmissing'));
 
 % draw SWATHobj
 ax = gca;

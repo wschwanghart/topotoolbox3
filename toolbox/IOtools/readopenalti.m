@@ -1,6 +1,6 @@
-function data = readopenalti(varargin)
+function data = readopenalti(options)
 
-%READOPENALTI Read altimetry data using the openaltimetry.org API
+%READOPENALTI Read ICESAT altimetry data using the openaltimetry.org API
 %
 % Syntax
 %
@@ -9,9 +9,9 @@ function data = readopenalti(varargin)
 % Description
 %
 %     readopenalti reads altimetry data from openaltimetry.org using the 
-%     API described on: https://openaltimetry.org/data/swagger-ui/
+%     API described on: https://openaltimetry.earthdatacloud.nasa.gov/data
 %     The data comes in geographic coordinates (WGS84). EGM96 geoid heights
-%     are added using the Mapping Toolbox function egm96geoid 
+%     are added using the Mapping Toolbox function egm96geoid if available.
 %
 % Input arguments
 %
@@ -71,79 +71,73 @@ function data = readopenalti(varargin)
 %
 % See also: GRIDobj, websave, readopentopo, egm96geoid
 %
-% Reference: https://openaltimetry.org/data/swagger-ui/
+% Reference: https://openaltimetry.earthdatacloud.nasa.gov/data/openapi/swagger-ui/index.html
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 25. November, 2021
+% Author: Wolfgang Schwanghart (schwanghart[at]uni-potsdam.de)
+% Date: 12. September, 2024
 
-
-defaultdate = datetime('today')-600 : datetime('today');
-
-p = inputParser;
-addParameter(p,'filename',[tempname '.csv']);
-addParameter(p,'interactive',false);
-addParameter(p,'extent',[]);
-addParameter(p,'addmargin',0.01);
-addParameter(p,'north',37.091337);
-addParameter(p,'south',36.738884);
-addParameter(p,'west',-120.168457);
-addParameter(p,'east',-119.465576);
-addParameter(p,'date',defaultdate)
-addParameter(p,'product','atl08');
-addParameter(p,'level3a',false);
-addParameter(p,'deletefile',true);
-addParameter(p,'verbose',true);
-parse(p,varargin{:});
+arguments
+    options.filename = [tempname '.csv']
+    options.interactive = false
+    options.addmargin = 0.01 %°
+    options.extent   = []
+    options.north (1,1) {mustBeNumeric,mustBeInRange(options.north,-90,90)} = 37.091337
+    options.south (1,1) {mustBeNumeric,mustBeInRange(options.south,-90,90)} = 36.738884
+    options.west  (1,1) {mustBeNumeric,mustBeInRange(options.west,-180,180)} = -120.16845
+    options.east  (1,1) {mustBeNumeric,mustBeInRange(options.east,-180,180)} = -119.46557
+    options.date = datetime('today')-600 : datetime('today')
+    options.product {mustBeTextScalar} = 'atl08'
+    options.level3a (1,1) = false
+    options.deletefile (1,1) = true
+    options.verbose (1,1) = true
+end
 
 validproducts = {'atl03','atl10','atl12',...
                  'atl13','atl06','atl07',...
                  'atl08'};
 
-product = validatestring(p.Results.product,validproducts,'readopenalti');
+product = validatestring(options.product,validproducts,'readopenalti');
 urltracks = 'https://openaltimetry.earthdatacloud.nasa.gov/data/api/icesat2/getTracks?';
-if ~p.Results.level3a
+if ~options.level3a
     url = ['https://openaltimetry.earthdatacloud.nasa.gov/data/api/icesat2/' product '?'];
 else
     url = 'https://openaltimetry.earthdatacloud.nasa.gov/data/api/icesat2/level3a?';
 end
-% Example call
-% https://openaltimetry.org/data/api/icesat2/atl08?date=2020-05-13&minx=55&miny=46&maxx=57&maxy=48&trackId=730&client=portal&outputFormat=csv
-
 
 % create output file
-f = fullfile(p.Results.filename);
+f = fullfile(options.filename);
     
-
 % save to drive
-options = weboptions('Timeout',100000);
+webopts = weboptions('Timeout',100000);
 
 % get extent
-if ~isempty(p.Results.extent)
-    if isa(p.Results.extent,'GRIDobj')
-        ext = getextent(p.Results.extent,true);
-        west  = ext(1) - p.Results.addmargin;
-        east  = ext(2) + p.Results.addmargin;
-        south = ext(3) - p.Results.addmargin;
-        north = ext(4) + p.Results.addmargin;
-        
-    elseif numel(p.Results.extent) == 4
-        west = p.Results.extent(1);
-        east = p.Results.extent(2);
-        south = p.Results.extent(3);
-        north = p.Results.extent(4);
+if ~isempty(options.extent)
+    if isa(options.extent,'GRIDobj')
+        % getextent with second input arg true returns lat/lon extent
+        ext = getextent(options.extent,true);
+        west  = ext(1) - options.addmargin;
+        east  = ext(2) + options.addmargin;
+        south = ext(3) - options.addmargin;
+        north = ext(4) + options.addmargin;
+    
+    elseif numel(options.extent) == 4
+        west = options.extent(1);
+        east = options.extent(2);
+        south = options.extent(3);
+        north = options.extent(4);
     else
         error('Unknown format of extent')
     end
 else
-    west = p.Results.west;
-    east = p.Results.east;
-    south = p.Results.south;
-    north = p.Results.north;
+    west = options.west;
+    east = options.east;
+    south = options.south;
+    north = options.north;
 end
 
 % now we have an extent. Or did the user request interactively choosing
 % the extent.
-if any([isempty(west) isempty(east) isempty(south) isempty(north)]) || p.Results.interactive
+if any([isempty(west) isempty(east) isempty(south) isempty(north)]) || options.interactive
     
     ext = roipicker();
    
@@ -153,7 +147,7 @@ if any([isempty(west) isempty(east) isempty(south) isempty(north)]) || p.Results
     north = ext(3);
 end
     
-if p.Results.verbose
+if options.verbose
     a = areaint([south south north north],...
                 [west east east west],almanac('earth','radius','kilometers'));
     disp('-------------------------------------')
@@ -168,21 +162,21 @@ if p.Results.verbose
 end
 
 % get date
-if isdatetime(p.Results.date)
-    dt = p.Results.date;
+if isdatetime(options.date)
+    dt = options.date;
     D  = string(dt,'yyyy-MM-dd');
 else
-    D = p.Results.date;
+    D = options.date;
     dt = datetime(D,'InputFormat','yyyy-MM-dd');
 end
 
-if p.Results.verbose
+if options.verbose
     disp(['Get tracks: ' char(datetime('now'))])
 end
 
 % Download tracks with websave
 tracktable = table([],[],'VariableNames',{'track','date'});
-if p.Results.verbose
+if options.verbose
     disp(['Identifying tracks: ' char(datetime('now'))])
 end
 
@@ -197,7 +191,7 @@ for r=1:numel(dt)
               'miny',south,...
               'client','TopoToolbox',...
               'outputFormat', 'csv', ...
-              options);
+              webopts);
     temptracks = readtable(f);
     temptracks.date = repmat(dt(r),size(temptracks,1),1);
     tracktable = [tracktable; temptracks];
@@ -212,13 +206,13 @@ end
 
 totaltracksfound = size(tracktable,1);
 
-if p.Results.verbose
+if options.verbose
     disp([num2str(totaltracksfound) ' tracks found.'])
     disp(['Data download starts: ' char(datetime('now'))])
 end
 
 % Download data
-if p.Results.level3a
+if options.level3a
     
     counter = 1;
     trackIds = unique(tracktable.track);
@@ -226,7 +220,7 @@ if p.Results.level3a
     endDate = D(end);
     for r = 1:numel(trackIds)
         trackId = trackIds(r);
-        if p.Results.verbose
+        if options.verbose
             disp(['Download trackId ' num2str(trackId) ': ' char(datetime('now'))])
         end
         try
@@ -241,7 +235,7 @@ if p.Results.level3a
                 'trackId',trackId,...
                 'client','TopoToolbox',...
                 'outputFormat', 'csv', ...
-                options);
+                webopts);
             if counter == 1 || ~exist('data','var')
                 data = readtable(f);
             else
@@ -260,7 +254,7 @@ else
     for r = 1:totaltracksfound
         dd = string(tracktable.date(r),'yyyy-MM-dd');
         trackId = num2str(tracktable.track(r));
-        if p.Results.verbose
+        if options.verbose
             disp(['Download ' char(dd) ',' num2str(trackId) ': ' char(datetime('now'))])
         end
         try
@@ -287,18 +281,18 @@ else
     end
 end
 
-if p.Results.verbose
+if options.verbose
     disp(['Total of ' num2str(size(data,1)) ' points downloaded: ' char(datetime('now'))])
 
 end
 
-if p.Results.verbose
+if options.verbose
     disp(['Adding EGM96 heights: ' char(datetime('now'))]);
 end
 
 data.egm96geoid = egm96geoid(data.latitude,data.longitude);
 
-if p.Results.verbose
+if options.verbose
     disp(['Done: ' char(datetime('now'))])
     disp('-------------------------------------')
 end
