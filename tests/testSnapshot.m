@@ -1,17 +1,19 @@
 classdef testSnapshot < matlab.unittest.TestCase
     % testSnapshot Snapshot testing using topotoolbox3 as a reference
-    % The data for the snapshot tests are stored in the
-    % TopoToolbox/test_data repository. This repository is added as a
-    % submodule to topotoolbox3 at the path tests/snapshots.
+    % The data for the snapshot tests are available as versioned releases
+    % in the TopoToolbox/snapshot_data repository. This repository is added
+    % as a submodule to topotoolbox3 at the path tests/snapshots.
     %
-    % To obtain the snapshot test data, you must initialize the
+    % To obtain the snapshot test data, you should initialize the
     % test/snapshots submodule. If you are cloning the repository for the
     % first time, you can use `git clone --recurse-submodules
     % https://github.com/TopoToolbox/topotoolbox3` to initialize the
     % submodule. If you have already cloned the project you should run `git
-    % submodule update --init`. If either of those commands complete
-    % successfully, you should have some GeoTIFFs in your tests/snapshots
-    % directory.
+    % submodule update --init`. Then, download the `snapshot_data.tar.gz` 
+    % archive from the latest release of the snapshot_data repository and 
+    % extract it within the tests/snapshots directory. You should now have
+    % a `data/` directory that contains all of the existing snapshot data
+    % files.
     %
     % If you need to pull in new changes from the TopoToolbox/topotoolbox3
     % repository that include changes to the snapshots submodule, you
@@ -34,19 +36,27 @@ classdef testSnapshot < matlab.unittest.TestCase
     %    version do not match according to the test. 
     % 4. Snapshotting of results must currently be done manually. If you
     %    want to save the results of a test run:
-    %    - Commit the new data to the /submodule/, not to topoboolbox3. If
-    %      you make the commit from the tests/snapshots directory, you
-    %      should be committing to the correct repository.
-    %    - Push the commit to your fork of TopoToolbox/test_data and make a
-    %      pull request.
-    %    - Once the pull request is merged, pull the new changes into the
-    %      submodule by going into the submodule directory and running the
-    %      appropriate `git pull` command. 
+    %    - The updated snapshots will be saved in the tests/snapshots/data
+    %      directory.
+    %    - Run `sha256sum` or its equivalent on the snapshot data to record
+    %      the SHA256 checksums of each of the snapshot data files. Store 
+    %      the results in the sha256sum.txt file in the snapshot_data
+    %      repository.
+    %    - Commit your changes to sha256sum.txt.
+    %    - Push the commit to your fork of TopoToolbox/snapshot_data and
+    %      make a pull request
+    %    - Once the pull request is merged, make a new release of the
+    %      snapshot_data repository and attach a gzipped tar file
+    %      containing the `tests/snapshots/data` directory with the new
+    %      snapshots.
+    %    - Pull the new changes into the submodule by going into the
+    %      submodule directory and running the appropriate `git pull`
+    %      command.
     %    - If you now move to the topotoolbox3 directory and run `git
     %      status` you should see changes to tests/snapshots, but not
     %      to any of the files within that directory. `git add
-    %      tests/snapshots` and `git commit` to record the new test_data
-    %      commit for the submodule.
+    %      tests/snapshots` and `git commit` to record the new
+    %      snapshot_data commit for the submodule.
     %    - Now push the topotoolbox3 commit to your fork and make a pull
     %      request. Once it is merged, you should be able to run `git pull
     %      --recurse-submodules` to pull the new changes including the new
@@ -71,7 +81,7 @@ classdef testSnapshot < matlab.unittest.TestCase
     methods (TestParameterDefinition,Static)
         function dataset = findDatasets()
             % Find all the existing snapshot datasets
-            available_datasets = [{},struct2table(dir("snapshots/*/dem.tif")).folder];
+            available_datasets = [{},struct2table(dir("snapshots/data/*/dem.tif")).folder];
             if ~isempty(available_datasets)
                 dataset = available_datasets;
             else
