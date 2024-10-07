@@ -1,4 +1,0 @@
-[submodule "tests/snapshots"]
-	path = tests/snapshots
-	url = https://github.com/TopoToolbox/test_data
-	branch = main
