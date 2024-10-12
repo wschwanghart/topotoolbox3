@@ -1,5 +1,5 @@
-function [d,z,varargout] = profiles(SW,varargin)
-%PROFILES obtain profiles from a SWATHobj
+function [d,z,varargout] = profiles(SW,options)
+%PROFILES Calculate profiles from a SWATHobj
 %
 % Syntax
 %
@@ -64,21 +64,18 @@ function [d,z,varargout] = profiles(SW,varargin)
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
 % Date: August, 2018
 
+arguments
+    SW   SWATHobj
+    options.dist {mustBeMember(options.dist,{'x','y'})} = 'x'
+    options.step {mustBeNumeric} = SW.width
+    options.format {mustBeMember(options.format,{'vec','mat'})} = 'vec'
+end
 
 
-
-% Parse inputs
-p = inputParser;
-p.FunctionName = 'profiles';
-addRequired(p,'SW',@(x) isa(x,'SWATHobj'));
-addParamValue(p,'dist','x',@(x) validatestring(x,{'x','y'}))
-addParamValue(p,'step',SW.width,@(x) isnumeric(x))
-addParamValue(p,'format','vec',@(x) ismember(x,{'vec','mat'}))
-parse(p,SW,varargin{:});
 
 Z = SW.Z;
 
-switch p.Results.dist
+switch options.dist
     case 'x'
         dx = SW.dx;
         dist_along = SW.distx;
@@ -90,7 +87,7 @@ switch p.Results.dist
         Z = Z';
 end
 
-dix = round(p.Results.step/dx);
+dix = round(options.step/dx);
 ix = 1:dix:length(dist_along);
 
 xdata = cell(length(ix),1);
@@ -115,7 +112,7 @@ if nargout>2
 end
 
 
-if strcmp(p.Results.format,'mat')
+if strcmp(options.format,'mat')
     xdata = {xdata{1}'};
     for i = 1 : length(ydata)
         ydata{i} = ydata{i}';

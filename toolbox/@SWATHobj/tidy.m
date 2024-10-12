@@ -1,6 +1,6 @@
 function OUT = tidy(SW,varargin)
 
-%TIDY remove overlapping points from SWATHobj
+%TIDY Remove overlapping points from SWATHobj
 %
 % Syntax
 %
@@ -37,7 +37,7 @@ function OUT = tidy(SW,varargin)
 %     figure,plot(SW,'points',true),axis equal
 %
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
-% Date: March, 2017
+% Date: 12. October, 2024
 
 
 % check inputs
