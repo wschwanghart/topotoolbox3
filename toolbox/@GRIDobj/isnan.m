@@ -1,6 +1,6 @@
 function I = isnan(DEM)
 
-% returns array elements that are NaNs as logical grid
+%ISNAN Returns array elements that are NaNs as logical grid
 %
 % Syntax
 %
@@ -10,11 +10,19 @@ function I = isnan(DEM)
 %
 %     overloaded isnan for GRIDobj. 
 %
+% Input arguments
+%
+%     DEM   GRIDobj
+%
+% Output arguments
+%
+%     I     GRIDobj with underlying type logical where true elements
+%           indicate NaNs in the DEM
+%
 % See also: isnan
 %
-%
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 20. February, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 18. October, 2024
 
 I = DEM;
 I.Z = isnan(DEM.Z);
