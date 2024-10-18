@@ -1,4 +1,4 @@
-function [DEM,ix] = largestinscribedgrid(DEM,varargin)
+function [DEM,ix] = largestinscribedgrid(DEM,options)
 
 %LARGESTINSCRIBEDGRID Find and crop the largest grid with no nans
 %
@@ -48,17 +48,18 @@ function [DEM,ix] = largestinscribedgrid(DEM,varargin)
 %
 % See also: GRIDobj/crop, readopentopo, reproject2utm
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 14. August, 2023
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 18. October, 2024
 
-p = inputParser;
-addParameter(p,'holes',false)
-parse(p,varargin{:})
+arguments
+    DEM
+    options.holes (1,1) = false
+end
 
 % Find non-nan region
 I = ~isnan(DEM.Z);
 % Remove holes if required
-if p.Results.holes
+if options.holes
     I = imfill(I,'holes');
 end
 
@@ -68,6 +69,7 @@ L = LargestRectangle(I,90,0,0,89.999,0);
 ix = sub2ind(DEM.size,L(2:end,2),L(2:end,1));
 % And clip the DEM
 DEM = crop(DEM,ix);
+DEM.name = 'largestinscribedgrid';
 
 
 end

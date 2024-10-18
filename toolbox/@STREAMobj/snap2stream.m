@@ -12,18 +12,27 @@ function [xn,yn,IX,D,MP] = snap2stream(S,x,y,options)
 %
 % Description
 %
-%     Often gauge locations are not precisely associated with 
-%     streams derived from a digital elevation model. Calculation of 
-%     drainage basins may thus return wrong basin delineations. One method 
-%     is to manually adjust their location to a derived stream raster.
-%     snap2stream does this automatically by finding identifying the
-%     shortest distance to a stream. 
+%     The "snap to stream" operation is used to adjust the location of
+%     points, such as GPS waypoints or sampling locations, so they align
+%     more precisely with a nearby stream or river stored in a STREAMobj S.
+%     This process "snaps" points that are slightly off-course due to GPS
+%     errors or digitization inaccuracies to the nearest vertex
+%     representing the stream.
+%
+%     This operation is useful for ensuring that points intended to
+%     represent features on a watercourse, like water quality measurement
+%     stations or bridges, are correctly placed on the stream itself. It
+%     helps in improving spatial accuracy, especially when analyzing
+%     relationships between features and water networks.
 %
 %     Sometimes, however, assigning nearest locations may lead to snapping
 %     to the wrong locations (e.g. tributaries instead to the trunk river).
 %     Providing additional argument pairs 'nalarea' and 'pointarea' offer
 %     additional means to constrain the snapping. The unit of the areas
-%     should be in the same units as the horizontal coordinates (e.g. m). 
+%     must be in the same units as the horizontal coordinates (e.g. m^2).
+%     The function then optimizes the locations by minimizing the sum of
+%     the snapping distance plus the square root of the absolute difference
+%     between the drainage areas.
 %
 % Input
 % 
@@ -68,25 +77,24 @@ function [xn,yn,IX,D,MP] = snap2stream(S,x,y,options)
 %     'plot'  true or {false}
 %     plot results
 %
-%
 % Output arguments
 %
 %     xn,yn    coordinate vectors of snapped locations
 %     IX       linear index into grid from which S was derived
 %     res      residual (eucl. distance between locations)
-%     MP       map struct that can be exported to a shapefile
+%     MP       geotable that can be exported to a shapefile
 %
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     FD  = FLOWobj(DEM);
-%     S   = STREAMobj(FD,A>1000);
+%     S   = STREAMobj(FD,'minarea',1000);
 %     IX  = randperm(prod(DEM.size),20);
 %     [x,y] = ind2coord(DEM,IX);
 %     [xn,yn,IX,res,MP] = snap2stream(S,x,y,'alongflow',FD,'plot',true);
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 17. June, 2024
+% Date: 13. October, 2024
 
 arguments
     S     STREAMobj
@@ -275,17 +283,10 @@ end
 
 if nargout == 5
     % create output mapstruct
-    MP = struct('Geometry',{'Point'},...
-        'X',num2cell(xn),...
-        'Y',num2cell(yn),...
-        'IX',num2cell(IX),...
-        'residual',num2cell(D),...
-        'inrange',num2cell(double(ID)),...
-        'Xold',num2cell(x),...
-        'Yold',num2cell(y));
+    MP = table(xn(:),yn(:),IX(:),D(:),ID(:),x,y,...
+        'VariableNames',{'X' 'Y' 'IX' 'residual' 'inrange' 'Xold' 'Yold'});
+    MP = table2geotable(MP,"GeometryType","point","CoordinateReferenceSystem",parseCRS(S));
 end
-
-
 
 if ~isinf(options.maxdist)
     ID = ~ID;

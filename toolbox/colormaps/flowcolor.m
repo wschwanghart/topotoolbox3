@@ -12,6 +12,8 @@ function y = flowcolor(n)
 %
 % Example
 %
+%     
+%
 %
 % Author: Francois Beauducel <beauducel@ipgp.fr>
 % Date: 2012/05/17

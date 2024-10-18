@@ -57,14 +57,16 @@ else
     title('Draw rectangle');
 end
 
+ext = getextent(DEM);
+cs4 = DEM.cellsize/4;
+ext = ext + cs4*[1 -1 1 -1];
+
 if ~options.rect
-    ext = getextent(DEM);
 
     h = drawpolygon('DrawingArea',...
         [ext(1) ext(3) ext(2)-ext(1) ext(4)-ext(3)]);
     pos = customWait(h);
 else
-    ext = getextent(DEM);
 
     h = drawrectangle('DrawingArea',...
         [ext(1) ext(3) ext(2)-ext(1) ext(4)-ext(3)]);

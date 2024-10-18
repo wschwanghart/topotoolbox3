@@ -12,8 +12,8 @@ function clr = ttclr(feature)
 %
 % Input arguments
 %
-%     feature     ttclr without input arguments for a list of possible
-%                 features.
+%     feature     'lake','lakeoutline','river','glacier','desert', or 
+%                 'meadow'
 %
 % Output arguments
 %
@@ -21,17 +21,14 @@ function clr = ttclr(feature)
 %
 % See also: ttscm, ttcmap
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. February, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. October, 2024
 
-validfeatures = {'lake','lakeoutline','river','glacier','desert'};
-
-if nargin == 0
-    clr = validfeatures;
-    return
+arguments
+    feature {mustBeMember(feature,{'lake','lakeoutline',...
+                                   'river','glacier',...
+                                   'desert','meadow'})}
 end
-
-feature = validatestring(feature,validfeatures,1);
 
 switch lower(feature)
     case 'lake'
@@ -46,4 +43,6 @@ switch lower(feature)
         % https://support.esri.com/en/technical-article/000010027
         % Sahara sand
         clr = [255 235 190]/255;
+    case 'meadow'
+        clr = [48 186 143]/255;
 end

@@ -39,22 +39,21 @@ function [lat,lon,varargout] = STREAMobj2latlon(S,varargin)
 % See also: STREAMobj/STREAMobj2XY
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 12. June, 2024
+% Date: 13. October, 2024
 
 [CRS,isproj] = parseCRS(S);
 if isnan(isproj)
     error("S has an undefined CRS.")
-end
-
-if ~isproj 
-    error("S already has a geographic CRS.")
-else
-    
 end
     
 nr = numel(varargin);
 c  = cell(1,nr);
 [x,y,c{:}] = STREAMobj2XY(S,varargin{:});
 
-[lat,lon] = projinv(CRS,x,y);
+if ~isproj
+    lat = y;
+    lon = x;
+else
+    [lat,lon] = projinv(CRS,x,y);
+end
 varargout = c;

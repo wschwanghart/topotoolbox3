@@ -1,6 +1,6 @@
 function [DEM,bw] = ksdensity(DEM,x,y,varargin)
 
-%KSDENSITY kernel density estimator for GRIDobj
+%KSDENSITY Kernel density estimator for GRIDobj
 %
 % Syntax
 %     
@@ -10,7 +10,8 @@ function [DEM,bw] = ksdensity(DEM,x,y,varargin)
 % Description
 %
 %     ksdensity returns a probability estimate f for the coordinates in x
-%     and y, evaluated at the cell centers of the GRIDobj DEM.
+%     and y, evaluated at the cell centers of the GRIDobj DEM. The function
+%     returns the estimated density (xy-locations per m^2). 
 %
 %     See the function ksdensity (Statistics and Machine Learning Toolbox
 %     for details).
@@ -38,10 +39,10 @@ function [DEM,bw] = ksdensity(DEM,x,y,varargin)
 %     [F,bw] = ksdensity(DEM,x,y,'bandwidth',1000);
 %     imageschs(DEM,F)
 %
-% See also: GRIDobj
+% See also: GRIDobj, ksdensity
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 19. March, 2018
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 18. October, 2024
 
 
 % go through varargin to find 'useparallel'

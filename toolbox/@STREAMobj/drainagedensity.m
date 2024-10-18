@@ -1,6 +1,6 @@
 function d = drainagedensity(S,FD,outputformat)
 
-%DRAINAGEDENSITY drainage density of a stream network
+%DRAINAGEDENSITY Drainage density of a stream network
 %
 % Syntax
 %
@@ -59,11 +59,13 @@ function d = drainagedensity(S,FD,outputformat)
 %
 % See also: STREAMobj, FLOWobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 6. September, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 13. October, 2024
 
-if nargin == 2
-    outputformat = 'grid';
+arguments
+    S  STREAMobj
+    FD FLOWobj
+    outputformat = 'grid'
 end
 
 a = flowacc(FD)*FD.cellsize^2;

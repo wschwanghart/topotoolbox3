@@ -34,14 +34,15 @@ function [x,y] = getcoordinates(DEM,type)
 [x,y] = wf2XY(DEM.wf,DEM.size);
 
 if nargin == 1
-    return;
+    type = 'vector';
 else
     type = validatestring(type,{'vector','matrix','GRIDobj'});
 end
 
 switch type
     case 'vector'
-        return
+        x = x(:)';
+        y = y(:);
     case 'matrix'
         [x,y] = meshgrid(x,y);
     case 'GRIDobj'

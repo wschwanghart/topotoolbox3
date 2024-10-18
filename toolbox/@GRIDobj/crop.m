@@ -116,27 +116,29 @@ elseif nargin >= 2
         else
             % interactive part
             try
-            imagesc(DEM);
-            [xx,yy] = getcoordinates(DEM);
-            minx = min(xx) - 0.1*DEM.cellsize;
-            maxx = max(xx) + 0.1*DEM.cellsize;
-            miny = min(yy) - 0.1*DEM.cellsize;
-            maxy = max(yy) + 0.1*DEM.cellsize;
-            
-            c = uicontrol('Style','Text','Units','normalized','position',[0 0 1 0.05],...
-                          'String','Draw rectangle and double click when finished.');
-            
-            fcn = makeConstrainToRectFcn('imrect',[minx maxx],[miny maxy]);
-            h = imrect(gca,'PositionConstraintFcn',fcn);
-            
-            
-            addNewPositionCallback(h,@(pos) set(c,'String',...
-                ['LX:' num2str(round(pos(1)),'%d') ', LY:' num2str(round(pos(2)),'%d') ...
-                 ', UX:' num2str(round(pos(1)+pos(3)),'%d') ', UY:' num2str(round(pos(2)+pos(4)),'%d')]));
-            [~] = wait(h);
-            MASK  = createMask(h);
-            delete(h)
-            close
+                MASK = createmask(DEM,'rect',true);
+                MASK = MASK.Z;
+            % imagesc(DEM);
+            % [xx,yy] = getcoordinates(DEM);
+            % minx = min(xx) - 0.1*DEM.cellsize;
+            % maxx = max(xx) + 0.1*DEM.cellsize;
+            % miny = min(yy) - 0.1*DEM.cellsize;
+            % maxy = max(yy) + 0.1*DEM.cellsize;
+            % 
+            % c = uicontrol('Style','Text','Units','normalized','position',[0 0 1 0.05],...
+            %               'String','Draw rectangle and double click when finished.');
+            % 
+            % fcn = makeConstrainToRectFcn('imrect',[minx maxx],[miny maxy]);
+            % h = imrect(gca,'PositionConstraintFcn',fcn);
+            % 
+            % 
+            % addNewPositionCallback(h,@(pos) set(c,'String',...
+            %     ['LX:' num2str(round(pos(1)),'%d') ', LY:' num2str(round(pos(2)),'%d') ...
+            %      ', UX:' num2str(round(pos(1)+pos(3)),'%d') ', UY:' num2str(round(pos(2)+pos(4)),'%d')]));
+            % [~] = wait(h);
+            % MASK  = createMask(h);
+            % delete(h)
+            % close
             catch ME
                 delete(h);
                 error('TopoToolbox:crop','output variable undefined')
