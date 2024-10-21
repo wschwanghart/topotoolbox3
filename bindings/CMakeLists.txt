@@ -12,7 +12,7 @@ include(FetchContent)
 FetchContent_Declare(
   topotoolbox
   GIT_REPOSITORY https://github.com/TopoToolbox/libtopotoolbox.git
-  GIT_TAG 2024-W36
+  GIT_TAG 2024-W43
 )
 FetchContent_MakeAvailable(topotoolbox)
 
@@ -24,8 +24,16 @@ matlab_add_mex(
   LINK_TO topotoolbox
 )
 
+matlab_add_mex(
+  NAME tt_fillsinks
+  MODULE
+  SRC tt_fillsinks.c
+  R2018a
+  LINK_TO topotoolbox
+)
+
 install(
-  TARGETS tt_has_topotoolbox
+  TARGETS tt_has_topotoolbox tt_fillsinks
   DESTINATION "."
   COMPONENT Runtime
 )

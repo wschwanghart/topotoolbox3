@@ -79,14 +79,19 @@ Inan      = isnan(dem);
 % set nans to -inf
 dem(Inan) = -inf;
 
-if nargin == 1
-    % fill depressions using imreconstruct with an 8-neighborhood
+if nargin == 1 && haslibtopotoolbox
+    % Using libtopotoolbox
+    bc = ones(size(dem), 'uint8');
+    bc(2:end-1, 2:end-1) = 0;
+    bc(Inan) = 1;
+    demfs = tt_fillsinks(dem, bc);
+elseif  nargin == 1
+    % Fall back to imreconstruct without libtopotoolbox
     marker     = -dem;
     II         = false(size(dem));
     II(2:end-1,2:end-1) = true;
     marker(II & ~Inan) = -inf;
-    demfs      = -imreconstruct(marker,-dem,8);
-    
+    demfs = -imreconstruct(marker,-dem,8);
 elseif nargin==2 && md
     
     % create mask
