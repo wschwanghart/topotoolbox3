@@ -1,13 +1,14 @@
-function DEM = fillsinks(DEM,maxdepth)
+function DEM = fillsinks(DEM,maxdepth,options)
 
-%FILLSINKS fill/remove pits, sinks or topographic depressions
+%FILLSINKS Fill/remove pits, sinks or topographic depressions
 %
 % Syntax
 %
 %     DEMfs = fillsinks(DEM)
 %     DEMfs = fillsinks(DEM,maxdepth)
 %     DEMfs = fillsinks(DEM,sinks)
-%     DEMfs = fillsinks(DEM,sinks,option)
+%     DEMfs = fillsinks(DEM,sinks)
+%     DEMfs = fillsinks(DEM,'uselibtt',true)
 %
 % Description
 %
@@ -23,6 +24,14 @@ function DEM = fillsinks(DEM,maxdepth)
 %     option, there will be one regional minima for each connected
 %     component in the sinks grid. 
 %
+%     fillsinks uses morphological image reconstruction (Image Processing
+%     Toolbox function imreconstruct). By default, and if the function is
+%     called with only one input argument, and if libtopotoolbox is
+%     available (see haslibtopotoolbox) the function uses the fillsinks
+%     function of libtopotoolbox. Set 'uselibtt', false, if you want to use
+%     the MATLAB implementation. Note that libtopotoolbox sets the
+%     underlying class of DEM to single precision.
+%
 % Input
 %
 %     DEM       digital elevation model (GRIDobj)
@@ -30,6 +39,10 @@ function DEM = fillsinks(DEM,maxdepth)
 %               filled
 %     SINKS     logical matrix same size as dem with true elements
 %               referring to sinks (GRIDobj)
+%
+%     Parameter name/value pairs
+%
+%     'uselibtt' {true} or false. If true, fillsinks uses libtopotoolbox.
 %
 % Output
 %
@@ -47,16 +60,17 @@ function DEM = fillsinks(DEM,maxdepth)
 %
 % See also: IMFILL, IMRECONSTRUCT, IMIMPOSEMIN, PREPROCESSTOOL
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 28. January, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 27. October, 2024
 
+arguments
+    DEM   GRIDobj
+    maxdepth = []
+    options.uselibtt (1,1) = true
+end
 
-% Check input arguments
-narginchk(1, 2)
-
-if nargin == 1
-    
-else
+% If two input arguments are supplied, validate input
+if nargin == 2
     if isscalar(maxdepth) && ~isa(maxdepth,'GRIDobj')
         validateattributes(maxdepth,{'numeric'},{'>',0});
         md = true;
@@ -79,12 +93,17 @@ Inan      = isnan(dem);
 % set nans to -inf
 dem(Inan) = -inf;
 
-if nargin == 1 && haslibtopotoolbox
-    % Using libtopotoolbox
+uselibtt = options.uselibtt && haslibtopotoolbox;
+
+if nargin == 1 || nargin >= 3 && uselibtt
+
+    % Use libtopotoolbox
+    dem = single(dem); % requires dem to be single
     bc = ones(size(dem), 'uint8');
     bc(2:end-1, 2:end-1) = 0;
     bc(Inan) = 1;
     demfs = tt_fillsinks(dem, bc);
+
 elseif  nargin == 1
     % Fall back to imreconstruct without libtopotoolbox
     marker     = -dem;

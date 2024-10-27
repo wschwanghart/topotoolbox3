@@ -193,7 +193,7 @@ arguments
     options.gridmarkers = []
     options.gridmarkercolor = 'k'
     options.useparallel (1,1) = true
-    options.usepermanent (1,1) = true
+    options.usepermanent (1,1) = false
     options.colorbarlabel = []
     options.colorbarylabel = []
     options.tickstokm (1,1) = false
