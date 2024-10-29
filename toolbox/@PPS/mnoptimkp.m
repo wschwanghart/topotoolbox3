@@ -462,7 +462,7 @@ F=zeros(size(x));
 if rem(n,2) == 0
   s = x>0;
   k = 0;
-  for jj = 0:n/2-1;
+  for jj = 0:n/2-1
     k = k + (x(s)/2).^jj/factorial(jj);
   end
   F(s) = 1-exp(-x(s)/2).*k;
@@ -762,7 +762,7 @@ x = xtransform(xu,params);
 % final reshape to make sure the result has the proper shape
 x = reshape(x,xsize);
 % Use a nested function as the OutputFcn wrapper
-  function stop = outfun_wrapper(x,varargin);
+  function stop = outfun_wrapper(x,varargin)
     % we need to transform x first
     xtrans = xtransform(x,params);
     

@@ -89,14 +89,14 @@ br = cellfun(@(x) '', br,'UniformOutput',false);
 
 % calculate stream order and record type of confluences one stream pixel
 % upstream of confluences
-for r = 1:numel(S.ix);
-    if s(S.ixc(r)) == 0 || s(S.ixc(r)) <  s(S.ix(r));
+for r = 1:numel(S.ix)
+    if s(S.ixc(r)) == 0 || s(S.ixc(r)) <  s(S.ix(r))
         s(S.ixc(r)) = s(S.ix(r));
-    elseif s(S.ixc(r)) ==  s(S.ix(r));
+    elseif s(S.ixc(r)) ==  s(S.ix(r))
         s(S.ixc(r)) = s(S.ix(r))+1;
     end
  
-    if confl(S.ixc(r));
+    if confl(S.ixc(r))
         br{S.ixc(r)} = [num2str(s(S.ix(r))) br{S.ixc(r)}];
     end
 end
@@ -106,20 +106,20 @@ br(confl) = cellfun(@(x) sort(x,'ascend'),br(confl),'UniformOutput',false);
 
 % check side branches and remove those where higher order river join lower
 % order rivers
-for r = 1:numel(S.ix);
-    if confl(S.ixc(r));
+for r = 1:numel(S.ix)
+    if confl(S.ixc(r))
         s1 = br{S.ixc(r)};
         s1 = str2double(s1(1));
         if s(S.ix(r)) == s1
             br{S.ix(r)} = br{S.ixc(r)};
         end
-    elseif confl(S.ix(r));
+    elseif confl(S.ix(r))
         br{S.ix(r)} = '';
     end
 end
 
 % follow and record side branching upstream
-for r = numel(S.ix):-1:1;
+for r = numel(S.ix):-1:1
     if isempty(br{S.ix(r)})
         br(S.ix(r)) = br(S.ixc(r));
     end
@@ -132,13 +132,13 @@ switch outputformat
     case 'mapstruct'
         MS  = STREAMobj2mapstruct(S);
         xy  = zeros(numel(MS),2);
-        for r = 1:numel(MS);
+        for r = 1:numel(MS)
             xy(r,1) = MS(r).X(1);
             xy(r,2) = MS(r).Y(1);
         end
         
         [~,locb] = ismember(xy,[S.x S.y],'rows');
-        for r = 1:numel(MS);
+        for r = 1:numel(MS)
             MS(r).sidebranch = br{locb(r)};
         end
         

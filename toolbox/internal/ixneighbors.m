@@ -78,7 +78,7 @@ function [ic,icd] = ixneighbors(varargin)
 
 
 % handle input and error checking
-if nargout~=2;
+if nargout~=2
     error('wrong number of output arguments')
 end
 
@@ -89,17 +89,17 @@ nrc = numel(X);
 In  = isnan(X);
 
 
-if nargin==1;   
+if nargin==1   
     method = 'getall';
     nhood  = 8;
-elseif nargin==2 || nargin==3;
+elseif nargin==2 || nargin==3
     ix = varargin{2};
-    if isempty(ix);
+    if isempty(ix)
         method = 'getall';
     else
         method = 'getsome';
         if islogical(ix)
-            if size(X) ~= size(ix);
+            if size(X) ~= size(ix)
                 error('if I is logical I and X must have same size')
             end
         else
@@ -111,9 +111,9 @@ elseif nargin==2 || nargin==3;
     end
     
     
-    if nargin==3;
+    if nargin==3
         nhood = varargin{3};
-        if ~ismember(nhood(1),[4 8]);
+        if ~ismember(nhood(1),[4 8])
             error('conn must be either 4 or 8')
         else
             nhood = nhood(1);
@@ -153,7 +153,7 @@ icd(:,2) = ic(I([end 1:end-1],:));                % shift down
 icd(:,3) = ic(I(:,[2:end 1]));                    % shift left        
 icd(:,4) = ic(I([2:end 1],:));                    % shift up      
 
-if nhood==8;
+if nhood==8
 
 icd(:,5) = ic(I([2:end 1],[end 1:end-1]));        % shift up and right        
 icd(:,6) = ic(I([2:end 1],[2:end 1]));            % shift up and left        

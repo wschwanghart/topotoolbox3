@@ -92,7 +92,7 @@ else
              'must not be more than one channel head.'])
     end
     
-    if numel(varargin) == 2;
+    if numel(varargin) == 2
         method = validatestring(varargin{2},...
             {'linear','nearest','next','previous','spline','pchip','cubic'},...
             'widenstream','method',4);
@@ -123,7 +123,7 @@ end
     
 DEM.Z(I) = DEM.Z(L(I));
 
-if nargout == 2;
+if nargout == 2
     MASK = GRIDobj(DEM,'logical');
     MASK.Z = I;
 end

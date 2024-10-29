@@ -95,7 +95,7 @@ KSN = G./(A.*(A.cellsize^2)).^STATS.theta;
 
 [x,y,ksn] = STREAMobj2XY(S,KSN);
 scatter(x,y,5,ksn,'filled')
-caxis([0 2000])
+clim([0 2000])
 title('ksn values')
 box on
 colorbar

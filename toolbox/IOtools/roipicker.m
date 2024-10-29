@@ -165,7 +165,7 @@ waitfor(b5,'UserData');
     end
     
     % --------------
-    function clearroi(btn,gx)
+    function clearroi(~,~)
         % Callback: Delete ROI
 
         b1.Value = 0;
@@ -180,7 +180,7 @@ waitfor(b5,'UserData');
     end
 
     % --------------
-    function zoom2roi(btn,gx)
+    function zoom2roi(~,gx)
         % Callback: Zoom to ROI
         if isempty(roi)
             return
@@ -195,7 +195,7 @@ waitfor(b5,'UserData');
     end
 
     % --------------
-    function mapextent2roi(btn,gx)
+    function mapextent2roi(~,gx)
         % Callback: Adjust mapextent to match ROI
 
         % Delete an existing roi
@@ -224,7 +224,7 @@ waitfor(b5,'UserData');
     end
 
     % --------------
-    function allevents(src,evt)
+    function allevents(~,evt)
         % Callback: Adjust behavior of geoaxes when ROI is moved
         evname = evt.EventName;
 
@@ -241,7 +241,7 @@ waitfor(b5,'UserData');
     end
 
     % --------------
-    function select(src,evt)
+    function select(~,~)
         % Callback: Select and output ROI extent and finish
         if isempty(roi)
             return
@@ -263,7 +263,7 @@ waitfor(b5,'UserData');
     end
 
     % --------------
-    function basemapselect(dd,evt)
+    function basemapselect(dd,~)
         % Callback: Select basemap
         gx.Basemap = dd.Value;
 
@@ -296,7 +296,7 @@ waitfor(b5,'UserData');
     end
 
     % --------------
-    function my_closereq(src,event)        
+    function my_closereq(~,~)        
         % Close request function
         % to display a question dialog box
         selection = questdlg('Quit selection and close?', ...

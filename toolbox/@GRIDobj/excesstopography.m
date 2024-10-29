@@ -25,7 +25,7 @@ function DEM = excesstopography(DEM,varargin)
 %    
 % Parameter name/value pairs
 %
-%    'maxgradient'   maximum gradient in degrees of slopes (default: 30°)
+%    'maxgradient'   maximum gradient in degrees of slopes (default: 30Â°)
 %    'unit'          deg (degrees = default) or tan (tangens). Applies to
 %                    'maxgradient' and 'tol'.
 %    'kernelsize'    side length in pixels used by the kernel. Must be 
@@ -38,7 +38,7 @@ function DEM = excesstopography(DEM,varargin)
 %                    reached
 %    'tol'           only applicable if 'iterate' is set to true. Iteration
 %                    terminates if max(gradient8(DEM))-maxgradient < tol.
-%                    The default is 6e-4 ° (degrees). Note that setting tol
+%                    The default is 6e-4 Â° (degrees). Note that setting tol
 %                    to a very small value might cause that the algorithm
 %                    uses all maxiter iterations.
 %    'maxiter'       only applicable if 'iterate' is set to true. Iteration
@@ -68,14 +68,14 @@ function DEM = excesstopography(DEM,varargin)
 %
 % Reference
 %
-%    Blöthe, J.H., Korup, O., Schwanghart, W. (2015): Large landslides lie
+%    BlÃ¶the, J.H., Korup, O., Schwanghart, W. (2015): Large landslides lie
 %    low: Excess topography in the Himalaya-Karakoram ranges. Geology 43, 6, 
 %    523-526.
 %
 % See also: GRIDobj/localtopography 
 %     
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 29. October, 2024
 
 
 
@@ -83,15 +83,15 @@ function DEM = excesstopography(DEM,varargin)
 p = inputParser;         
 p.FunctionName = 'excesstopography';
 addRequired(p,'DEM', @(x) isa(x,'GRIDobj'));
-addParamValue(p,'maxgradient',30,@(x) isscalar(x) && (x >= 0));
-addParamValue(p,'gradtype','G8', @(x) ischar(validatestring(x,{'G8','central'})));
-addParamValue(p,'kernelsize',11, @(x) isscalar(x) && (rem(x,2)==1) && (x>=3));
-addParamValue(p,'output','difference', @(x) ischar(validatestring(x,{'difference','elevation'})));
-addParamValue(p,'iterate',true);
-addParamValue(p,'maxiter',100);
-addParamValue(p,'tol',6e-4);
-addParamValue(p,'unit','deg', @(x) ischar(validatestring(x,{'deg','tan'})));
-addParamValue(p,'verbose',false, @(x) isscalar(x));
+addParameter(p,'maxgradient',30,@(x) isscalar(x) && (x >= 0));
+addParameter(p,'gradtype','G8', @(x) ischar(validatestring(x,{'G8','central'})));
+addParameter(p,'kernelsize',11, @(x) isscalar(x) && (rem(x,2)==1) && (x>=3));
+addParameter(p,'output','difference', @(x) ischar(validatestring(x,{'difference','elevation'})));
+addParameter(p,'iterate',true);
+addParameter(p,'maxiter',100);
+addParameter(p,'tol',6e-4);
+addParameter(p,'unit','deg', @(x) ischar(validatestring(x,{'deg','tan'})));
+addParameter(p,'verbose',false, @(x) isscalar(x));
 
 parse(p,DEM,varargin{:});
 
@@ -143,20 +143,20 @@ DEMcopy = DEM;
 mG = getmaximumgradient(DEMcopy,gradtype,INAN);
 
 if p.Results.verbose
-    disp([datestr(clock) ' -- Maximum gradient: ' num2str(atand(mG))])
+    disp([char(datetime('now')) ' -- Maximum gradient: ' num2str(atand(mG))])
 end
 
-if mG > maxg;
+if mG > maxg
     
     if iterate
         iter = 0;
-        while ((mG-maxg) > tol) && (iter<= p.Results.maxiter);
+        while ((mG-maxg) > tol) && (iter<= p.Results.maxiter)
             iter = iter+1;
             DEMcopy.Z = ordfilt2(double(DEMcopy.Z)-m,1,domain,double(offset),'zeros') + m;
             mG = getmaximumgradient(DEMcopy,gradtype,INAN);
             
             if p.Results.verbose
-                disp([datestr(clock) ' -- Iteration ' num2str(iter,'%d') ', Maximum gradient: ' num2str(atand(mG))])
+                disp([char(datetime('now')) ' -- Iteration ' num2str(iter,'%d') ', Maximum gradient: ' num2str(atand(mG))])
             end
             
         end

@@ -127,7 +127,7 @@ if iterate && floor((EndAngle-StartAngle)/RotationStep)+1<10
     numRotSteps=floor((EndAngle-StartAngle)/RotationStep)+1;
 end
 if ~islogical(image)
-  image=im2bw(image);
+  image=imbinarize(image,0.5);
 end
 ImBWc=image;
 %add 1px black border arround ImBWc:
@@ -412,18 +412,34 @@ function LR=getLR(LR,border,ColLims,RowLims)
             xLimitTempB2=xLimit2;
             Indx=1;while RowLims(yNow,Indx)<xNow;Indx=Indx+1;end        
             xT2=RowLims(yNow,Indx)-1;xT1=RowLims(yNow,Indx-1)+1;%faster in one line
-            if xT1>xLimitTempT1;xLimitTempT1=xT1;end
-            if xT2<xLimitTempT2;xLimitTempT2=xT2;end
+            if xT1>xLimitTempT1
+                xLimitTempT1=xT1;
+            end
+            if xT2<xLimitTempT2
+                xLimitTempT2=xT2;
+            end
             if (xLimitTempT2-xLimitTempT1+1)*heightMax<LR(1)  
               break;
             end    
             for yB=yNow:yLimit2
               Indx=1;while RowLims(yB,Indx)<xNow;Indx=Indx+1;end 
               xB2=RowLims(yB,Indx)-1;xB1=RowLims(yB,Indx-1)+1;%faster in one line
-              if xB1>xLimitTempB1;xLimitTempB1=xB1;end
-              if xB2<xLimitTempB2;xLimitTempB2=xB2;end          
-              if xLimitTempB1>xLimitTempT1;xL=xLimitTempB1;else xL=xLimitTempT1;end
-              if xLimitTempB2>xLimitTempT2;xR=xLimitTempT2;else xR=xLimitTempB2;end              
+              if xB1>xLimitTempB1
+                  xLimitTempB1=xB1;
+              end
+              if xB2<xLimitTempB2
+                  xLimitTempB2=xB2;
+              end          
+              if xLimitTempB1>xLimitTempT1
+                  xL=xLimitTempB1;
+              else 
+                  xL=xLimitTempT1;
+              end
+              if xLimitTempB2>xLimitTempT2
+                  xR=xLimitTempT2;
+              else 
+                  xR=xLimitTempB2;
+              end              
               if (xR-xL+1)*heightMax<LR(1)
                 break;
               end
@@ -444,17 +460,33 @@ function LR=getLR(LR,border,ColLims,RowLims)
           Indx=1;while RowLims(yNow,Indx)<xNow;Indx=Indx+1;end    
           xB2=RowLims(yNow,Indx)-1;
           xB1=RowLims(yNow,Indx-1)+1;
-          if xB1>xLimitTempB1;xLimitTempB1=xB1;end
-          if xB2<xLimitTempB2;xLimitTempB2=xB2;end
+          if xB1>xLimitTempB1
+              xLimitTempB1=xB1;
+          end
+          if xB2<xLimitTempB2
+              xLimitTempB2=xB2;
+          end
           if (xLimitTempB2-xLimitTempB1+1)*heightMax>LR(1)
             for yT=yNow:-1:yLimit1
               Indx=1;while RowLims(yT,Indx)<xNow;Indx=Indx+1;end
               xT2=RowLims(yT,Indx)-1;
               xT1=RowLims(yT,Indx-1)+1;        
-              if xT1>xLimitTempT1;xLimitTempT1=xT1;end
-              if xT2<xLimitTempT2;xLimitTempT2=xT2;end 
-              if xLimitTempB1>xLimitTempT1;xL=xLimitTempB1;else xL=xLimitTempT1;end
-              if xLimitTempB2<xLimitTempT2;xR=xLimitTempB2;else xR=xLimitTempT2;end
+              if xT1>xLimitTempT1
+                  xLimitTempT1=xT1;
+              end
+              if xT2<xLimitTempT2
+                  xLimitTempT2=xT2;
+              end 
+              if xLimitTempB1>xLimitTempT1
+                  xL=xLimitTempB1;
+              else 
+                  xL=xLimitTempT1;
+              end
+              if xLimitTempB2<xLimitTempT2
+                  xR=xLimitTempB2;
+              else 
+                  xR=xLimitTempT2;
+              end
               if (xR-xL+1)*heightMax<LR(1)
                 break;
               end
@@ -483,16 +515,28 @@ function LR=getLR(LR,border,ColLims,RowLims)
             xLimitTempB2=xLimit2;
             Indx=1;while RowLims(yT,Indx)<xNow;Indx=Indx+1;end        
             xT2=RowLims(yT,Indx)-1;xT1=RowLims(yT,Indx-1)+1;%faster in one line
-            if xT1>xLimitTempT1;xLimitTempT1=xT1;end
-            if xT2<xLimitTempT2;xLimitTempT2=xT2;end
+            if xT1>xLimitTempT1
+                xLimitTempT1=xT1;
+            end
+            if xT2<xLimitTempT2
+                xLimitTempT2=xT2;
+            end
             if (xLimitTempT2-xLimitTempT1+1)*heightMax<LR(1)  
               break;
             end 
             for yB=yNow:yLimit2
               if xB1a(yB-yNow+1)>xLimitTempB1;xLimitTempB1=xB1a(yB-yNow+1);end
               if xB2a(yB-yNow+1)<xLimitTempB2;xLimitTempB2=xB2a(yB-yNow+1);end          
-              if xLimitTempB1>xLimitTempT1;xL=xLimitTempB1;else xL=xLimitTempT1;end
-              if xLimitTempB2>xLimitTempT2;xR=xLimitTempT2;else xR=xLimitTempB2;end              
+              if xLimitTempB1>xLimitTempT1
+                  xL=xLimitTempB1;
+              else 
+                  xL=xLimitTempT1;
+              end
+              if xLimitTempB2>xLimitTempT2
+                  xR=xLimitTempT2;
+              else 
+                  xR=xLimitTempB2;
+              end              
               if (xR-xL+1)*(yLimit2-yT+1)<LR(1)
                 break;
               end              
@@ -516,16 +560,32 @@ function LR=getLR(LR,border,ColLims,RowLims)
             yLimitTempR2=yLimit2;
             Indx=1;while ColLims(xNow,Indx)<yNow;Indx=Indx+1;end     
             yL2=ColLims(xNow,Indx)-1;yL1=ColLims(xNow,Indx-1)+1;%faster in one line
-            if yL1>yLimitTempL1;yLimitTempL1=yL1;end
-            if yL2<yLimitTempL2;yLimitTempL2=yL2;end
+            if yL1>yLimitTempL1
+                yLimitTempL1=yL1;
+            end
+            if yL2<yLimitTempL2
+                yLimitTempL2=yL2;
+            end
             if widthMax*(yLimitTempL2-yLimitTempL1+1)>LR(1)
               for xR=xNow:xLimit2
                 Indx=1;while ColLims(xR,Indx)<yNow;Indx=Indx+1;end              
                 yR2=ColLims(xR,Indx)-1;yR1=ColLims(xR,Indx-1)+1;%faster in one line
-                if yR1>yLimitTempR1;yLimitTempR1=yR1;end%much faster than yR1=max([yLimitTempR1,yR1]);
-                if yR2<yLimitTempR2;yLimitTempR2=yR2;end            
-                if yLimitTempR1>yLimitTempL1;yT=yLimitTempR1;else yT=yLimitTempL1;end
-                if yLimitTempR2>yLimitTempL2;yB=yLimitTempL2;else yB=yLimitTempR2;end  
+                if yR1>yLimitTempR1
+                    yLimitTempR1=yR1;
+                end%much faster than yR1=max([yLimitTempR1,yR1]);
+                if yR2<yLimitTempR2
+                    yLimitTempR2=yR2;
+                end            
+                if yLimitTempR1>yLimitTempL1
+                    yT=yLimitTempR1;
+                else 
+                    yT=yLimitTempL1;
+                end
+                if yLimitTempR2>yLimitTempL2
+                    yB=yLimitTempL2;
+                else 
+                    yB=yLimitTempR2;
+                end  
                 if widthMax*(yB-yT+1)<LR(1)
                   break;
                 end
@@ -544,8 +604,12 @@ function LR=getLR(LR,border,ColLims,RowLims)
           yLimitTempR2=yLimit2; 
             Indx=1;while ColLims(xNow,Indx)<yNow;Indx=Indx+1;end              
             yR2=ColLims(xNow,Indx)-1;yR1=ColLims(xNow,Indx-1)+1;%faster in one line
-            if yR1>yLimitTempR1;yLimitTempR1=yR1;end
-            if yR2<yLimitTempR2;yLimitTempR2=yR2;end             
+            if yR1>yLimitTempR1
+                yLimitTempR1=yR1;
+            end
+            if yR2<yLimitTempR2
+                yLimitTempR2=yR2;
+            end             
             if widthMax*(yLimitTempR2-yLimitTempR1+1)<LR(1)  
               break;
             end
@@ -554,10 +618,22 @@ function LR=getLR(LR,border,ColLims,RowLims)
             for xL=xNow:-1:xLimit1  
               Indx=1;while ColLims(xL,Indx)<yNow;Indx=Indx+1;end
               yL2=ColLims(xL,Indx)-1;yL1=ColLims(xL,Indx-1)+1;%faster in one line
-              if yL1>yLimitTempL1;yLimitTempL1=yL1;end
-              if yL2<yLimitTempL2;yLimitTempL2=yL2;end
-              if yLimitTempR1>yLimitTempL1;yT=yLimitTempR1;else yT=yLimitTempL1;end
-              if yLimitTempR2>yLimitTempL2; yB=yLimitTempL2;else yB=yLimitTempR2;end 
+              if yL1>yLimitTempL1
+                  yLimitTempL1=yL1;
+              end
+              if yL2<yLimitTempL2
+                  yLimitTempL2=yL2;
+              end
+              if yLimitTempR1>yLimitTempL1
+                  yT=yLimitTempR1;
+              else 
+                  yT=yLimitTempL1;
+              end
+              if yLimitTempR2>yLimitTempL2 
+                  yB=yLimitTempL2;
+              else 
+                  yB=yLimitTempR2;
+              end 
               if widthMax*(yB-yT+1)<LR(1)
                 break;
               end
@@ -584,18 +660,34 @@ function LR=getLR(LR,border,ColLims,RowLims)
             Indx=1;while ColLims(xR,Indx)<yNow;Indx=Indx+1;end              
             yR2=ColLims(xR,Indx)-1;yR1=ColLims(xR,Indx-1)+1;%faster in one line
             
-            if yR1>yLimitTempR1;yLimitTempR1=yR1;end
-            if yR2<yLimitTempR2;yLimitTempR2=yR2;end             
+            if yR1>yLimitTempR1
+                yLimitTempR1=yR1;
+            end
+            if yR2<yLimitTempR2
+                yLimitTempR2=yR2;
+            end             
             if widthMax*(yLimitTempR2-yLimitTempR1+1)<LR(1)  
               break;
             end
             yLimitTempL1=yLimit1;
             yLimitTempL2=yLimit2;
             for xL=xNow:-1:xLimit1  
-              if yL1a(xL-xLimit1+1)>yLimitTempL1;yLimitTempL1=yL1a(xL-xLimit1+1);end
-              if yL2a(xL-xLimit1+1)<yLimitTempL2;yLimitTempL2=yL2a(xL-xLimit1+1);end
-              if yLimitTempR1>yLimitTempL1;yT=yLimitTempR1;else yT=yLimitTempL1;end
-              if yLimitTempR2>yLimitTempL2; yB=yLimitTempL2;else yB=yLimitTempR2;end 
+              if yL1a(xL-xLimit1+1)>yLimitTempL1
+                  yLimitTempL1=yL1a(xL-xLimit1+1);
+              end
+              if yL2a(xL-xLimit1+1)<yLimitTempL2
+                  yLimitTempL2=yL2a(xL-xLimit1+1);
+              end
+              if yLimitTempR1>yLimitTempL1
+                  yT=yLimitTempR1;
+              else 
+                  yT=yLimitTempL1;
+              end
+              if yLimitTempR2>yLimitTempL2 
+                  yB=yLimitTempL2;
+              else 
+                  yB=yLimitTempR2;
+              end 
               if (xR-xLimit1+1)*(yB-yT+1)<LR(1)
                 break;
               end              
@@ -702,7 +794,7 @@ function plotResult(ImBW,LR,x,y)
     dyT=(y(3)-y(2))/2;
     txt=sprintf('%.2f °',90-LR(6));
     r=sqrt(dxT^2+dyT^2);
-    if r>imsize(2)*.9-x(3)-1;
+    if r>imsize(2)*.9-x(3)-1
       r=imsize(2)*.99-x(3);
       ytxt=y(3)-r*sin((pi/2-phi)/2); 
       xtxt=x(3)+r*cos((pi/2-phi)/2);

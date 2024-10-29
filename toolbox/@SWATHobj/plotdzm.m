@@ -313,7 +313,7 @@ ylabel(sprintf('Z (%s)',SW.zunit))
 if colbar && ~strcmp(plotmode,'image')
     colormap(colmap);
     hc = colorbar;
-    if strcmp(colmode,'inverse');
+    if strcmp(colmode,'inverse')
         set(get(hc,'Children'),'CData',(64:-1:1)');
     end
     yt = get(hc,'YTick');
@@ -327,7 +327,7 @@ elseif colbar && strcmp(plotmode,'image')
     hc = colorbar;
 end
 
-if nargout==1;
+if nargout==1
     h = unique(hout);
     if exist('hc','var')
         h(end+1) = hc;

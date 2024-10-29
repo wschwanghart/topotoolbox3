@@ -89,7 +89,7 @@ function updatedata
     h.YData(2:3:end) = yhigh;
 
 end
-    function upondelete(scr,evt,hlist)
+    function upondelete(~,~,hlist)
         delete(hlist)
     end
 end

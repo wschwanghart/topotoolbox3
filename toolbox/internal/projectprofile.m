@@ -21,7 +21,7 @@ x = x(:);
 y = y(:);
 z = z(:);
 
-if x(1) > x(end);
+if x(1) > x(end)
     x = flipud(x);
 end
 sp = [x(1); y(1)];

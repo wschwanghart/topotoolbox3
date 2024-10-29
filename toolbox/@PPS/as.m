@@ -69,8 +69,13 @@ function varargout = as(P,outtype)
 % See also: GRIDobj, FLOWobj, STREAMobj, PPS/shapewrite,
 %           STREAMobj/STREAMobj2mapstruct, STREAMobj/STREAMobj2XY
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 10. January, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 28. October, 2024
+
+arguments
+    P   PPS
+    outtype = 'STREAMobj'
+end
 
 switch lower(outtype)
     case 'streamobj'

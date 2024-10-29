@@ -44,11 +44,11 @@ function [IXgn,d] = snap2stream(I,IXg,plotit)
 % Date: 7. March, 2018
 
 narginchk(2,3)
-if nargin == 2;
+if nargin == 2
     plotit = false;
 end
 
-if ~isa(I.Z,'logical');
+if ~isa(I.Z,'logical')
     error('TopoToolbox:GRIDobj','The instance of GRIDobj must contain a logical stream raster.')
 end
 

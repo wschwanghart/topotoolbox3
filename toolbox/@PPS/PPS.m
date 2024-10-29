@@ -124,7 +124,7 @@ properties
 %    The S property contains a stream network stored as STREAMobj.
 %
 %    See also STREAMobj
-    S   = STREAMobj
+    S   STREAMobj
     
 %PP column vector of doubles
 %    PP contains the linear indices into the node-attribute list of S.
@@ -159,70 +159,50 @@ end
 
 
 methods
-    function [P,II] = PPS(S,varargin)
-        
-        narginchk(1,inf);
-               
-        % Check input arguments
-        p = inputParser;
-        p.FunctionName = 'PPS';
-        addRequired(p,'S',@(x) isa(x,'STREAMobj'));
-        
-        % Add elevation
-        addParameter(p,'z',[],@(x) isa(x,'GRIDobj') || isnal(S,x));
-        
-        % Either, points are provided (this may include marks, but this is not yet supported)
-        addParameter(p,'PP',[]);
-        addParameter(p,'marks',table, @(x) istable(x));
-        
-        % Or the users sets a number of options to simulate points
-        % 1. Number of uniform points
-        addParameter(p,'runif',[],@(x) isscalar(x)); 
-        % 2. Intensity of poisson process
-        addParameter(p,'rpois',[],@(x) isnumeric(x));
-        
-        % Or find intersections with polylines or polygons
-        addParameter(p,'intersect',[]);
-        
-        % Finally, covariates may be included
-        addParameter(p,'covariates',table,@(x) istable(x));
-        addParameter(p,'interactive',false);
-        
-        % Some additional parameters
-        addParameter(p,'warning',true);
-        addParameter(p,'alongflow',[],@(x) isa(x,'FLOWobj'));
+    function [P,II] = PPS(S,options)
 
-        % Parse
-        parse(p,S,varargin{:});
+        arguments
+            S    STREAMobj
+            options.z {mustBeGRIDobjOrNalOrEmpty(options.z,S)} = []
+            options.PP = []
+            options.runif = []
+            options.rpois = []
+            options.intersect = []
+            options.warning = []
+            options.alongflow = []
+            options.marks = []
+            options.interactive = []
+            options.covariates = []
+
+        end
         
-        results = p.Results;
-        P.S = results.S;
+        P.S = S;
         
         %% Elevations
-        if isa(results.z,'GRIDobj')
-            P.z = getnal(S,results.z);
+        if ~isempty(options.z)
+            P.z = ezgetnal(S,options.z);
         else
-            P.z = results.z;
+            P.z = [];
         end
-
+        
         %% Enable reading of geotable
         if ~verLessThan('map','5.2')
-            if isgeotable(results.PP)
-                points = results.PP.Shape;
+            if isgeotable(options.PP)
+                points = options.PP.Shape;
                 x = [points.X];
                 y = [points.Y];
 
-                results.PP = [x(:) y(:)];
+                options.PP = [x(:) y(:)];
             end
         end
         
         %% Read or create points
-        if ~isempty(results.PP) 
+        if ~isempty(options.PP) 
             %% Points (PP)
             % Users can submit different kind of points
-            if iscolumn(results.PP) && ~islogical(results.PP) && ~isstruct(results.PP)
+            if iscolumn(options.PP) && ~islogical(options.PP) && ~isstruct(options.PP)
                 % linear index
-                IXgrid     = results.PP;
+                IXgrid     = options.PP;
                 [II,P.PP]   = ismember(IXgrid,P.S.IXgrid);
                 if ~all(II) && p.Results.warning
                     warning([num2str(numel(II)-nnz(II)) ' of ' num2str(numel(II)) ...
@@ -230,37 +210,38 @@ methods
                     P.PP = P.PP(II);
                 end
 
-            elseif isnal(S,results.PP) && islogical(results.PP)
+            elseif isnal(S,options.PP) && islogical(options.PP)
                 % logical node attribute list
-                P.PP = find(results.PP);
+                P.PP = find(options.PP);
                 
-            elseif (size(results.PP,2) == 2 && ~islogical(results.PP)) || isstruct(results.PP)
+            elseif (size(options.PP,2) == 2 && ~islogical(options.PP)) || isstruct(options.PP)
                 % structure array or array with coordinates.
-                if isstruct(results.PP)
-                    x = [results.PP.X]';
-                    y = [results.PP.Y]';
+                if isstruct(options.PP)
+                    x = [options.PP.X]';
+                    y = [options.PP.Y]';
                 else
-                    x = results.PP(:,1);
-                    y = results.PP(:,2);
+                    x = options.PP(:,1);
+                    y = options.PP(:,2);
                 end
                 
                 % coordinates
-                [~,~,IXgrid] = snap2stream(S,x,y,'alongflow',results.alongflow);
+                [~,~,IXgrid] = snap2stream(S,x,y,'alongflow',options.alongflow);
                 [~,P.PP] = ismember(IXgrid,P.S.IXgrid);
+
             end
             
         %% Generate points            
-        elseif ~isempty(results.runif)
+        elseif ~isempty(options.runif)
             %% Uniform random
-            IX = randlocs(P.S,results.runif,false);
+            IX = randlocs(P.S,options.runif,false);
             [~,P.PP] = ismember(IX,P.S.IXgrid);
-        elseif ~isempty(results.rpois)
+        elseif ~isempty(options.rpois)
             %% Poisson distributed
-            IX = randpoi(P.S,results.rpois);
+            IX = randpoi(P.S,options.rpois);
             [~,P.PP] = ismember(IX,P.S.IXgrid);
-        elseif ~isempty(results.intersect)
+        elseif ~isempty(options.intersect)
             %% From intersection with other data
-            PS = results.intersect;
+            PS = options.intersect;
             if isnumeric(PS)
                 X1 = PS(:,1);
                 Y1 = PS(:,2);
@@ -288,10 +269,10 @@ methods
         % Marks (only applicable if PP is set, table must have the same 
         % height as PP)
         
-        if ~isempty(results.marks)
+        if ~isempty(options.marks)
             % make sure that there are as many observations as there are
             % points
-            t = results.marks;
+            t = options.marks;
             
             if exist('II','var')
                 t = t(II,:);
@@ -310,10 +291,10 @@ methods
         end
                
         % Covariates (must be node attribute lists)
-        if ~isempty(results.covariates)
+        if ~isempty(options.covariates)
             % make sure that there are as many observations as there are
             % points
-            t = results.covariates;
+            t = options.covariates;
             if height(t) ~= numel(P.S.IXgrid)
                 error('Covariate table must have as many rows as there are nodes in the stream network.')
             end

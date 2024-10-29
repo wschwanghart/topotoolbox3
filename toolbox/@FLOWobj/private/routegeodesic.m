@@ -55,7 +55,7 @@ if any(I(:))
     % calculate weight matrix for geodesic distance transform
     D  = bwdist(~I);
     S  = regionprops(I,D,'MaxIntensity','PixelIdxList');
-    for r = 1:numel(S);
+    for r = 1:numel(S)
         D((S(r).PixelIdxList)) = S(r).MaxIntensity - D((S(r).PixelIdxList)) + 1;
     end
     D(~I)    = inf;
@@ -71,7 +71,7 @@ if any(I(:))
         case 'single'
             g = zeros(numel(ic),1);
             icd = zeros(numel(ic),1);
-            for r = 1:8;
+            for r = 1:8
                 ict = ic+neighs(r);
                 gt  = (C(ic)-C(ict))/distan(r);
                 UD  = gt>g;
@@ -84,7 +84,7 @@ if any(I(:))
         case 'multi'
             icd = [];
             ic2 = [];
-            for r = 1:8;
+            for r = 1:8
                 DSN = ic+neighs(r);
                 II  = C(ic)-C(DSN) > 0;
                 icd = [icd; DSN(II)];

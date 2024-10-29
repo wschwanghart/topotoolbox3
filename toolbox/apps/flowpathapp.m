@@ -215,7 +215,7 @@ hPlotProfiles = [];
 
 
 
-    function PressLeftButton(src,evt)
+    function PressLeftButton(~,~)
         
         % get the axis position
         p = get(hAx,'CurrentPoint');

@@ -83,7 +83,7 @@ end
 
 
 % and write them in A
-for r = 1:numel(CC.PixelIdxList);
+for r = 1:numel(CC.PixelIdxList)
     A(CC.PixelIdxList{r}) = val(r);
 end
 

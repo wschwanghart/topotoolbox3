@@ -105,12 +105,14 @@ if nargin == 1 || nargin >= 3 && uselibtt
     demfs = tt_fillsinks(dem, bc);
 
 elseif  nargin == 1
+
     % Fall back to imreconstruct without libtopotoolbox
     marker     = -dem;
     II         = false(size(dem));
     II(2:end-1,2:end-1) = true;
     marker(II & ~Inan) = -inf;
     demfs = -imreconstruct(marker,-dem,8);
+    
 elseif nargin==2 && md
     
     % create mask

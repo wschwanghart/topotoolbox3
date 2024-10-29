@@ -49,7 +49,7 @@ siz      = size(dem);
 
 % handle NaNs
 log_nans = isnan(dem);
-if any(log_nans(:));
+if any(log_nans(:))
     flag_nans = true;
 else
     flag_nans = false;
@@ -81,7 +81,7 @@ flats(:,[1 2 end-1 end])  = false;
 flats([1 2 end-1 end],:)  = false;
 
 % any flats there? If yes, start recursive flat routing
-if any(flats(:));
+if any(flats(:))
     II = true;
     
     switch type

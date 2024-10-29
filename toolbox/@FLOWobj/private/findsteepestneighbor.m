@@ -12,8 +12,8 @@ dist = [cs csd cs csd cs csd cs csd];
 
 ixc  = zeros(size(ix),class(ix));
 
-for ixix = 1:numel(ix);
-    if isinf(D(ix(ixix)));
+for ixix = 1:numel(ix)
+    if isinf(D(ix(ixix)))
         inflat = false;
         g = 0;
     else
@@ -21,35 +21,35 @@ for ixix = 1:numel(ix);
         g = 0;
     end
     
-        for neighbor = 1:8;
+        for neighbor = 1:8
             c = col(ixix) + coln(neighbor);
-            if c < 1 || c > ncol;
+            if c < 1 || c > ncol
                 continue
             end
             r = row(ixix) + rown(neighbor);
-            if r < 1 || r > nrow;
+            if r < 1 || r > nrow
                 continue
             end
             
             ixn = (c-1)*nrow + r;
 %             ixn = sub2ind(siz,r,c);
             % if your index is in nonflat areas
-            if ~inflat;
+            if ~inflat
                 gg = (dem(ix(ixix))-dem(ixn))/dist(neighbor);
-                if gg > g;
+                if gg > g
                     ixc(ixix) = ixn;
                     g = gg;
                 end
             else
-                if D(ix(ixix)) == 1;
-                    if dem(ixn) == dem(ix(ixix)) && isinf(D(ixn));
+                if D(ix(ixix)) == 1
+                    if dem(ixn) == dem(ix(ixix)) && isinf(D(ixn))
                         ixc(ixix) = ixn;
                         break
                     end
                 else
                 
                 gg = (D(ix(ixix))-D(ixn))/dist(neighbor);%D(ixn);
-                if gg > g && ~isinf(gg);
+                if gg > g && ~isinf(gg)
                     ixc(ixix) = ixn;
                     g = gg;
                 end
