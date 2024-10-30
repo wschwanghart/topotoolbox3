@@ -134,9 +134,9 @@ end
 
 
 %% Snapping
-if minarea > 0;
+if minarea > 0
     % calculate stream grid
-    if minarea < 10;
+    if minarea < 10
         warning('TopoToolbox:slopeareatool','minimum area is quite small')
     end
     W = A.Z>(minarea) & A.Z<(maxarea);
@@ -213,7 +213,7 @@ acenters = aedges + [diff(aedges)/2;0];
 
 
     %% Subfunctions
-    function PressLeftButton(src,evt)
+    function PressLeftButton(~,~)
         
         % get the axis position
         cp = get(hAx,'CurrentPoint');
@@ -246,7 +246,7 @@ acenters = aedges + [diff(aedges)/2;0];
 
     function PlotProfiles
         % get coordinates of mouse click
-        if A.Z(IXchannelhead) > maxarea;
+        if A.Z(IXchannelhead) > maxarea
             counter = counter-1;
             return
         elseif FD.ixcix(IXchannelhead) == 0
@@ -261,13 +261,13 @@ acenters = aedges + [diff(aedges)/2;0];
         % color
         color(counter) = strfind(colors,props.linecolor);
         
-        if counter == 1;
+        if counter == 1
             set(hMenuFit,'Enable','on')
             hButtonFit = uimenu(hMenuFit,'Label',['Fit to ' colornames{color(counter)} ' data'],'Callback',@(src,event) fitline(src,event,color(counter)));
             
             set(hMenuExport,'Enable','on')
             hButtonExport = uimenu(hMenuExport,'Label',['Export ' colornames{color(counter)} ' streams as STREAMobj to workspace'],'Callback',@(src,event) exporttoworkspace(src,event,color(counter))); 
-        elseif ~ismember(color(end),color(1:end-1));
+        elseif ~ismember(color(end),color(1:end-1))
             hButtonFit(end+1) = uimenu(hMenuFit,'Label',['Fit to ' colornames{color(counter)} ' data'],'Callback',@(src,event) fitline(src,event,color(counter)));
             hButtonExport(end+1) = uimenu(hMenuExport,'Label',['Export ' colornames{color(counter)} ' streams as STREAMobj to workspace'],'Callback',@(src,event) exporttoworkspace(src,event,color(counter)));
         end
@@ -300,7 +300,7 @@ acenters = aedges + [diff(aedges)/2;0];
         hold(hAx,'off');
         
         % Slope area plot
-        if ~ishandle(hAxProfiles);
+        if ~ishandle(hAxProfiles)
             hAxProfiles = createSlopeAreaFigure;
         end
         
@@ -315,7 +315,7 @@ acenters = aedges + [diff(aedges)/2;0];
         
     end
 
-    function changelinecolor(src,event)
+    function changelinecolor(src,~)
         
         I = src == hButtonColors;
         
@@ -327,7 +327,7 @@ acenters = aedges + [diff(aedges)/2;0];
         
     end
 
-    function fitline(src,event,colornum)
+    function fitline(src,~,colornum)
         
         switch get(src,'Checked')
             case 'off'
@@ -411,7 +411,7 @@ acenters = aedges + [diff(aedges)/2;0];
         end
     end
 
-    function exporttoworkspace(src,event,colornum)
+    function exporttoworkspace(~,~,colornum)
         linecolor = colors(colornum);
         % fit line
         IXchannel = IXchannel(:);

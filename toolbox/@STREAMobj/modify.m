@@ -592,7 +592,7 @@ function posn = getnearestend(pos)
 
 end
 
-function drawpath(pos)
+function drawpath(~)
     % DRAWPATH   
     
     % bring hpstart and hpend to top

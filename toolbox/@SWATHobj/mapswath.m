@@ -37,7 +37,7 @@ function [OUT] = mapswath(SW,M,varargin)
 
 
 narginchk(2,3)
-if nargin == 2;
+if nargin == 2
     method = 'linear';
 else
     method = validatestring(varargin{1},...

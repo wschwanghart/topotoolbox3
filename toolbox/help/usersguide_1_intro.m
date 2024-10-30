@@ -207,8 +207,8 @@ STATS = regionprops(DB.Z,'PixelIdxList','Area','Centroid');
 imageschs(DEM,DB);
 
 hold on
-for run = 1:nrDB;
-    if STATS(run).Area*DB.cellsize^2 > 10e6;
+for run = 1:nrDB
+    if STATS(run).Area*DB.cellsize^2 > 10e6
         [x,y] = ind2coord(DB,...
             sub2ind(DB.size,...
             round(STATS(run).Centroid(2)),...

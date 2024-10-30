@@ -214,7 +214,7 @@ if p.Results.plot
     mapshow(CCL,'color','k')
     
     colormap(summer(10))
-    caxis([0 1])
+    clim([0 1])
     h = colorbar;
     h.Label.String = 'T-factor';
 end

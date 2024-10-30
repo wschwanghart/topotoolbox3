@@ -187,7 +187,7 @@ else
     zb   = double(DEM(outlet));
 end
 
-if isa(A,'GRIDobj');
+if isa(A,'GRIDobj')
     % a is the term inside the brackets of equation 6b 
     a    = double(a0./(A.Z(S.IXgrid)*(A.cellsize.^2)));
 else
@@ -216,7 +216,7 @@ end
 
 % find values of the ratio of m and n that generate a linear Chi plot
 % uses fminsearch
-if isempty( p.Results.mn );
+if isempty( p.Results.mn )
     mn0  = 0.5; % initial value
     % fminsearch is a nonlinear optimization procedure that doesn't require
     % the statistics toolbox
@@ -355,9 +355,9 @@ end
 %% fitting function
 function sqres = mnfit(varargin)
     
-    if nargin == 1;
+    if nargin == 1
         mn = varargin{1};
-    elseif nargin == 2;
+    elseif nargin == 2
         mn = varargin{1};
         a  = varargin{2};
     end
@@ -368,7 +368,7 @@ CHI = cumtrapz(SFIT,a(Lib).^mn);
 % normalize both variables
 CHI = CHI ./ max(CHI);
 
-if nargin == 2;
+if nargin == 2
     sqres = CHI;
     return
 end

@@ -338,9 +338,9 @@ function z = lowerenv(S,z,ix)
 
 
 kn = false(size(S.x));
-if nargin == 3;
-    if isempty(ix);
-    elseif islogical(ix);
+if nargin == 3
+    if isempty(ix)
+    elseif islogical(ix)
         kn = ix;
     else
         kn(ix) = true;
@@ -360,7 +360,7 @@ ixcix(ix) = 1:numel(ix);
 
 onenvelope = true(nrc,1);
 
-for r = numel(S.ixc):-1:1;
+for r = numel(S.ixc):-1:1
     s  = ix(r);
     ss = ixc(r);
     

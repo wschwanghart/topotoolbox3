@@ -43,7 +43,7 @@ dem = DEM.Z;
 dem = dem(~isnan(dem));
 dem = dem(:);
 
-if nargin == 2;
+if nargin == 2
     [n,elev] = hist(dem,bins); 
     n = flipud(n(:));
     elev = flipud(elev(:));
@@ -65,7 +65,7 @@ end
 n = n./n(end) * 100;
 
 % plot results
-if nargout ~= 2;
+if nargout ~= 2
     axis_handle = plot(n,elev,linestyle);
     axis xy
     xlabel('frequency [%]')
@@ -75,7 +75,7 @@ end
 % prepare output
 if nargout == 1
     varargout{1} = axis_handle;
-elseif nargout == 2;
+elseif nargout == 2
     varargout{1} = n;
     varargout{2} = elev;
 end

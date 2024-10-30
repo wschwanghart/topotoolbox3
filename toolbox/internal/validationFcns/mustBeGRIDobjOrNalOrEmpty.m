@@ -1,6 +1,6 @@
 function mustBeGRIDobjOrNalOrEmpty(x,S)
 
-%mustBeGRIDobjOrNalOrEmpty Validate that value is GRIDobj or a valid nal
+%mustBeGRIDobjOrNalOrEmpty Validate that value is GRIDobj, a valid nal or empty
 %
 % Syntax
 %

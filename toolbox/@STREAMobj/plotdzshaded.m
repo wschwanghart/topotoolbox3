@@ -155,7 +155,7 @@ xlabel(['Distance upstream [' lower(p.Results.dunit) ']'])
 ylabel('Elevation [m]')
 
 
-if nargout == 1;
+if nargout == 1
     h = ph;
 end
 

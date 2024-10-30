@@ -254,7 +254,7 @@ if doplot
     plot(Sd,newz_sig,'b--')
     xlims = get(gca,'XLim');
     ylims = get(gca,'YLim');
-    tstr = sprintf('S = k_s A^{-theta}\n  k_s = %1.2e ± %1.2e\n  theta = %1.2f',ks,ks_sig,mn);
+    tstr = sprintf('S = k_s A^{-theta}\n  k_s = %1.2e Â± %1.2e\n  theta = %1.2f',ks,ks_sig,mn);
     text(max(xlims).*0.1,max(ylims).*0.85,tstr);
     hold off
 end
@@ -278,7 +278,7 @@ function posn = getnearestend(pos)
 
 end
 
-function drawpath(pos)
+function drawpath(~)
     % DRAWPATH   
     if ixend == 0
         ixpath = ix:numel(Sd);

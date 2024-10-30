@@ -52,16 +52,16 @@ function [DEM, totalarea] = demarea(DEM,correctEdges)
 %
 % References
 %
-%     This approach is based on Jenness, Jeff S. 2004. ìCalculating
-%     Landscape Surface Area from Digital Elevation Models.î Wildlife
-%     Society Bulletin 32 (3): 829ñ839.
+%     This approach is based on Jenness, Jeff S. 2004. ‚ÄúCalculating
+%     Landscape Surface Area from Digital Elevation Models.‚Äù Wildlife
+%     Society Bulletin 32 (3): 829‚Äì839.
 %
-% Author: J¸rnjakob Dugge 
+% Author: J√ºrnjakob Dugge 
 % see original contribution here:
 % http://www.mathworks.com/matlabcentral/fileexchange/42204-calculate-dem-surface-area
 % Date: 18. September, 2017
 
-if nargin == 1;
+if nargin == 1
     correctEdges = true;
 end
 
@@ -106,9 +106,9 @@ function [ totalarea, cellareas ] = demareasub( Z, varargin )
 %   |/    |    \|
 %   7-----6-----5
 %   
-%   This approach is based on Jenness, Jeff S. 2004. ìCalculating Landscape
-%   Surface Area from Digital Elevation Models.î Wildlife Society Bulletin
-%   32 (3): 829ñ839.
+%   This approach is based on Jenness, Jeff S. 2004. ‚ÄúCalculating Landscape
+%   Surface Area from Digital Elevation Models.‚Äù Wildlife Society Bulletin
+%   32 (3): 829‚Äì839.
 %
 %
 %   Example, calculating the surface area of a pyramid with a base length
