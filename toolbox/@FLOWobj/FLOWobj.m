@@ -126,7 +126,7 @@ methods
             options.verbose (1,1) = false
             options.sinks = []
             options.internaldrainage (1,1) = false
-            options.uselibtopotoolbox (1,1) = false
+            options.uselibtt (1,1) = false
             options.tweight (1,1) {mustBeNumeric,mustBePositive} = 2
             options.cweight (1,1) {mustBeNumeric,mustBePositive} = 1
             options.mex (1,1) = false
@@ -156,7 +156,8 @@ methods
         [D,DEM,SILLS] = createAuxiliaryTopo(DEM,...
             'internaldrainage',options.internaldrainage,...
             'preprocess',options.preprocess,...
-            'verbose',options.verbose);
+            'verbose',options.verbose,...
+            'uselibtt',options.uselibtt);
 
         % D     - Auxiliary elevations starting at presillpixels. All other
         %         pixels are -inf (numeric matrix)
@@ -278,7 +279,10 @@ methods
         case 'multi'
             %% Multiple flow direction
             D(SILLS) = 0;
-
+            
+            % This function returns a list of downstream neighbors ixc for 
+            % each pixel ix. The list is not topologically sorted and the
+            % fractions are still to be de
             [ix,ixc]=ixdsneighbors(DEM.Z,D,'keepequal',false);
 
             FD.ix = ix;

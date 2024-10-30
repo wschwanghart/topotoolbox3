@@ -41,8 +41,8 @@ function varargout = identifyflats(DEM,options)
 % 
 % See also: GRIDobj, GRIDobj/fillsinks
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 26. April, 2018
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 30. October, 2024
 
 arguments
     DEM   GRIDobj
@@ -62,7 +62,7 @@ else
     flag_nans = false;
 end
 
-uselibtt = options.uselibtt & haslibtopotoolbox
+uselibtt = options.uselibtt & haslibtopotoolbox;
 
 if uselibtt
  

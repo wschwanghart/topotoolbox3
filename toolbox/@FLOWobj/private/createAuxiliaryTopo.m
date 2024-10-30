@@ -27,6 +27,7 @@ arguments
     options.internaldrainage (1,1) = false
     options.sinks = []
     options.verbose (1,1) = false
+    options.uselibtt (1,1) = true
 end
 
 % start preprocessing (e.g. carve or fill)
@@ -42,7 +43,7 @@ switch lower(options.preprocess)
         end
 
         if isempty(sinks)
-            DEM = fillsinks(DEM);
+            DEM = fillsinks(DEM,'uselibtt',options.uselibtt);
         else
             DEM = fillsinks(DEM,sinks);
         end
@@ -55,7 +56,7 @@ switch lower(options.preprocess)
             disp([char(datetime("now"))  ' -- Sink filling'])
         end
         if isempty(options.sinks)
-            DEMF = fillsinks(DEM);
+            DEMF = fillsinks(DEM,'uselibtt',options.uselibtt);
         else
             DEMF = fillsinks(DEM,options.sinks);
         end
@@ -78,9 +79,9 @@ end
 % will not attempt to route through the lowest region in a
 % internally drained basin (e.g. a flat lake surface).
 if options.internaldrainage
-    [Iobj,SILLSobj,IntBasin] = identifyflats(DEM);
+    [Iobj,SILLSobj,IntBasin] = identifyflats(DEM,'uselibtt',options.uselibtt);
 else
-    [Iobj,SILLSobj] = identifyflats(DEM);
+    [Iobj,SILLSobj] = identifyflats(DEM,'uselibtt',options.uselibtt);
 end
 
 I     = Iobj.Z;
