@@ -1,4 +1,4 @@
-function varargout = identifyflats(DEM)
+function varargout = identifyflats(DEM,options)
 
 %IDENTIFYFLATS identify flat terrain in a digital elevation model
 %
@@ -18,6 +18,10 @@ function varargout = identifyflats(DEM)
 % Input
 %
 %     DEM        digital elevation model(GRIDobj)
+%     
+%     Parameter name/value pairs
+%
+%     'uselibtt' {true} or false. If true identifyflats uses libtopotoolbox.
 %    
 % Output
 % 
@@ -40,7 +44,11 @@ function varargout = identifyflats(DEM)
 % Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
 % Date: 26. April, 2018
 
-narginchk(1,1)
+arguments
+    DEM   GRIDobj
+    options.uselibtt (1,1) = true
+end
+
 dem = DEM.Z;
 
 % identify NaNs
@@ -54,16 +62,21 @@ else
     flag_nans = false;
 end
 
-if haslibtopotoolbox
+uselibtt = options.uselibtt & haslibtopotoolbox
+
+if uselibtt
+ 
     % Use libtopotoolbox's identifyflats
     % bitget(iflats,1) == 1 for flats
     % bitget(iflats,2) == 1 for sills
     % bitget(iflats,4) == 1 for pre-sills
     % 2024-10-07: closed pixels are not yet identified by
     % libtopotoolbox
-    iflats = tt_identifyflats(dem);
+    iflats = tt_identifyflats(single(dem));
     flats = bitget(iflats,1) == 1;
+
 else
+
     % Fallback to the Image Processing Toolbox
     dem(log_nans) = -inf;
 
@@ -81,6 +94,7 @@ else
         % remove flat pixels bordering to nans
         flats(imdilate(log_nans,ones(3))) = false;
     end
+
 end
 
 
@@ -91,9 +105,12 @@ varargout{1}.name = 'flats';
 
 % identify sills
 if nargout >= 2
-    if haslibtopotoolbox
+    if uselibtt
+
         Imr = bitget(iflats,2) == 1;
+
     else
+ 
         Imr = -inf(size(dem));
         Imr(flats) = dem(flats);
         Imr = (imdilate(Imr,ones(3)) == dem) & ~flats;
@@ -101,6 +118,7 @@ if nargout >= 2
         if flag_nans
             Imr(log_nans) = false;
         end
+
     end
 
     % prepare output
@@ -111,10 +129,13 @@ end
 
 % identify interior basins
 if nargout >= 3
-    if haslibtopotoolbox
+
+    if uselibtt
+
         % libtopotoolbox doesn't yet compute interior basins
         % so we need to process the NaNs if we haven't already
         dem(log_nans) = -inf;
+
     end
     varargout{3} = DEM;
     varargout{3}.Z = imregionalmin(dem);
