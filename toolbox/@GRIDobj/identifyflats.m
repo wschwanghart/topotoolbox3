@@ -1,4 +1,4 @@
-function varargout = identifyflats(DEM)
+function varargout = identifyflats(DEM,options)
 
 %IDENTIFYFLATS identify flat terrain in a digital elevation model
 %
@@ -18,6 +18,10 @@ function varargout = identifyflats(DEM)
 % Input
 %
 %     DEM        digital elevation model(GRIDobj)
+%     
+%     Parameter name/value pairs
+%
+%     'uselibtt' {true} or false. If true identifyflats uses libtopotoolbox.
 %    
 % Output
 % 
@@ -40,38 +44,59 @@ function varargout = identifyflats(DEM)
 % Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
 % Date: 26. April, 2018
 
+arguments
+    DEM   GRIDobj
+    options.uselibtt (1,1) = true
+end
 
-narginchk(1,1)
 dem = DEM.Z;
 
-
-% handle NaNs
+% identify NaNs
+% libtopotoolbox's implementation does not need the NaNs removed from
+% the DEM, so we remove them below after deciding whether we will use
+% libtopotoolbox
 log_nans = isnan(dem);
 if any(log_nans(:))
     flag_nans = true;
-    dem(log_nans) = -inf;
 else
     flag_nans = false;
 end
-nhood = ones(3);
 
+uselibtt = options.uselibtt & haslibtopotoolbox
 
-% identify flats
-% flats: logical matrix with true where cells don't have lower neighbors
-if flag_nans
-    flats = imerode(dem,nhood) == dem & ~log_nans;
+if uselibtt
+ 
+    % Use libtopotoolbox's identifyflats
+    % bitget(iflats,1) == 1 for flats
+    % bitget(iflats,2) == 1 for sills
+    % bitget(iflats,4) == 1 for pre-sills
+    % 2024-10-07: closed pixels are not yet identified by
+    % libtopotoolbox
+    iflats = tt_identifyflats(single(dem));
+    flats = bitget(iflats,1) == 1;
+
 else
-    flats = imerode(dem,nhood) == dem;
+
+    % Fallback to the Image Processing Toolbox
+    dem(log_nans) = -inf;
+
+    if flag_nans
+        flats = imerode(dem,ones(3)) == dem & ~log_nans;
+    else
+        flats = imerode(dem,ones(3)) == dem;
+    end
+
+    % remove flats at the border
+    flats(1:end,[1 end]) = false;
+    flats([1 end], 1:end) = false;
+
+    if flag_nans
+        % remove flat pixels bordering to nans
+        flats(imdilate(log_nans,ones(3))) = false;
+    end
+
 end
 
-% remove flats at the border
-flats(1:end,[1 end])  = false;
-flats([1 end],1:end)  = false;
-
-if flag_nans
-    % remove flat pixels bordering to nans
-    flats(imdilate(log_nans,ones(3))) = false;
-end
 
 % prepare output
 varargout{1} = DEM;
@@ -79,15 +104,23 @@ varargout{1}.Z = flats;
 varargout{1}.name = 'flats';
 
 % identify sills
-if nargout >= 2   
-    % find sills and set marker
-    Imr = -inf(size(dem));
-    Imr(flats) = dem(flats);
-    Imr = (imdilate(Imr,ones(3)) == dem) & ~flats;
-    
-    if flag_nans
-        Imr(log_nans) = false;
+if nargout >= 2
+    if uselibtt
+
+        Imr = bitget(iflats,2) == 1;
+
+    else
+ 
+        Imr = -inf(size(dem));
+        Imr(flats) = dem(flats);
+        Imr = (imdilate(Imr,ones(3)) == dem) & ~flats;
+
+        if flag_nans
+            Imr(log_nans) = false;
+        end
+
     end
+
     % prepare output
     varargout{2} = DEM;
     varargout{2}.Z = Imr;
@@ -96,6 +129,14 @@ end
 
 % identify interior basins
 if nargout >= 3
+
+    if uselibtt
+
+        % libtopotoolbox doesn't yet compute interior basins
+        % so we need to process the NaNs if we haven't already
+        dem(log_nans) = -inf;
+
+    end
     varargout{3} = DEM;
     varargout{3}.Z = imregionalmin(dem);
     
@@ -109,4 +150,7 @@ if nargout >= 3
     varargout{3}.name = 'closed basins';
 end
 
+
+
+end
 
