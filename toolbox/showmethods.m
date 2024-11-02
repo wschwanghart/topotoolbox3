@@ -20,22 +20,19 @@ function showmethods(classname,showlink)
 %     showlink      false or true (default). If true, the function displays
 %                   hyperlinks to the documentation.
 %                   
-%
 % Example
 %
 %     showmethods('GRIDobj')
 %
 % See also: methods, properties, class
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 5. December, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 2. November, 2024
 
-narginchk(1,2)
-
-if nargin == 1
-    showlink = true;
+arguments
+    classname 
+    showlink (1,1) = true
 end
-
 
 m = methods(classname);
 
@@ -82,7 +79,6 @@ for r = 1:numel(m)
     catch
         disp(m{r})
     end
-    
     
 end
             

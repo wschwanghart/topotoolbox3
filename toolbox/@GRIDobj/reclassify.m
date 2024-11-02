@@ -1,6 +1,6 @@
-function DEM = reclassify(DEM,varargin)
+function DEM = reclassify(DEM,method,num)
 
-%RECLASSIFY generate univariate class intervals for an instance of GRIDobj
+%RECLASSIFY Generate univariate class intervals for an instance of GRIDobj
 %
 % Syntax
 %
@@ -49,9 +49,9 @@ function DEM = reclassify(DEM,varargin)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 3. May, 2024
 
-narginchk(1,3)
-
-allowedmethods = {'equalintervals',...
+arguments
+    DEM
+    method {mustBeMember(method,{'equalintervals',...
                   'definedintervals',...
                   'definedquantiles',...
                   'equalquantiles',...
@@ -59,18 +59,10 @@ allowedmethods = {'equalintervals',...
                   'standarddeviation',...
                   'std',...
                   'otsu'...
-                 };
-% nr of classes
-if nargin == 1
-    method = 'equalintervals';
-    num = 10;
-else
-    method = validatestring(varargin{1},allowedmethods);
-    
-    if nargin==3
-        num = varargin{2};
-    end
+                 })} = 'equalintervals'
+    num = 10
 end
+
 
 INAN = isnan(DEM.Z) | isinf(DEM.Z);
 DEM.Z(INAN) = nan;
@@ -108,7 +100,7 @@ switch method
         num(end+1) = inf;
         num = [-inf; num(:)];
         siz = size(DEM.Z);
-        [~,DEM.Z] = histc(DEM.Z(:),num);
+        [~,~,DEM.Z] = histcounts(DEM.Z(:),num);
         DEM.Z = reshape(DEM.Z,siz);
     case 'equalquantiles'
         validateattributes(num,{'numeric'},{'scalar','integer','>',1});
@@ -119,7 +111,7 @@ switch method
         q = ceil(q*numel(z));
         edges = z(q);
         edges(end) = inf;
-        [~,DEM.Z] = histc(DEM.Z(:),[-inf; edges]);
+        [~,~,DEM.Z] = histcounts(DEM.Z(:),[-inf; edges]);
         DEM.Z = reshape(DEM.Z,DEM.size);
         DEM.Z(INAN) = nan;
     case 'definedquantiles'
@@ -135,7 +127,7 @@ switch method
         edges = interp1((0:n-1).'/(n-1), sort(z), p);
   
         edges(end) = inf;
-        [~,DEM.Z] = histc(DEM.Z(:),[-inf; edges]);
+        [~,~,DEM.Z] = histcounts(DEM.Z(:),[-inf; edges]);
         DEM.Z = reshape(DEM.Z,DEM.size);
         DEM.Z(INAN) = nan;
         
@@ -159,7 +151,7 @@ switch method
         
         edges2(end) = inf;
         
-        [~,DEM.Z] = histc(DEM.Z(:),[edges1(end:-1:1) edges2]);
+        [~,~,DEM.Z] = histcounts(DEM.Z(:),[edges1(end:-1:1) edges2]);
         DEM.Z = reshape(DEM.Z,DEM.size);
         DEM.Z(INAN) = nan;
         

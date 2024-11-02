@@ -1,6 +1,6 @@
 function OUT = roughness(DEM,type,ks)
 
-%ROUGHNESS terrain ruggedness, position and roughness indices of DEMs
+%ROUGHNESS Terrain ruggedness, position and roughness indices of DEMs
 %
 % Syntax
 %
@@ -48,23 +48,21 @@ function OUT = roughness(DEM,type,ks)
 %     Concepts, Software, Applications, Hengl, T. & Reuter, H. I. (Eds.),
 %     Elsevier, 33, 141-169.
 %
-%
-%
 % See also: stdfilt, FLOWobj/meltonruggedness
 % 
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 24. June, 2024
+% Date: 2. November, 2024
 
 arguments
     DEM   GRIDobj
     type  {mustBeMember(type,{'tpi','tri','roughness','srf'})}= 'roughness'
-    ks    = [3 3]
+    ks    (1,2) = [3 3]
 end
 
 % Check kernel size
-if isscalar(ks)
-    ks = [ks ks];
-end
+% if isscalar(ks)
+%     ks = [ks ks];
+% end
 validateattributes(ks,{'numeric'},{'odd','positive'},'GRIDobj/rougnhess','ks',3)
 
 
@@ -128,19 +126,10 @@ switch lower(type)
         % Roughness
         % Roughness is the the largest inter-cell difference of a central
         % pixel and its surrounding cell
-        kernel = ones(3);        
+        kernel = ones(ks);        
         R = max(imdilate(dem,kernel)-dem,dem-imerode(dem,kernel));
         
-        if nargin == 3
-        warning('TopoToolbox:incorrectinput',...
-            'the kernel size does not apply to the roughness index.')
-        end
-    %case 'ruggedness'
-    %    % Ruggedness
-    %    % Value range divided by the squared area
-    %    kernel = ones(ks);
-    %    R = (imdilate(dem,kernel) - imerode(dem,kernel))/sqrt((DEM.cellsize^2)*numel(kernel));
-    case 'srf'
+     case 'srf'
         % surface roughness factor according to Hobson (1972) (in Olaya
         % 2009)
         [Nx,Ny,Nz] = surfnorm(dem);
