@@ -1,6 +1,6 @@
 function Lgrid = shufflelabel(Lgrid,r)
 
-%SHUFFLELABEL shufflelabel randomly relabels a label matrix
+%SHUFFLELABEL Shufflelabel randomly relabels a label matrix
 %
 % Syntax
 %
@@ -43,7 +43,7 @@ function Lgrid = shufflelabel(Lgrid,r)
 
 arguments
     Lgrid  GRIDobj
-    r  = false
+    r  (1,1) = false
 end
 
 % get values in GRIDobj
