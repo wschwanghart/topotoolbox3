@@ -147,5 +147,19 @@ classdef testSnapshot < matlab.unittest.TestCase
                 testCase.verifyEqual(logical(closed_result.Z),CLOSED.Z);
             end
         end
+
+        function acv(testCase,dataset)
+            A = testCase.dem.acv();
+
+            result_file = fullfile(dataset,"acv.tif");
+
+            if ~isfile(result_file)
+                % Write the result to the directory
+                A.GRIDobj2geotiff(result_file);
+            else
+                demf_result = GRIDobj(result_file);
+                testCase.verifyEqual(demf_result.Z,A.Z);
+            end
+        end
     end
 end
