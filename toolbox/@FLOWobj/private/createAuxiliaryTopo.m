@@ -168,9 +168,9 @@ I = ~I;
 switch lower(options.preprocess)
     case {'fill','none'}
         D = bwdist(I,'euclidean');
-        mask = inf(FD.size,class(D));
+        mask = inf(size(D),class(D));
         mask(I) = 0;
-        D = (imreconstruct(D+1,mask) - D)*FD.cellsize;
+        D = (imreconstruct(D+1,mask) - D)*DEM.cellsize;
     case 'carve'
 
 end

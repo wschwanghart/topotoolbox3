@@ -73,7 +73,7 @@ function data = readopenalti(options)
 %
 % Reference: https://openaltimetry.earthdatacloud.nasa.gov/data/openapi/swagger-ui/index.html
 %
-% Author: Wolfgang Schwanghart (schwanghart[at]uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 12. September, 2024
 
 arguments
@@ -87,9 +87,9 @@ arguments
     options.east  (1,1) {mustBeNumeric,mustBeInRange(options.east,-180,180)} = -119.46557
     options.date = datetime('today')-600 : datetime('today')
     options.product {mustBeTextScalar} = 'atl08'
-    options.level3a (1,1) = false
+    options.level3a (1,1)    = false
     options.deletefile (1,1) = true
-    options.verbose (1,1) = true
+    options.verbose (1,1)    = true
 end
 
 validproducts = {'atl03','atl10','atl12',...
@@ -183,7 +183,7 @@ end
 for r=1:numel(dt)
 	   textwaitbar(r,numel(dt),'Wait');
 	   
-	   outfile = websave(f,urltracks,...
+	   [~] = websave(f,urltracks,...
               'date',D(r),...
               'minx',west,...
               'maxx',east,...
@@ -194,7 +194,7 @@ for r=1:numel(dt)
               webopts);
     temptracks = readtable(f);
     temptracks.date = repmat(dt(r),size(temptracks,1),1);
-    tracktable = [tracktable; temptracks];
+    tracktable = [tracktable; temptracks]; %#ok<AGROW>
     delete(f);
 	   
 end
@@ -224,7 +224,7 @@ if options.level3a
             disp(['Download trackId ' num2str(trackId) ': ' char(datetime('now'))])
         end
         try
-            outfile = websave(f,url,...
+            [~] = websave(f,url,...
                 'product',product,...
                 'startDate',startDate,...
                 'endDate',endDate,...
@@ -239,7 +239,7 @@ if options.level3a
             if counter == 1 || ~exist('data','var')
                 data = readtable(f);
             else
-                data = [data; readtable(f)];
+                data = [data; readtable(f)]; %#ok<AGROW>
             end
             counter = counter + 1;
         catch
@@ -258,7 +258,7 @@ else
             disp(['Download ' char(dd) ',' num2str(trackId) ': ' char(datetime('now'))])
         end
         try
-            outfile = websave(f,url,...
+            [~] = websave(f,url,...
                 'date',dd,...
                 'minx',west,...
                 'maxx',east,...
@@ -271,7 +271,7 @@ else
             if counter == 1  || ~exist('data','var')
                 data = readtable(f);
             else
-                data = [data; readtable(f)];
+                data = [data; readtable(f)]; %#ok<AGROW>
             end
             counter = counter + 1;
         catch

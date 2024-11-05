@@ -1,6 +1,6 @@
 function exaggerate(axes_handle,exagfactor)
 
-% elevation exaggeration in a 3D surface plot
+%EXAGGERATE Elevation exaggeration in a 3D surface plot
 %
 % Syntax
 %
@@ -29,12 +29,12 @@ function exaggerate(axes_handle,exagfactor)
 % See also: GRIDobj/SURF, exaggerate, GRIDobj/imageschs
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 17. June 2024
+% Date: 4. November 2024
 
-if nargin == 1
-    exagfactor = 1;
+arguments
+    axes_handle {mustBeA(axes_handle,'matlab.graphics.axis.Axes')} = gca
+    exagfactor (1,1) {mustBeNumeric} = 1
 end
+
 axis(axes_handle,'image');
 set(axes_handle,'DataAspectRatio',[1 1 1/exagfactor]);
-
-

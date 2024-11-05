@@ -1,4 +1,4 @@
-function extout = padextent(padval,varargin)
+function extout = padextent(padval,ax,options)
 
 %PADEXTENT pad current axis extent 
 %
@@ -50,19 +50,17 @@ function extout = padextent(padval,varargin)
 %
 % See also: IMAGESCHS, GETEXTENT, SETEXTENT
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]unibas.ch)
-% Date: 23. January, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 4. November 2024
 
-p = inputParser;
-addRequired(p,'padval');
-addOptional(p,'ax',gca)
-addParameter(p,'unit','map')
-parse(p,padval,varargin{:});
+arguments 
+    padval
+    ax {mustBeA(ax,'matlab.graphics.axis.Axes')} = gca
+    options.unit {mustBeMember(options.unit,{'map','percent'})}= 'map'
+end
 
-ax  = p.Results.ax;
 ext = getextent(ax);
-
-unit = validatestring(p.Results.unit,{'map' 'percent'});
+unit = options.unit;
 
 % padextent will use map units, hence any conversion is done here
 switch unit

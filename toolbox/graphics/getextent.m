@@ -1,6 +1,6 @@
 function extent = getextent(ax)
 
-%GETEXTENT get current axis extent 
+%GETEXTENT Get current axis extent 
 %
 % Syntax
 %
@@ -22,11 +22,12 @@ function extent = getextent(ax)
 %
 % See also: IMAGESCHS, SETEXTENT, PADEXTENT
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]unibas.ch)
-% Date: 23. January, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 4. November 2024
 
-if nargin == 0
-    ax = gca;
+arguments
+    ax {mustBeA(ax,'matlab.graphics.axis.Axes')} = gca
 end
+
 extent = get(ax,{'xlim','ylim'});  % Get axes limits.
 

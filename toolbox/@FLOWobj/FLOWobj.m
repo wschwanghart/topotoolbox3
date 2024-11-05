@@ -37,8 +37,6 @@ classdef FLOWobj
 %     
 % Parameter name/value pairs   {default}
 %
-%  Applicable only, if calculated from GRIDobj
-%
 %     'preprocess' --  {'carve'}, 'fill', 'none'
 %            set DEM preprocessing that determines flow behavior in
 %            topographic depressions and flat areas 
@@ -59,11 +57,17 @@ classdef FLOWobj
 %            verbose output in the command window to track computational
 %            progress. Particularly interesting when working with very
 %            large matrices.
-%     'mex' --  {'false'},true
+%     'mex' --  {false},true (option is deprecated and will be removed
+%            shortly)
 %            controls if the mex routines should be called. If true, the mex
 %            functions (see function compilemexfiles) must be available on
 %            the search path. Using mex functions can increase the speed at
 %            which an instance of FLOWobj is constructed.
+%     'uselibtt' - {true},false
+%            if true, then FLOWobj will be calculated using functions in
+%            libtopotoolbox. If false, then functions of the image
+%            processing toolbox will be used. Currently, this option only
+%            applies if no sinks are to be retained.
 %
 % Output
 %
@@ -82,11 +86,13 @@ classdef FLOWobj
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     FD  = FLOWobj(DEM,'multi');
 %     A   = flowacc(FD);
-%     imageschs(DEM,log(A));
-% 
-% See also: GRIDobj, STREAMobj, M2FLOWobj
+%     imageschs(DEM,log(A),'colormap',flowcolor);
 %
 % References: 
+%
+%     Freeman, T. G.: Calculating catchment area with divergent flow based
+%     on a regular grid, Computers & Geosciences, 17, 413–422,
+%     https://doi.org/10.1016/0098-3004(91)90048-I, 1991.
 %
 %     Tarboton, D. G. (1997). A new method for the determination of flow 
 %     directions and upslope areas in grid digital elevation models. 
@@ -95,8 +101,16 @@ classdef FLOWobj
 %     Eddins, S. (2016). Upslope area function. Mathworks File Exchange, 
 %     https://www.mathworks.com/matlabcentral/fileexchange/15818-upslope-area-functions
 %
+%     Schwanghart, W., Groom, G., Kuhn, N. J., and Heckrath, G.: Flow
+%     network derivation from a high resolution DEM in a low relief,
+%     agrarian landscape, Earth Surface Processes and Landforms, 38,
+%     1576–1586, https://doi.org/10.1002/esp.3452, 2013.
+%
+%
+% See also: GRIDobj, STREAMobj, M2FLOWobj
+%
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 06. September, 2024
+% Date: 3. November, 2024
 
 
 properties(GetAccess = 'public', SetAccess = 'public')
@@ -122,11 +136,13 @@ methods
         arguments
             DEM = []
             type {mustBeTextScalar} = 'single'
-            options.preprocess {mustBeTextScalar} = 'carve'
+            options.preprocess {mustBeTextScalar,...
+                mustBeMember(options.preprocess,{'carve','fill','none'})} ...
+                                    = 'carve'
             options.verbose (1,1) = false
             options.sinks = []
             options.internaldrainage (1,1) = false
-            options.uselibtt (1,1) = false
+            options.uselibtt (1,1) = true
             options.tweight (1,1) {mustBeNumeric,mustBePositive} = 2
             options.cweight (1,1) {mustBeNumeric,mustBePositive} = 1
             options.mex (1,1) = false
