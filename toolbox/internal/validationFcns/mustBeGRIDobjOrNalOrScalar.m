@@ -9,10 +9,15 @@ function mustBeGRIDobjOrNalOrScalar(x,S)
 % Description
 %
 %     The function validates that a value x is a GRIDobj or node-attribute
-%     list that is aligned with a STREAMobj S. x can also be a scalar. 
+%     list that is aligned with a STREAMobj S or PPS object. x can also be
+%     a scalar.
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 10. November, 2024
+
+if isa(S,'PPS')
+    S = S.S;
+end
 
 if isa(x,'GRIDobj')
     TF = isequal(S.size,x.size) && isequal(S.wf,x.wf);

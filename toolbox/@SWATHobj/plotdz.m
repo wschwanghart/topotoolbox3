@@ -65,8 +65,8 @@ function h = plotdz(SW,options)
 %
 %
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
-%         Wolfgang Schwanghart 
-% Date: 11. December, 2022
+%         Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. November, 2024
 
 arguments
     SW  SWATHobj
@@ -75,14 +75,14 @@ arguments
     options.distadjust (1,1) = 0
     options.boundedline (1,1) = true
     options.facecolor = [0.5059 0.8471 0.8157]
-    options.facealpha = 1
-    options.minmaxfacecolor = [.8 .8 .8]
+    options.facealpha = .5
+    options.minmaxfacecolor = []
     options.edgecolor = 'none'
     options.meancolor = 'k'
     options.plotminmax (1,1) = true
-    options.minmaxcolor = [.7 .7 .7]
+    options.minmaxcolor = []
     options.minmaxedgecolor = 'none'
-    options.minmaxfacealpha = 1
+    options.minmaxfacealpha = .3
 end
 
 % parameters
@@ -90,6 +90,24 @@ distadjust = options.distadjust;
 left       = options.left;
 right      = options.right;
 boundedl   = options.boundedline;
+
+% by default, minmax color should be equal to the boundedline, but be more
+% transparent
+if isempty(options.minmaxcolor)
+    if isstring(options.facecolor) || ischar(options.facecolor)
+        options.minmaxcolor = letter2rgb(options.facecolor);
+    else
+        options.minmaxcolor = options.facecolor;
+    end
+end
+if isempty(options.minmaxfacecolor)
+    if isstring(options.facecolor) || ischar(options.facecolor)
+        options.minmaxfacecolor = letter2rgb(options.facecolor);
+    else
+        options.minmaxfacecolor = options.facecolor;
+    end
+end
+
 
 if ~left && ~right
     warning('Empty SWATHobj: nothing to plot')

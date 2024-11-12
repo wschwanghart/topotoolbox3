@@ -1,4 +1,4 @@
-function g = gfun(P,varargin)
+function g = gfun(P,options)
 
 %GFUN G-function (nearest inter-point distance distribution)
 %
@@ -35,37 +35,34 @@ function g = gfun(P,varargin)
 %
 % See also: PPS
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 26. August, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. November, 2024
 
+arguments
+    P PPS
+    options.nsim (1,1) {mustBeNonnegative} = 0
+    options.model = []
+    options.plot (1,1) = false
+end
 
-% Check input arguments
-p = inputParser;
-p.FunctionName = 'PPS/gfun';
-addParameter(p,'nsim',0);
-addParameter(p,'model',[]);
-addParameter(p,'plot',false);
-% Parse
-parse(p,varargin{:});
-
-plotit = nargout == 0 || p.Results.plot;
+plotit = nargout == 0 || options.plot;
 
 d      = pointdistances(P,'output','matrix');
 d(eye(size(d))>0) = inf;
 d      = min(d,[],2);
 d      = sort(d,'ascend');
 
-nsim   = p.Results.nsim;
+nsim   = options.nsim;
 if nsim > 0
     PPSIM = cell(nsim,1);
     for r = 1:nsim
-        if isempty(p.Results.model)
+        if isempty(options.model)
             PSIM = random(P);
         else
-            if isa(p.Results.model,'GeneralizedLinearModel')
-                PSIM = random(P,p.Results.model);
+            if isa(options.model,'GeneralizedLinearModel')
+                PSIM = random(P,options.model);
             else
-                PSIM = simulate(P,'intensity',p.Results.model);
+                PSIM = simulate(P,'intensity',options.model);
             end
         end
         PPSIM{r} = PSIM.PP;

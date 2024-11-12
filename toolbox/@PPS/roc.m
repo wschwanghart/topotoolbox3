@@ -1,6 +1,6 @@
 function varargout = roc(P,c,varargin)
 
-%ROC receiver-operating characteristics of point pattern
+%ROC Receiver-operating characteristics of point pattern
 %
 % Syntax
 %
