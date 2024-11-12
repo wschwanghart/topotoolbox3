@@ -56,12 +56,12 @@ function d = pointdistances(P,options)
 
 arguments
     P  PPS
-    options.output = 'matrix'
-    options.type   = 'graph'
+    options.output {mustBeMember(options.output,{'matrix','vector'})} = 'matrix'
+    options.type  {mustBeMember(options.type,{'graph','digraph','nearest'})} = 'graph'
     options.d3d   (1,1) = false
     options.extendednetwork (1,1) = false
     options.val = []
-    options.direction = 'down'
+    options.direction {mustBeMember(options.direction,{'up','down'})} = 'down'
     options.sourcepoints = []
     options.targetpoints = []
 end
