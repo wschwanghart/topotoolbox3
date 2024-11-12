@@ -43,11 +43,12 @@ function extout = setextent(extent,ax)
 %
 % See also: IMAGESCHS, GETEXTENT, PADEXTENT
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]unibas.ch)
-% Date: 23. January, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 4. November 2024
 
-if nargin == 1
-    ax = gca;
+arguments
+    extent
+    ax = gca
 end
 
 zoom reset

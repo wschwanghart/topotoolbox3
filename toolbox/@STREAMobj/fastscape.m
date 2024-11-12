@@ -1,4 +1,4 @@
-function z = fastscape(S,z,a,varargin)
+function z = fastscape(S,z,a,options)
 
 %FASTSCAPE Simulate river incision using the stream power incision model
 %
@@ -49,10 +49,14 @@ function z = fastscape(S,z,a,varargin)
 %                 chi-transformed profile.
 %     gifname     By default empty, but if filename is provided, a gif file
 %                 will be written to the disk. 
-%     gifopts     Structure array with gif options for the function gif
-%                 (see help gif)
+%     LoopCount   Number of times the gif animation will play (see gif)
+%     DelayTime   Delay time in seconds between frames (see gif)
+%     overwrite   {true} or false. If true, then gif will be overwritten
+%                 without warning and affirmation.
 %     ylim        Two-element vector with minimum and maximum of y-axis if
-%                 'plot' is true
+%                 'plot' is true. This is helpful to constrain the y-axis
+%                 limits to some range that would otherwise change during
+%                 the simulation.
 %
 % Example
 %
@@ -111,7 +115,8 @@ function z = fastscape(S,z,a,varargin)
 %     bct.z = [zb zb zb-50 zb-50 zb-200 zb-200]';
 %     z   = fastscape(ST,DEM,A,'k',4e-5,'plot',true,...
 %                     'bc',bct,'bctype','elev','tspan',5e5,...
-%                     'u',0.003,'dt',50, 'n',1.3,'ploteach',50);
+%                     'u',0.003,'dt',50, 'n',1.3,'ploteach',50,...
+%                     'ylim',[100 1800]);
 %
 % References
 %
@@ -135,76 +140,71 @@ function z = fastscape(S,z,a,varargin)
 %
 % Authors: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de) and
 %          Benjamin Campforts.
-% Date: 12. March, 2024
+% Date: 11. November, 2024
 
+arguments
+    S   STREAMobj
+    z   {mustBeGRIDobjOrNal(z,S)}
+    a   {mustBeGRIDobjOrNal(a,S)}
+    options.convertpx (1,1) = true
+    options.uplift {mustBeGRIDobjOrNalOrScalar(options.uplift,S)} = 0.001
+    options.k {mustBeGRIDobjOrNalOrScalar(options.k,S)} = 1e-5
+    options.m (1,1) {mustBePositive} = 0.5
+    options.n (1,1) {mustBePositive} = 1
+    options.tspan (1,1) {mustBePositive} = 100000
+    options.dt (1,1) {mustBePositive} = 1000
+    options.bc = []
+    options.bctype {mustBeMember(options.bctype,{'rate','elev'})} = 'rate'
+    options.plot (1,1) = true
+    options.ploteach (1,1) {mustBePositive} = 10
+    options.plotchi (1,1) = false
+    options.plotkm (1,1) = false
+    options.gifname = ''
+    options.DelayTime (1,1) {mustBePositive} = 1/15
+    options.LoopCount (1,1) {mustBePositive} = inf
+    options.overwrite (1,1) = true
+    options.ylim = []
+end
 
-gifopts.DelayTime = 1/15;
-gifopts.LoopCount = inf;
-% gifopts.frame     = gcf; % commented out because it will open a window
-% even in the case if no plot is wanted.
-gifopts.overwrite = false;
-
-%% Input parsing
-p = inputParser;
-addRequired(p,'S',@(x) isa(x,'STREAMobj'))
-addRequired(p,'z')
-addRequired(p,'a')
-
-addParameter(p,'convertpx',true)
-addParameter(p,'uplift',0.001) % 1 mm y^-1 default
-addParameter(p,'k',1e-5)
-addParameter(p,'m',0.5)
-addParameter(p,'n',1)
-addParameter(p,'tspan',100000)
-addParameter(p,'dt',1000)
-addParameter(p,'bc',[])
-addParameter(p,'bctype','rate')
-addParameter(p,'plot',true)
-addParameter(p,'ploteach',10)
-addParameter(p,'plotchi',0)
-addParameter(p,'gifname','')
-addParameter(p,'gifopts',gifopts)
-addParameter(p,'ylim',[],@(x) isempty(x) || ((numel(x) == 2) && (x(1)< x(2))))
-parse(p,S,z,a,varargin{:})
-
-% STREAMobj
-S = p.Results.S;
 % Elevations
-z = ezgetnal(S,p.Results.z);
+z = ezgetnal(S,z);
 z = imposemin(S,z);
 
 % Set y limits if plot is required
-if isempty(p.Results.ylim) 
+if isempty(options.ylim) 
     ylimauto = true;
 else
     ylimauto = false;
-    yl = p.Results.ylim;
+    yl = options.ylim;
 end
 
 % Upstream areas
-a = ezgetnal(S,p.Results.a);
-if p.Results.convertpx
+a = ezgetnal(S,a);
+if options.convertpx
     a = a*S.cellsize^2;
 end
 
 % Uplift
-u = ezgetnal(S,p.Results.uplift);
+u = ezgetnal(S,options.uplift);
 % Erodibility K
-k = ezgetnal(S,p.Results.k);
+k = ezgetnal(S,options.k);
 % Stream power parameter
-m = p.Results.m;
-n = p.Results.n;
+m = options.m;
+n = options.n;
 % Simulation time and timestep
-tspan = p.Results.tspan;
-dte   = p.Results.dt;
+tspan = options.tspan;
+dte   = options.dt;
 % Plot?
-plotit   = p.Results.plot;
-ploteach = p.Results.ploteach;
-plotchi  = p.Results.plotchi;
-% Write gif
-writegif = p.Results.gifname;
-gifopts  = p.Results.gifopts;
+plotit   = options.plot;
+ploteach = options.ploteach;
+plotchi  = options.plotchi;
+writegif = options.gifname;
 
+if options.plotkm
+    dunit = 'km';
+else
+    dunit = 'm';
+end
 
 %FASTSCAPE1D 1D implementation of Braun and Willett 2013 implicit scheme
 ix  = S.ix;
@@ -226,18 +226,18 @@ dte    = diff(dte);
 % get timeseries of boundary conditions
 outlet = streampoi(S,'outlet','logical');
 outletix = find(outlet);
-bctype = validatestring(p.Results.bctype,{'rate','elev'});
-if isempty(p.Results.bc)
+bctype = validatestring(options.bctype,{'rate','elev'});
+if isempty(options.bc)
     zb = repmat(z(outletix),1,numel(dte));
-elseif isnumeric(p.Results.bc) && strcmp(bctype,'rate')
-    zb = z(outletix) + p.Results.bc*cumsum(dte);
-elseif isnumeric(p.Results.bc) && strcmp(bctype,'elev')
+elseif isnumeric(options.bc) && strcmp(bctype,'rate')
+    zb = z(outletix) + options.bc*cumsum(dte);
+elseif isnumeric(options.bc) && strcmp(bctype,'elev')
     zb = interp1([0;tspan],...
-                 [z(outletix)'; repmat(p.Results.bc,1,numel(outletix))],...
+                 [z(outletix)'; repmat(options.bc,1,numel(outletix))],...
                  cumsum(dte)');
     zb = zb';
-elseif istable(p.Results.bc)
-    BCT = p.Results.bc;
+elseif istable(options.bc)
+    BCT = options.bc;
     if BCT.t(end) < tspan
         BCT.t(end) = tspan;
         warning('TopoToolbox:fastscape',...
@@ -256,12 +256,12 @@ elseif istable(p.Results.bc)
             zb = zb';      
     end
     
-elseif isa(p.Results.bc,'function_handle')
+elseif isa(options.bc,'function_handle')
     if strcmp(bctype,'rate')
         dtc = cumsum([0 dte]);
-        zb = z(outletix) + cumtrapz(dtc,p.Results.bc(dtc));
+        zb = z(outletix) + cumtrapz(dtc,options.bc(dtc));
     else
-        zb = z(outletix)*0 + cumsum(p.Results.bc(dte));
+        zb = z(outletix)*0 + cumsum(options.bc(dte));
     end
 else
     error('Cannot handle boundary conditions')
@@ -273,7 +273,7 @@ if plotit
     elseif plotchi == 1
         d  = chitransform(S,ar,"mn",m/n);
     end
-    hh = plotdz(S,z,'color','r','distance',d); 
+    hh = plotdz(S,z,'color','r','distance',d,'dunit',dunit); 
     if ~ylimauto
         ylim(yl)
     end
@@ -283,7 +283,9 @@ if plotit
     end
 
     if ~isempty(writegif)
-        gif(writegif,gifopts)
+        gif(writegif,'LoopCount',options.LoopCount,...
+                     'DelayTime',options.DelayTime,...
+                     'overwrite',options.overwrite);
     end
 end
 
@@ -312,7 +314,7 @@ if n == 1
                 delete(h(1))
                 h(1:9) = h(2:10);
             end            
-            h(plotcounter) = plotdz(S,z,'color','k','distance',d);
+            h(plotcounter) = plotdz(S,z,'color','k','distance',d,'dunit',dunit);
             if plotchi
                 xlabel('\chi [m]')
             end

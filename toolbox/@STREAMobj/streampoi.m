@@ -28,7 +28,8 @@ function [OUT,OUT2] = streampoi(S,type,outformat)
 %                 'ix': nx1 vector with linear indices into an instance of
 %                       GRIDobj with the same dimension as the GRIDobj from
 %                       which S was derived.
-%                 'logical': node attribute list (logical)
+%                 'logical': node attribute list (logical) 
+%                 'nal': same as 'logical'
 %                 'mappoint': mappoint (see function mapshape)
 %                 'geopoint': geopoint (see function geopoint). Requires a
 %                       valid coordinate reference system.
@@ -39,39 +40,45 @@ function [OUT,OUT2] = streampoi(S,type,outformat)
 %     V           output as specified in outformat
 %     x,y         coordinate vectors
 %
-% Example
+% Example 1
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'mex',true,'preprocess','carve');
+%     FD = FLOWobj(DEM);
 %     S  = STREAMobj(FD,'minarea',1000);
 %     xy = streampoi(S,'confluence');
 %     plot(S);
 %     hold on
 %     plot(xy(:,1),xy(:,2),'s')
 %     hold off
+%
+% Example 2
+%
+%     P  = streampoi(S,'confluence','PPS');
+%     P.z = DEM;
+%     plotdz(P)
 % 
 % See also: STREAMobj, FLOWobj/streampoi
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 26. November, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 8. November, 2024
 
 arguments
     S   STREAMobj
     type = 'channelheads'
     outformat  {mustBeMember(outformat,...
-        {'xy','ix','logical','mappoint','geopoint','PPS'})} = 'xy'
+        {'xy','ix','logical','nal','mappoint','geopoint','PPS'})} = 'xy'
 end
 
+% Place type into a cell array 
 if ischar(type) || isstring(type)
     type = {type};
 end
-outformat = validatestring(outformat,{'xy','ix','logical','mappoint','geopoint','PPS'},'streampoi','outformat',3);
 
 % Sparse matrix representation of the network
 ix  = S.ix;
 ixc = S.ixc;
 nrc = numel(S.x);
-M  = sparse(double(ix),double(ixc),true,nrc,nrc);
+M   = sparse(double(ix),double(ixc),true,nrc,nrc);
 
 % Output logical array
 V = false(nrc,1);
@@ -119,7 +126,7 @@ switch lower(outformat)
         ix   = ix(:);
         OUT  = S.IXgrid(ix);
         
-    case 'logical'
+    case {'logical','nal'}
         
         OUT  = full(V(:));
         

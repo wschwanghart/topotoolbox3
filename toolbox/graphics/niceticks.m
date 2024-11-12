@@ -1,4 +1,4 @@
-function niceticks(ax,varargin)
+function niceticks(ax,options)
 
 %NICETICKS Makes nice ticks in a 2D plot
 %
@@ -30,35 +30,31 @@ function niceticks(ax,varargin)
 %
 % See also: imageschs
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 13. May, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 5. November, 2024
 
-if nargin == 0
-    ax = gca;
+arguments
+    ax = gca
+    options.degree (1,1) = false
+    options.twoticks (1,1) = true
+    options.precision (1,1) = 0
+    options.exponent (1,1) = 0
+    options.rotateylabel (1,1) = true
 end
 
-p = inputParser;
-p.FunctionName = 'niceticks';
-addParameter(p,'degree',false)
-addParameter(p,'twoticks',true)
-addParameter(p,'precision',0)
-addParameter(p,'exponent',0)
-addParameter(p,'rotateylabel',true)
-parse(p,varargin{:})
-
-prec = ['% .' num2str(p.Results.precision) 'f'];
+prec = ['% .' num2str(options.precision) 'f'];
 
 xticks(ax,'auto')
 yticks(ax,'auto')
 xticklocs = get(ax,'XTick');
 yticklocs = get(ax,'YTick');
 
-nx = numel(xticklocs);
-ny = numel(yticklocs);
+% nx = numel(xticklocs);
+% ny = numel(yticklocs);
 
 % xticks
-ix = find(round(xticklocs,p.Results.precision) == xticklocs);
-if p.Results.twoticks
+ix = find(round(xticklocs,options.precision) == xticklocs);
+if options.twoticks
     if nnz(ix) >= 2    
         xticklocs = xticklocs(ix([1 end]));
     end
@@ -70,8 +66,8 @@ end
 set(ax,'XTick',xticklocs)
 
 % yticks
-ix = find(round(yticklocs,p.Results.precision) == yticklocs);
-if p.Results.twoticks
+ix = find(round(yticklocs,options.precision) == yticklocs);
+if options.twoticks
     if nnz(ix) >= 2    
         yticklocs = yticklocs(ix([1 end]));
     end
@@ -82,7 +78,7 @@ else
 end
 set(ax,'YTick',yticklocs)
 
-if p.Results.degree
+if options.degree
     xtickformat([prec '°E'])
     ytickformat([prec '°N'])
 else
@@ -90,15 +86,15 @@ else
     ytickformat(prec)
 end
 
-ax.XAxis.Exponent = p.Results.exponent;
-ax.YAxis.Exponent = p.Results.exponent;
+ax.XAxis.Exponent = options.exponent;
+ax.YAxis.Exponent = options.exponent;
 
 % rotate tick labels if matlab 2014b or newer available
-if ~verLessThan('matlab','8.4') && p.Results.rotateylabel
+if ~verLessThan('matlab','8.4') && options.rotateylabel
     set(ax,'YTickLabelRotation',90);
 end
 
-% if p.Results.degree
+% if options.degree
 %     setlabelstodeg(ax)
 % end
 end
