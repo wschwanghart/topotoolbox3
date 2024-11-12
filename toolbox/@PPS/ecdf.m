@@ -1,4 +1,4 @@
-function varargout = ecdf(P,varargin)
+function varargout = ecdf(P,options)
 
 %ECDF Empirical cumulative distribution function of a covariate 
 %
@@ -10,9 +10,9 @@ function varargout = ecdf(P,varargin)
 % 
 % Description
 %
-%     ecdf returns the empirical cumulative distribution function (eCDF) of the
-%     point pattern P. Without further input arguments, ecdf computes the 
-%     stepwise function based on the stream network distance calculated
+%     ecdf returns the empirical cumulative distribution function (eCDF) of
+%     the point pattern P. Without further input arguments, ecdf computes
+%     the stepwise function based on the stream network distance calculated
 %     from the outlets of the stream network in P.
 %
 %     ecdf compares the computed eCDF to the hypothesis of complete spatial
@@ -69,41 +69,32 @@ function varargout = ecdf(P,varargin)
 %
 % See also: PPS, PPS/rhohat
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. February, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. November, 2024
 
-
-
-% Check input arguments
-p = inputParser;
-p.FunctionName = 'ecdf';
-addRequired(p,'P',@(x) isa(x,'PPS'));
-
-% Add elevation
-addParameter(p,'accintervals',true);
-addParameter(p,'confintervals',false);
-addParameter(p,'nsim',1000);
-addParameter(p,'covariate',[]);
-addParameter(p,'plot',true);
-addParameter(p,'alpha',0.05);
-addParameter(p,'ksdensity',false);
-addParameter(p,'bandwidth',[]);
-addParameter(p,'function','cdf');
-addParameter(p,'weights',ones(npoints(P),1),@(x) numel(x) == npoints(P) & all(x > 0));
-
-% Parse
-parse(p,P,varargin{:});
+arguments
+    P PPS
+    options.accintervals (1,1) = true
+    options.confintervals (1,1) = false
+    options.nsim (1,1) {mustBeNonnegative} = 1000
+    options.covariate {mustBeGRIDobjOrNalOrEmpty(options.covariate,P)} = []
+    options.plot (1,1) = true
+    options.alpha (1,1) = 0.05
+    options.ksdensity = false
+    options.bandwidth = []
+    options.function = 'cdf'
+    options.weights = ones(npoints(P),1)
+end
 
 % get covariate
-c = getcovariate(P,p.Results.covariate);
+c = getcovariate(P,options.covariate);
 
 % x-axis
 edges = linspace(min(c),max(c),1000);
 x     = edges(1:end-1)+diff(edges([1 2]));
 
-
-useks  = p.Results.ksdensity;
-usefun = p.Results.function;
+useks  = options.ksdensity;
+usefun = options.function;
 
 if ~useks
     % histogram
@@ -112,15 +103,15 @@ if ~useks
     bw = 0;
 else
     % kernel density
-    [N,~,bw] = ksdensity(c(P.PP),x,'function',usefun,'bandwidth',p.Results.bandwidth,'weights',p.Results.weights);
+    [N,~,bw] = ksdensity(c(P.PP),x,'function',usefun,'bandwidth',options.bandwidth,'weights',options.weights);
     Np = ksdensity(c,x,'function',usefun,'bandwidth',bw);
 end
 
 nnp   = numel(P.PP);
-if p.Results.accintervals && ~p.Results.confintervals
-    NS    = zeros(numel(edges)-1,p.Results.nsim);
+if options.accintervals && ~options.confintervals
+    NS    = zeros(numel(edges)-1,options.nsim);
     S     = P.S;
-    parfor r = 1:p.Results.nsim
+    parfor r = 1:options.nsim
         PS = PPS(S,'runif',nnp);
         csim = PS.PP;
         if ~useks
@@ -132,13 +123,13 @@ if p.Results.accintervals && ~p.Results.confintervals
     legendentry = 'Acceptance interval';
 end
 
-if p.Results.confintervals
+if options.confintervals
     % create bootstrap samples
-    RI   = randi(nnp,nnp,p.Results.nsim);
+    RI   = randi(nnp,nnp,options.nsim);
     csim = c(P.PP(RI));
-    wsim = p.Results.weights(RI);
-    NS    = zeros(numel(edges)-1,p.Results.nsim);
-    parfor r = 1:p.Results.nsim
+    wsim = options.weights(RI);
+    NS    = zeros(numel(edges)-1,options.nsim);
+    parfor r = 1:options.nsim
         if ~useks
             NS(:,r)   = histcounts(csim(:,r),edges,'Normalization',usefun);
         else
@@ -150,16 +141,16 @@ if p.Results.confintervals
 end
 
 % Calculate bounds
-if p.Results.accintervals || p.Results.confintervals
-NQ   = quantile(NS,[p.Results.alpha 1-p.Results.alpha],2);
+if options.accintervals || options.confintervals
+NQ   = quantile(NS,[options.alpha 1-options.alpha],2);
 clear NS
 end
 
 x = x(:);
 
-if p.Results.plot
+if options.plot
     tf = ishold;
-    if p.Results.accintervals || p.Results.confintervals
+    if options.accintervals || options.confintervals
         patch([x; flipud(x)],[NQ(:,1);flipud(NQ(:,2))],[.8 .8 .8],'EdgeColor','none');
         hold on
     end
@@ -172,8 +163,8 @@ if p.Results.plot
     end
     
     box on
-    if ischar(p.Results.covariate)
-        xlabel(p.Results.covariate)
+    if ischar(options.covariate)
+        xlabel(options.covariate)
     else
         xlabel('x');
     end
@@ -188,7 +179,7 @@ if nargout >= 1
     varargout{1} = N(:);
     varargout{2} = x;
     varargout{3} = Np(:);
-    if p.Results.confintervals || p.Results.accintervals
+    if options.confintervals || options.accintervals
     varargout{4} = NQ(:,1);
     varargout{5} = NQ(:,2);
     end
