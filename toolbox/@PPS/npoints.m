@@ -1,6 +1,6 @@
 function np = npoints(P)
 
-%NPOINTS number of points in the point pattern
+%NPOINTS Number of points in the point pattern
 %
 % Syntax
 %
@@ -21,8 +21,11 @@ function np = npoints(P)
 %
 % See also: PPS, PPS/tlength 
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. February, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. November, 2024
 
+arguments
+    P PPS
+end
 
 np = numel(P.PP);

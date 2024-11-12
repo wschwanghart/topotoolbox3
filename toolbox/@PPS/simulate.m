@@ -1,6 +1,6 @@
 function CP = simulate(P,varargin)
 
-%SIMULATE simulate point pattern using random thinning
+%SIMULATE Simulate point pattern using random thinning
 %
 % Syntax
 %
@@ -10,7 +10,7 @@ function CP = simulate(P,varargin)
 %
 % Description
 %
-%     
+%     This function uses random thinning to compute a random point pattern.     
 %
 % Input arguments
 %
@@ -25,6 +25,10 @@ function CP = simulate(P,varargin)
 %                    probability for each point in P.
 %     'nsim'         number of simulations
 %
+% Output arguments
+%
+%     
+%
 % Algorithm
 %
 %     simulate with the option 'intensity' randomly generates a point
@@ -33,7 +37,7 @@ function CP = simulate(P,varargin)
 %
 % See also: PPS, PPS/convhull
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 11. February, 2019
 
 narginchk(3,inf)
@@ -78,8 +82,6 @@ if ~isempty(int)
     % ratio between intensity and the maximum intensity
     p_remain = int(P.PP)./maxint;
     
-    
-    
 else
     
     if isscalar(p.Results.prob)
@@ -95,8 +97,4 @@ remain   = remain > 0;
 
 P.PP = P.PP(remain);
 CP   = P;
-
-
-
-
 

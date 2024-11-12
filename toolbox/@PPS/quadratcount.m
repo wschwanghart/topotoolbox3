@@ -1,4 +1,4 @@
-function qc = quadratcount(P,varargin)
+function qc = quadratcount(P,options)
 
 %QUADRATCOUNT Quadrat count and chi2 test
 %
@@ -40,24 +40,23 @@ function qc = quadratcount(P,varargin)
 %
 % See also: PPS, PPS/npoints 
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. February, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. November, 2024
 
-% Parse inputs
-p = inputParser;
-p.FunctionName = 'PPS/quadratcount';
-addParameter(p,'seglength',tlength(P)/npoints(P)*10);
-addParameter(p,'chi2test',true);
-addParameter(p,'voronoi',true);
-parse(p,varargin{:});
+arguments
+    P  PPS
+    options.seglength = tlength(P)/npoints(P)*10
+    options.chi2test (1,1) = true
+    options.voronoi (1,1) = true
+end
 
 % distance between nodes
 d = zeros(size(P.S.x));
 d(P.S.ix) = nodedistance(P);
 
 % calculate histogram
-[~,lab,cc] = histogram(P,'voronoi',p.Results.voronoi,...
-                          'seglength',p.Results.seglength,...
+[~,lab,cc] = histogram(P,'voronoi',options.voronoi,...
+                          'seglength',options.seglength,...
                           'normalization','counts');
 nrlab = max(lab);
 
@@ -66,7 +65,7 @@ qc.qlength  = accumarray(lab,d,[nrlab 1]);
 qc.qcount   = cc;
 qc.qint     = qc.qcount./qc.qlength;
 
-if p.Results.chi2test
+if options.chi2test
     totlength = tlength(P);
     
     qc.qcountexp = zeros(size(qc.qcount));

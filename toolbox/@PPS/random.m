@@ -40,9 +40,15 @@ function Psim = random(P,mdl,covariates)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 17. August, 2024
 
+arguments
+    P  PPS
+    mdl = intensity(P)
+    covariates = []
+end
+
 
 if nargin == 1
-    Psim = PPS(P.S,'rpois',intensity(P));
+    Psim = PPS(P.S,'rpois',mdl);
     P.PP = Psim.PP;
     Psim = P;
     return

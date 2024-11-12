@@ -1,6 +1,6 @@
 function [tf,I] = hasduplicates(P,plotit)
 
-%HASDUPLICATES checks whether there are duplicate points
+%HASDUPLICATES Determines whether there are duplicate points
 %
 % Syntax
 %
@@ -28,8 +28,13 @@ function [tf,I] = hasduplicates(P,plotit)
 %
 % See also: PPS, PPS/removeduplicates 
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. February, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. November, 2024
+
+arguments
+    P PPS
+    plotit (1,1) = false
+end
 
 [u,~,b] = unique(P.PP);
 

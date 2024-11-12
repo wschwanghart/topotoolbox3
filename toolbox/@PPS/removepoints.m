@@ -24,8 +24,9 @@ function P = removepoints(P,data)
 %
 % See also: PPS
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. February, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. November, 2024
+
 
 if npoints(P) == numel(data)
     tf = data;
