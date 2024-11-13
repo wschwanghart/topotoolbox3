@@ -1,6 +1,6 @@
-function shapewrite(P,filename,varargin)
+function shapewrite(P,filename,options)
 
-%SHAPEWRITE write point pattern to shapefile
+%SHAPEWRITE Write point pattern to shapefile
 %
 % Syntax
 %
@@ -30,20 +30,22 @@ function shapewrite(P,filename,varargin)
 %                attribute lists. Alternatively, one can supply a table
 %                with marks.
 %
+% Output arguments
 %
 % See also: STREAMobj/STREAMobj2mapstruct 
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. February, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. November, 2024
+
+arguments
+    P PPS
+    filename {mustBeTextScalar}
+    options.streams = false
+    options.postfix = '_stream'
+    options.marks   = []
+end
 
 [filepath,name,~] = fileparts(filename);
-
-p = inputParser;
-p.FunctionName = 'PPS/shapewrite';
-addParameter(p,'streams',false);
-addParameter(p,'postfix','_stream');
-addParameter(p,'marks',[]);
-parse(p,varargin{:});
 
 
 xy = P.ppxy;
@@ -52,24 +54,27 @@ sh = struct('Geometry','Point',...
             'X',num2cell(xy(:,1)),...
             'Y',num2cell(xy(:,2)),...
             'id',num2cell(id));
-if ~isempty(p.Results.marks)
-    if iscell(p.Results.marks)
-        for r = 1:2:numel(p.Results.marks)
-            mark = num2cell(p.Results.marks{r+1});
-            [sh.(p.Results.marks{r})] = mark{:};
+if ~isempty(options.marks)
+    if iscell(options.marks)
+        for r = 1:2:numel(options.marks)
+            mark = num2cell(options.marks{r+1});
+            [sh.(options.marks{r})] = mark{:};
         end
-    elseif istable(p.Results.marks)
+    elseif istable(options.marks)
         sh = struct2table(sh);
-        sh = [sh p.Results.marks];
+        sh = [sh options.marks];
         sh = table2struct(sh);
-%         t = struct2table(p.Results.marks);
+%         t = struct2table(options.marks);
 %         sh = [sh;t];
     end
 end
 
+sh = mapstruct2geotable(sh,"CoordinateReferenceSystem",parseCRS(P),...
+    "coordinateSystemType","planar");
+
 shapewrite(sh,fullfile(filepath,name))
 
-if p.Results.streams
-    MS = STREAMobj2mapstruct(P.S);
-    shapewrite(MS,fullfile(filepath,[name p.Results.postfix]));
+if options.streams
+    MS = STREAMobj2geotable(P.S);
+    shapewrite(MS,fullfile(filepath,name + options.postfix));
 end

@@ -523,7 +523,7 @@ for ii=1:length(varargin)
       error('Propery names must be character strings');
     end
     f = find(strcmp(prop_names, arg));
-    if length(f) == 0
+    if isempty(f)
       error('%s ',['invalid property ''',arg,'''; must be one of:'],prop_names{:});
     end
     TargetField = arg;

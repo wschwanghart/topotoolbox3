@@ -1,4 +1,4 @@
-function GT = STREAMobj2geotable(S,varargin)
+function GT = STREAMobj2geotable(S,options)
 
 %STREAMobj2geotable Convert STREAMobj to a geotable
 %
@@ -55,21 +55,17 @@ function GT = STREAMobj2geotable(S,varargin)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 13. June, 2024
 
-d = S.distance;
-defaultseglength = max(max(d)/20,5*S.cellsize);
+arguments
+    S   STREAMobj
+    options.type {mustBeMember(options.type,{'geo','map'})} = 'map'
+    options.seglength (1,1) {mustBePositive} = max(max(S.distance)/20,5*S.cellsize)
+    options.attributes {mustBeA(options.attributes,'cell')} = {}
+end
 
-% Check inputs
-p = inputParser;
-addParameter(p,'type','map',...
-    @(x) ischar(validatestring(x,{'geo' 'map'},'STREAMobj2geotable')));
-addParameter(p,'seglength',defaultseglength,@(x) isscalar(x) && x>S.cellsize);
-addParameter(p,'attributes',{})
-addParameter(p,'proj',projcrs())
-parse(p,varargin{:});
 
 % Calculate mapping structure
-GT = STREAMobj2mapstruct(S,'seglength',p.Results.seglength,...
-    'attributes',p.Results.attributes);
+GT = STREAMobj2mapstruct(S,'seglength',options.seglength,...
+    'attributes',options.attributes);
 
 if isProjected(S)
     proj = S.georef.ProjectedCRS;
@@ -84,7 +80,8 @@ end
 
 GT = mapstruct2geotable(GT,'CoordinateReferenceSystem',proj,...
     'coordinateSystemType',t);
+GT.ID = (1:size(GT,1))';
 
-if isProjected(S) & strcmp(p.Results.type,'geo')
+if isProjected(S) & strcmp(options.type,'geo')
     GT = projectshape(GT,4326);
 end
