@@ -72,8 +72,13 @@ if ~isa(target,'GRIDobj')
         scale = DEM.cellsize / target;
         [B,RB] = georesize(DEM.Z,DEM.georef,scale,method);        
     else
-        % no mapping toolbox seems to be available
-        error("Function requires mapping toolbox and georef information to be available.")
+        if ~isempty(DEM.georef)
+            scale = DEM.cellsize / target;
+            [B,RB] = mapresize(DEM.Z,DEM.georef,scale,method);
+        else
+            % no mapping toolbox seems to be available
+            error("Function requires mapping toolbox and georef information to be available.")
+        end
     end
     DEMr = GRIDobj(B,RB);
 else
