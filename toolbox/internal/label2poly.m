@@ -71,7 +71,7 @@ L(~I) = nan;
 
 % call ixneighbor, which will connect all border pixels within an
 % 8-neighborhood
-[neighb(:,1) neighb(:,2)] = ixneighbors(L,I,8);
+[neighb(:,1), neighb(:,2)] = ixneighbors(L,I,8);
 
 % remove double edges 
 neighb = unique(sort(neighb,2),'rows');

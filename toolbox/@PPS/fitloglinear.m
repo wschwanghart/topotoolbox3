@@ -108,8 +108,9 @@ function [mdl,int,rts,rtssigma,ismx,sigmapred] = fitloglinear(P,c,varargin)
 %
 % See also: PPS, PPS/random, fitglm, stepwiseglm
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 9. September, 2022 
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 13. November, 2024 
+
 
 p = inputParser;
 p.KeepUnmatched = true;

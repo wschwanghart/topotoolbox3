@@ -1,6 +1,6 @@
-function OUT = chiplot(S,DEM,A,varargin)
+function OUT = chiplot(S,DEM,A,options)
 
-%CHIPLOT CHI analysis for bedrock river analysis
+%CHIPLOT Chi analysis for bedrock river analysis
 %
 % Syntax
 %
@@ -66,7 +66,14 @@ function OUT = chiplot(S,DEM,A,varargin)
 %     plot the CHIplot.
 %
 %     'mnplot': {false}, true
-%     plot data for various values of mn [.1:.1:.9]
+%     plot data for various values of mn (see mnvalues)
+%
+%     'mnvalues': [0.2:0.1:0.8] 
+%     different values of mnvalues for chiplots if mnplot is set to true.
+%
+%     'normchi': {false} or true
+%     if true, then the horizontal distance in the mnplot will be
+%     normalized to range between 0 and 1.
 %
 % Output arguments
 %
@@ -103,10 +110,9 @@ function OUT = chiplot(S,DEM,A,varargin)
 %     profile analysis. Earth Surface Processes and Landforms, 38, 570-576.
 %     [DOI: 10.1002/esp.3302]
 %     
-%
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de) and 
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de) and 
 % %       Karina Marques (https://github.com/karina-marques)
-% Date: 30. June, 2022
+% Date: 12. November, 2024
 
 % update 11. June, 2014
 % supports node attribute lists as input data (DEM,A)
@@ -115,55 +121,44 @@ function OUT = chiplot(S,DEM,A,varargin)
 % update 30. June, 2022
 % added options to color the output by Karina Marques 
 
-ax      = gca;
-
-if verLessThan('matlab','8.4')
-    % For MATLAB versions before 2014b
-    clr = 'b';
-else
-    % For MATLAB versions with the new graphics engine
-    colororderindex = mod(ax.ColorOrderIndex, size(ax.ColorOrder,1));
-    if colororderindex==0; colororderindex=size(ax.ColorOrder,1); end
-    clr = ax.ColorOrder(colororderindex,:);
+arguments
+    S  STREAMobj
+    DEM {mustBeGRIDobjOrNal(DEM,S)}
+    A {mustBeGRIDobjOrNal(A,S)}
+    options.color = []
+    options.colorMainTrunk = []
+    options.mn = []
+    options.trunkstream = []
+    options.plot (1,1) = true
+    options.mnplot (1,1) = false
+    options.mnvalues (1,:) {mustBePositive,mustBeNonempty} = [0.2:0.1:0.8]
+    options.fitto {mustBeMember(options.fitto,{'all','ts'})} = 'all'
+    options.mnoptim {mustBeMember(options.mnoptim,...
+        {'fminsearch','nlinfit'})}= 'fminsearch'
+    options.a0 (1,1) {mustBePositive} = 1e6
+    options.betamethod {mustBeMember(options.betamethod,{'ls','lad'})} = 'ls'
+    options.mnmethod {mustBeMember(options.mnmethod,{'ls','lad'})} = 'ls'
+    options.normchi (1,1) = false
 end
 
-% Parse Inputs
-p = inputParser;         
-p.FunctionName = 'chiplot';
-addRequired(p,'S',@(x) isa(x,'STREAMobj'));
-addRequired(p,'DEM', @(x) isa(x,'GRIDobj') || isequal(size(S.IXgrid),size(x)));
-addRequired(p,'A', @(x) isa(x,'GRIDobj') || isequal(size(S.IXgrid),size(x)))
+fitto = options.fitto;
+color = options.color;
+colorMainTrunk = options.colorMainTrunk;
+betamethod = validatestring(options.betamethod,{'ls','lad'});
+mnmethod   = validatestring(options.mnmethod,{'ls','lad'});
 
-addParamValue(p,'color',clr);
-addParamValue(p,'colorMainTrunk',clr);
-addParamValue(p,'mn',[],@(x) isscalar(x) || isempty(x));
-addParamValue(p,'trunkstream',[],@(x) isa(x,'STREAMobj') || isempty(x));
-addParamValue(p,'plot',true,@(x) isscalar(x));
-addParamValue(p,'mnplot',false,@(x) isscalar(x));
-addParamValue(p,'fitto','all');
-addParamValue(p,'mnoptim','fminsearch');
-addParamValue(p,'a0',1e6,@(x) isscalar(x) && isnumeric(x));
-addParamValue(p,'betamethod','ls',@(x) ischar(validatestring(x,{'ls','lad'})));
-addParamValue(p,'mnmethod','ls',@(x) ischar(validatestring(x,{'ls','lad'})));
+if options.plot
+    ax = gca;
+end
 
-parse(p,S,DEM,A,varargin{:});
-S     = p.Results.S;
-DEM   = p.Results.DEM;
-A     = p.Results.A;
-fitto = p.Results.fitto;
-color = p.Results.color;
-colorMainTrunk = p.Results.colorMainTrunk;
-betamethod = validatestring(p.Results.betamethod,{'ls','lad'});
-mnmethod   = validatestring(p.Results.mnmethod,{'ls','lad'});
-
-% to which stream should the data be fitted? Trunkstream or all streams?
-if ischar(fitto)
-    fitto = validatestring(fitto,{'all','ts'});    
-    if strcmpi(fitto,'ts') && isempty(p.Results.trunkstream)
-        error('TopoToolbox:wronginput',...
-             ['You must supply a trunkstream, if you use the parameter \n'...
-              'fitto together with the option ts']);
-    end
+% Make sure that a trunk stream is supplied if 'ts' is chosen
+switch fitto
+    case 'ts'
+        if isempty(options.trunkstream)
+            error('TopoToolbox:wronginput',...
+                ['You must supply a trunkstream, if you use the parameter \n'...
+                'fitto together with the option ts']);
+        end
 end
 
 % nr of nodes in the entire stream network
@@ -176,23 +171,12 @@ if nnz(outlet)>1
 end
 
 % reference drainage area
-a0   = p.Results.a0; % m^2
+a0   = options.a0; % m^2
 % elevation values at nodes
-if isa(DEM,'GRIDobj')
-    zx   = double(getnal(S,DEM));
-    % elevation at outlet
-    zb   = zx(outlet);
-else
-    zx   = double(DEM);
-    zb   = double(DEM(outlet));
-end
+zx   = ezgetnal(S,DEM,'double');
+zb   = zx(outlet);
 
-if isa(A,'GRIDobj')
-    % a is the term inside the brackets of equation 6b 
-    a    = double(a0./(A.Z(S.IXgrid)*(A.cellsize.^2)));
-else
-    a    = double(a0./(double(A) .* S.cellsize.^2));
-end
+a = ezgetnal(S,A)*(A.cellsize.^2); 
 
 % x is the cumulative horizontal distance in upstream direction
 x    = S.distance;
@@ -204,7 +188,7 @@ switch fitto
         Lib  = true(size(x));
 
     case 'ts'
-        SFIT = p.Results.trunkstream;
+        SFIT = options.trunkstream;
         [Lia,Lib] = ismember(SFIT.IXgrid,S.IXgrid);
         if any(~Lia)
             error('TopoToolbox:chiplot',...
@@ -216,39 +200,48 @@ end
 
 % find values of the ratio of m and n that generate a linear Chi plot
 % uses fminsearch
-if isempty( p.Results.mn )
+if isempty( options.mn )
     mn0  = 0.5; % initial value
     % fminsearch is a nonlinear optimization procedure that doesn't require
     % the statistics toolbox
-    switch p.Results.mnoptim
+    switch options.mnoptim
         case 'fminsearch'
             mn   = fminsearch(@mnfit,mn0);
             ci   = [];
         case 'nlinfit'
             ztest   = zx(Lib)-zb;
             ztest   = ztest./max(ztest);
-            [mn0,R,J,CovB,MSE,ErrorModelInfo] = nlinfit(a,ztest,@mnfit,mn0);
-            ci = nlparci(mn0,R,'jacobian',J)
+            [mn0,R,J] = nlinfit(a,ztest,@mnfit,mn0);
+            ci = nlparci(mn0,R,'jacobian',J);
     end
 else
     % or use predefined mn ratio.
-    mn   = p.Results.mn;
+    mn   = options.mn;
     ci   = [];
 end
 
 % plot different values of mn
-if p.Results.mnplot
-    mntest = .1:.1:.9;
+if options.mnplot
+    mntest = options.mnvalues;
     cvec = jet(numel(mntest));
     figure('DefaultAxesColorOrder',cvec);
-    chitest = zeros(numel(Lib),numel(mntest));
     
     for r = 1:numel(mntest)
-        chitest(:,r) = cumtrapz(S,a.^mntest(r));
+        c = chitransform(S,a/S.cellsize,"a0",options.a0,"mn",mntest(r));
+        if options.normchi
+            c = c/max(c);
+        end
+        plotdz(S,zx,'distance',c,'color',cvec(r,:))
+        hold on
     end
-    plot(chitest,zx(Lib)-zb,'x');
-    xlabel('\chi [m]')
-    ylabel('elevation [m]');
+    hold off
+    
+    if options.normchi
+        xlabel('\chi [m] (normalized)')
+    else
+        xlabel('\chi [m]')
+    end
+    ylabel('Elevation [m]');
     title('\chi plots for different values of mn')
     legnames = cellfun(@(x) num2str(x),num2cell(mntest),'uniformoutput',false);
     legend(legnames);
@@ -274,8 +267,7 @@ R2   = 1-(SSE/SSZ);
 betase = sqrt((SSE/(n-2))./(sum((chi(Lib)-mean(chi(Lib))).^2)));
 
 
-if p.Results.plot
-    figure
+if options.plot
     % plot results
     order = S.orderednanlist;
     I     = ~isnan(order);
@@ -283,16 +275,23 @@ if p.Results.plot
     c(I)  = chi(order(I));
     zz    = nan(size(order));
     zz(I) = zx(order(I));
+
+    if isempty(color)
+
+        colororderindex = mod(ax.ColorOrderIndex, size(ax.ColorOrder,1));
+        if colororderindex==0; colororderindex=size(ax.ColorOrder,1); end
+        color = ax.ColorOrder(colororderindex,:);
+    end
     
-    plot(c,zz,'-','color', color);
+    plot(ax,c,zz,'-','color', color);
     hold on
 
-    if ~isempty( p.Results.trunkstream )
-        switch p.Results.fitto
+    if ~isempty( options.trunkstream )
+        switch options.fitto
             case 'all'
                 % check trunkstream
         
-                ST    = p.Results.trunkstream;
+                ST    = options.trunkstream;
                 [Lia,Lib] = ismember(ST.IXgrid,S.IXgrid);
         
                 if any(~Lia)
@@ -314,10 +313,14 @@ if p.Results.plot
         zz    = nan(size(order));
         zz(I) = zxfit(order(I));
 
-        plot(c,zz,'color', colorMainTrunk,'LineWidth',2);
+        if isempty(colorMainTrunk)
+            colorMainTrunk = color;
+        end
+
+        plot(ax,c,zz,'color', colorMainTrunk,'LineWidth',2);
     end
     
-    refline(beta,zb);
+    refline(ax,beta,zb);
     hold off
     xlabel('\chi [m]')
     ylabel('elevation [m]');

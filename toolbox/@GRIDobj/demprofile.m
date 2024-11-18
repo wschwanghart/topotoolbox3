@@ -39,9 +39,9 @@ function [dn,z,x,y] = demprofile(DEM,n,x,y)
 
 arguments
     DEM GRIDobj
-    n {mustBeNumeric} = []
-    x {mustBeNumeric} = []
-    y {mustBeNumeric} = []
+    n  = []
+    x  = []
+    y  = []
 end
 
 
