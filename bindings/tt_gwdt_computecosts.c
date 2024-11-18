@@ -66,9 +66,21 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   float *costs = mxGetSingles(plhs[0]);
 
   // Allocate necessary intermediate arrays
+  if (dims[0] > 0 && dims[1] > PTRDIFF_MAX / dims[0]) {
+    mexErrMsgIdAndTxt("tt3:tt_gwdt_computecosts:mxMalloc",
+                      "Element count overflows");
+  }
+  ptrdiff_t count = dims[0] * dims[1];
+
+  if (count > PTRDIFF_MAX / sizeof(ptrdiff_t)) {
+    mexErrMsgIdAndTxt("tt3:tt_gwdt_computecosts:mxMalloc",
+                      "Intermediate array size overflows");
+  }
+  ptrdiff_t *conncomps = mxMalloc(sizeof(ptrdiff_t) * count);
 
   // Call libtopotoolbox function
   gwdt_computecosts(costs, conncomps, flats, original_dem, filled_dem, dims);
 
   // Destroy intermediate arrays
+  mxFree(conncomps);
 }
