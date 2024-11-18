@@ -161,5 +161,23 @@ classdef testSnapshot < matlab.unittest.TestCase
                 testCase.verifyEqual(demf_result.Z,A.Z);
             end
         end
+
+        function auxtopo(testCase, dataset)
+            D = testCase.dem;
+            D.Z = single(createAuxiliaryTopo(testCase.dem, ...
+                'preprocess', 'carve', ...
+                'uselibtt',false, ...
+                'verbose', false, ...
+                'internaldrainage',false));
+
+            result_file = fullfile(dataset,"auxtopo.tif");
+
+            if ~isfile(result_file)
+                D.GRIDobj2geotiff(result_file);
+            else
+                D_result = GRIDobj(result_file);
+                testCase.verifyEqual(D_result.Z, D.Z);
+            end
+        end
     end
 end
