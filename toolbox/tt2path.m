@@ -18,7 +18,7 @@ p = mfilename('fullpath');
 f = fileparts(p);
 oldfolder = cd(f);
 
-cd("..\")
+cd("..")
 addpath(genpath('toolbox'))
 
 rmpath(['toolbox' filesep 'help'])
