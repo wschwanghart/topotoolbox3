@@ -16,6 +16,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   // Allocate necessary intermediate arrays
 
   // Call libtopotoolbox function
+  gwdt_computecosts(costs, conncomps, flats, original_dem, filled_dem, dims);
 
   // Destroy intermediate arrays
 }
