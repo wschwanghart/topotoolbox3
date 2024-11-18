@@ -27,7 +27,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   float *original_dem = mxGetSingles(demArray);
 
   const mxArray *demfArray = prhs[1]; // DEMF
-  float *filled_dem = mxGetSingles(demArray);
+  float *filled_dem = mxGetSingles(demfArray);
 
   const mxArray *flatsArray = prhs[2]; // FLATS
   int32_t *flats = mxGetInt32s(flatsArray);
