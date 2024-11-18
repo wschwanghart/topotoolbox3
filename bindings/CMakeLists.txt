@@ -40,8 +40,16 @@ matlab_add_mex(
   LINK_TO topotoolbox
 )
 
+matlab_add_mex(
+  NAME tt_gwdt_computecosts
+  MODULE
+  SRC tt_gwdt_computecosts.c
+  R2018a
+  LINK_TO topotoolbox
+)
+
 install(
-  TARGETS tt_has_topotoolbox tt_fillsinks tt_identifyflats
+  TARGETS tt_has_topotoolbox tt_fillsinks tt_identifyflats tt_gwdt_computecosts
   DESTINATION "."
   COMPONENT Runtime
 )
