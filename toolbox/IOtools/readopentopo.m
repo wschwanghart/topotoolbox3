@@ -105,19 +105,23 @@ function DEM = readopentopo(options)
 % Date: 6. June, 2024
 
 arguments
-    options.demtype {mustBeTextScalar} = 'SRTMGL3'
+    options.demtype {mustBeTextScalar,mustBeMember(options.demtype,...
+        {'SRTMGL3','SRTMGL1','SRTMGL1_E',...
+     'AW3D30','AW3D30_E','SRTM15Plus',...
+     'NASADEM','COP30','COP90',...
+     'EU_DTM','GEDI_L3','GEBCOSubIceTopo','GEBCOIceTopo'})} = 'SRTMGL3'
     options.filename = [char(tempname) '.tif']
-    options.interactive = false
+    options.interactive (1,1) = false
     options.extent = []
-    options.addmargin = 0.01
-    options.north = 37.091337
-    options.south = 36.738884
-    options.west  = -120.168457
-    options.east  = -119.465576
-    options.deletefile = true
-    options.verbose = true
+    options.addmargin (1,1) = 0.01
+    options.north (1,1) = 37.091337
+    options.south (1,1) = 36.738884
+    options.west  (1,1) = -120.168457
+    options.east  (1,1) = -119.465576
+    options.deletefile (1,1) = true
+    options.verbose (1,1) = true
     options.apikey  = ''
-    options.checkrequestlimit = true
+    options.checkrequestlimit (1,1) = true
 end
 
 validdems = {'SRTMGL3','SRTMGL1','SRTMGL1_E',...
