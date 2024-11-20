@@ -142,7 +142,7 @@ methods
             options.verbose (1,1) = false
             options.sinks = []
             options.internaldrainage (1,1) = false
-            options.uselibtt (1,1) = true
+            options.uselibtt (1,1) = true && haslibtopotoolbox
             options.tweight (1,1) {mustBeNumeric,mustBePositive} = 2
             options.cweight (1,1) {mustBeNumeric,mustBePositive} = 1
             options.mex (1,1) = false
