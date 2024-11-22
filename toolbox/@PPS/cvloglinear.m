@@ -41,9 +41,8 @@ function [ypredcv,stats] = cvloglinear(P,mdl,varargin)
 % 
 % See also: PPS, PPS/fitloglinear
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 24. April, 2023
-
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 19. November, 2024
 
 p = inputParser;
 p.FunctionName = 'cvloglinear';

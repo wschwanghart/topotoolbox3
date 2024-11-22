@@ -79,14 +79,14 @@ function cmap = ttscm(name,n,percrange)
 %      doi:10.5194/gmd-11-2541-2018
 %
 %
-% See also: GRIDobj/IMAGESCHS, ttcmap
+% See also: GRIDobj/IMAGESCHS, ttcmap, ttscmposter
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 6. June, 2024
 
 arguments 
     name = "batlow"
-    n    = 255
+    n (1,1) {mustBePositive,mustBeInteger} = 255
     percrange = []
 end
 

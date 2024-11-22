@@ -29,7 +29,6 @@ function S = removeedgeeffects(S,FD,DEM)
 %
 %     S2    trimmed STREAMobj
 %
-% 
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
@@ -42,12 +41,16 @@ function S = removeedgeeffects(S,FD,DEM)
 %
 % See also: STREAMobj/mnoptim, STREAMobj/chitransform
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 24. October, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 19. November, 2024
 
-narginchk(2,3)
+arguments
+    S  STREAMobj
+    FD FLOWobj {validatealignment(S,FD)}
+    DEM {mustBeGRIDobjOrEmpty} = []
+end
 
-if nargin == 2
+if isempty(DEM)
     I  = GRIDobj(FD,'logical');
     I.Z(:,:) = true;
     I.Z(2:end-1,2:end-1) = false;
@@ -65,7 +68,6 @@ else
         clear II
     end
 end
-
 
 I  = influencemap(FD,I);
 S = modify(S,'upstreamto',~I);

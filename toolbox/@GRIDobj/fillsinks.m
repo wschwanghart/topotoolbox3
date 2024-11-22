@@ -95,7 +95,7 @@ dem(Inan) = -inf;
 
 uselibtt = options.uselibtt && haslibtopotoolbox;
 
-if nargin == 1 || nargin >= 3 && uselibtt
+if (nargin == 1 || nargin >= 3) && uselibtt
 
     % Use libtopotoolbox
     dem = single(dem); % requires dem to be single

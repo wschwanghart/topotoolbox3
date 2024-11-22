@@ -20,6 +20,10 @@ function y = landcolor(n)
 % Author: Francois Beauducel <beauducel@ipgp.fr>
 % Date: 2012/05/17
 
+arguments
+    n (1,1) {mustBePositive,mustBeInteger} = 255
+end
+
 
 J = [ ...
 0.095678 0.53427 0.21682 
@@ -88,7 +92,8 @@ J = [ ...
 ];
 
 l = length(J);
-if nargin < 1
-	n = 255;
+if n ~= l
+    y = interp1(1:l,J,linspace(1,l,n),'*linear');
+else
+    y = J;
 end
-y = interp1(1:l,J,linspace(1,l,n),'*linear');

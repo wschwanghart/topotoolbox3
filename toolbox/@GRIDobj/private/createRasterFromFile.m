@@ -25,6 +25,18 @@ if license('test','MAP_Toolbox')
         'CoordinateSystemType',options.CoordinateSystemType);
     wf = worldFileMatrix(R);
 
+    % handle nans
+    try
+        tiffinfo = imfinfo(filename);
+        if isfield(tiffinfo,'GDAL_NODATA')
+            nodata_val = str2double(tiffinfo.GDAL_NODATA);
+            Z(Z==nodata_val) = nan;
+        end
+    catch
+        % do nothing
+    end
+
+
     % [~,~,ext] = fileparts(filename);
     % switch lower(ext)
     %     case {'.tif','.tiff'}
