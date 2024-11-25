@@ -46,7 +46,8 @@ classdef GRIDobj
 %     DEM = GRIDobj('ESRIasciiGrid.txt') creates a GRIDobj from an ESRI 
 %     Ascii grid exported from other GI systems. 
 %
-%     DEM = GRIDobj('GeoTiff.tif') creates a GRIDobj from a Geotiff.
+%     DEM = GRIDobj('GeoTiff.tif') creates a GRIDobj from a Geotiff. Note
+%     that reading image files may not reliably detect missing data.
 %
 %     DEM = GRIDobj(filename) tries to create a GRIDobj from other formats
 %     supported by the Mapping Toolbox function readgeoraster.
