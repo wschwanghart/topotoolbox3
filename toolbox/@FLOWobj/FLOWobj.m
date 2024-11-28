@@ -336,10 +336,10 @@ methods
         % starting from a single pixel. It is used when deriving flow 
         % paths, e.g., flowpathextract.
         
-        switch lower(FD.type)
-            case {'multi','dinf'}
-                error('Fast indexing only possible for single flow directions.')
-        end
+        % switch lower(FD.type)
+        %    case {'multi','dinf'}
+        %        error('Fast indexing only possible for single flow directions.')
+        %end
 
         validateattributes(val,{'numeric','logical'},{'scalar'})
         

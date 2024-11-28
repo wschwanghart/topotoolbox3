@@ -17,6 +17,10 @@ function [mn,cm,zm,zsd] = mnoptimvar(S,DEM,A,options)
 %     variance of elevation values in each bin. The objective function is
 %     the weighted mean of these variances.
 %
+%     The function minimizes the chi disorder sensu Hergarten et al.
+%     (2016) although the author define the objective function somewhat
+%     differently.
+%
 % Input arguments
 %
 %     S     STREAMobj
@@ -58,11 +62,17 @@ function [mn,cm,zm,zsd] = mnoptimvar(S,DEM,A,options)
 %     S   = klargestconncomps(S);
 %     mn  = mnoptimvar(S,DEM,A);
 %     
+% Reference:
+%
+%     Hergarten, S., Robl, J., and Stüwe, K.: Tectonic geomorphology at
+%     small catchment sizes – extensions of the stream-power approach and
+%     the χ method, Earth Surface Dynamics, 4, 1–9,
+%     https://doi.org/10.5194/esurf-4-1-2016, 2016.
 %
 % See also: STREAMobj, STREAMobj/mnoptim
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 17. June, 2024
+% Date: 25. November, 2024
 
 arguments
     S     STREAMobj
