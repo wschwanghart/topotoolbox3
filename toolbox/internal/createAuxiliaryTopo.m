@@ -66,10 +66,6 @@ switch lower(options.preprocess)
         % There is also a weights option, which is a
         % GRIDobj with weights. But this is currently
         % undocumented
-
-        D    = DEMF-DEM;
-        D = D.Z;
-        DEM  = DEMF;
 end
 
 % construct height graph
@@ -79,9 +75,9 @@ end
 % will not attempt to route through the lowest region in a
 % internally drained basin (e.g. a flat lake surface).
 if options.internaldrainage
-    [Iobj,SILLSobj,IntBasin] = identifyflats(DEM,'uselibtt',options.uselibtt);
+    [Iobj,SILLSobj,IntBasin] = identifyflats(DEMF,'uselibtt',options.uselibtt);
 else
-    [Iobj,SILLSobj] = identifyflats(DEM,'uselibtt',options.uselibtt);
+    [Iobj,SILLSobj] = identifyflats(DEMF,'uselibtt',options.uselibtt);
 end
 
 I     = Iobj.Z;
@@ -131,36 +127,51 @@ end
 % chosen, we derive here the costs to route through sinks
 switch options.preprocess
     case 'carve'
-        CarveMinVal = 0.1;
-        % if ~isscalar(cweight)
-        %     D = (D + cweight);
-        %     D = linscale(D,0,100);
-        % end
+        if options.uselibtt
+            % We must have access to both DEM and DEM to use
+            % tt_gwdt_computecosts.
+            %
+            % The flats array is an int32 array with 1 labeling the flats.
+            % It was designed to be used with the output of
+            % tt_identifyflats, which encodes flats as pixels with bit 1
+            % set. It does not, however, use the encodings for other types
+            % of pixels. It is correct to supply an int32 version of
+            % the logical I array, since that will have 1 for all flats and
+            % 0 for all other pixels.
+            D = tt_gwdt_computecosts(single(DEM.Z), single(DEMF.Z), int32(I));
+        else
+            D = DEMF.Z-DEM.Z;
 
-        % -- New version -- slightly faster but may require
-        % more memory
-        %                         STATS = regionprops(I,D,{'PixelIdxList','MaxIntensity','PixelValues'});
-        %                         PixelValues = cellfun(@(pixval,maxval) (maxval-pixval).^tweight + CarveMinVal,...
-        %                             {STATS.PixelValues},{STATS.MaxIntensity},...
-        %                             'UniformOutput',false);
-        %                         D(vertcat(STATS.PixelIdxList)) = cell2mat(PixelValues);
+            CarveMinVal = 0.1;
+            % if ~isscalar(cweight)
+            %     D = (D + cweight);
+            %     D = linscale(D,0,100);
+            % end
 
-        % -- Old version
-        CC = bwconncomp(I);
-        tweight = 1;
-        for r = 1:CC.NumObjects
-            maxdepth = max(D(CC.PixelIdxList{r}));
-            D(CC.PixelIdxList{r}) = (maxdepth - D(CC.PixelIdxList{r})).^tweight + CarveMinVal;
-            %                             D(CC.PixelIdxList{r}) = maxdepth - D(CC.PixelIdxList{r});
-            %                             D(CC.PixelIdxList{r}) = (D(CC.PixelIdxList{r})./maxdepth + CarveMinVal).^tweight;
+            % -- New version -- slightly faster but may require
+            % more memory
+            %                         STATS = regionprops(I,D,{'PixelIdxList','MaxIntensity','PixelValues'});
+            %                         PixelValues = cellfun(@(pixval,maxval) (maxval-pixval).^tweight + CarveMinVal,...
+            %                             {STATS.PixelValues},{STATS.MaxIntensity},...
+            %                             'UniformOutput',false);
+            %                         D(vertcat(STATS.PixelIdxList)) = cell2mat(PixelValues);
+
+            % -- Old version
+            CC = bwconncomp(I);
+            tweight = 1;
+            for r = 1:CC.NumObjects
+                maxdepth = max(D(CC.PixelIdxList{r}));
+                D(CC.PixelIdxList{r}) = (maxdepth - D(CC.PixelIdxList{r})).^tweight + CarveMinVal;
+                %                             D(CC.PixelIdxList{r}) = maxdepth - D(CC.PixelIdxList{r});
+                %                             D(CC.PixelIdxList{r}) = (D(CC.PixelIdxList{r})./maxdepth + CarveMinVal).^tweight;
+            end
+            clear CC
         end
-        clear CC
-
 
 end
 
 % Compute the linear index of pixels upstream of sill pixels
-PreSillPixel = getPreSillPixels(DEM.Z,I,SILLS);
+PreSillPixel = getPreSillPixels(DEMF.Z,I,SILLS);
 
 % Some more preprocessing if option fill is chosen. Here we
 % derive the costs to route over flats
@@ -170,7 +181,7 @@ switch lower(options.preprocess)
         D = bwdist(I,'euclidean');
         mask = inf(size(D),class(D));
         mask(I) = 0;
-        D = (imreconstruct(D+1,mask) - D)*DEM.cellsize;
+        D = (imreconstruct(D+1,mask) - D)*DEMF.cellsize;
     case 'carve'
 
 end
