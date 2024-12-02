@@ -2,7 +2,7 @@
 
 tt_gwdt_computecosts.c
 
-COSTS = tt_gwdt_computecosts(DEMF, DEM, FLATS)
+COSTS = tt_gwdt_computecosts(DEM, DEMF, FLATS)
 
 */
 
