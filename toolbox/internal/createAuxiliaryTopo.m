@@ -1,4 +1,4 @@
-function [D,DEM,SILLS] = createAuxiliaryTopo(DEM,options)
+function [D,DEMF,SILLS] = createAuxiliaryTopo(DEM,options)
 
 %CREATEAUXILIARYTOPO Calculate auxiliary topography from DEM
 %
@@ -42,10 +42,10 @@ switch lower(options.preprocess)
             disp([char(datetime("now"))  ' -- Sink filling'])
         end
 
-        if isempty(sinks)
-            DEM = fillsinks(DEM,'uselibtt',options.uselibtt);
+        if isempty(options.sinks)
+            DEMF = fillsinks(DEM,'uselibtt',options.uselibtt);
         else
-            DEM = fillsinks(DEM,sinks);
+            DEMF = fillsinks(DEM,options.sinks);
         end
 
     case 'carve'
