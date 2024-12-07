@@ -35,8 +35,8 @@ if numel(r) ~= numel(c)
     error('TopoToolbox:wronginput','r and c must have the same number of elements')
 end
 
-mustBeInRange(r,1,nrows(DEM))
-mustBeInRange(c,1,ncols(DEM))
+mustBeInRange(r,1-.6,nrows(DEM)+.6)
+mustBeInRange(c,1-.6,ncols(DEM)+.6)
 
 r = r(:);
 c = c(:);
