@@ -66,6 +66,8 @@ switch lower(options.preprocess)
         % There is also a weights option, which is a
         % GRIDobj with weights. But this is currently
         % undocumented
+    case 'none'
+        DEMF = DEM;
 end
 
 % construct height graph
