@@ -1,12 +1,12 @@
 function rgb = imageschs(DEM,A,options)
 
-%IMAGESCHS plot hillshade image with overlay
+%IMAGESCHS Plot hillshade image with overlay
 %
 % Syntax
 %
 %     imageschs(DEM)
 %     imageschs(DEM,A)
-%     imageschs(DEM,A,pn,pv,...)
+%     imageschs(_____,pn,pv,...)
 %     RGB = imageschs(...)
 %
 % Description
@@ -24,10 +24,6 @@ function rgb = imageschs(DEM,A,options)
 %     hillshade but returns an RGB image. The hillshading algorithm follows
 %     the logarithmic approach to shaded relief representation of Katzil
 %     and Doytsher (2003).
-%
-%     Some of the parameter settings (e.g. colorbarylabel) require MATLAB's
-%     graphics engine introduced in R2014b and will throw errors when used
-%     with older versions.
 %
 %     If the DEM has a geographic coordinate system (isGeographic(DEM)),
 %     the function will calculate the average spatial resolution in
@@ -48,21 +44,25 @@ function rgb = imageschs(DEM,A,options)
 %     colormap         string for colormap name or [ncol x 3] matrix. Note 
 %                      that if NaNs or Infs are found in A, the colormap  
 %                      must not have more than 255 colors. Default: 'jet'
-%     percentclip      scalar prc (%) that truncates the displayed range to  
-%                      the prc's and 100%-prc's percentile of the data in A.
-%                      This parameter is ignored if 'caxis' is defined.
+%     percentclip      scalar prc (%) that truncates the displayed range to
+%                      the prc's and 100%-prc's percentile of the data in
+%                      A. This parameter is ignored if 'caxis' is defined.
 %                      Default is prc=0.
-%     truecolor        three element vector (rgb) with values between 0 and 1  
-%                      that indicates how true values are plotted if A is 
-%                      logical.
-%                      Default is [0 1 0].
-%     falsecolor       three element vector (rgb) with values between 0 and 1  
-%                      that indicates how false values are plotted if A is 
-%                      logical.
+%     truecolor        three element vector (rgb) with values between 0 and
+%                      1 that indicates how true values are plotted if A is
+%                      logical. This option also takes color names that can
+%                      be interpreted by letter2rgb or ttclrr. Default is
+%                      [0 1 0].
+%     falsecolor       three element vector (rgb) with values between 0 and   
+%                      1 that indicates how false values are plotted if A  
+%                      is logical. This option also takes color names that 
+%                      can be interpreted by letter2rgb or ttclrr.
 %                      Default is [1 1 1].
-%     nancolor         three element vector (rgb) with values between 0 and 1  
-%                      that indicates how NaNs and Infs are plotted 
-%                      Default is [1 1 1].
+%     nancolor         three element vector (rgb) with values between 0 and   
+%                      1 that indicates how NaNs and Infs are plotted 
+%                      Default is [1 1 1]. This option also takes color 
+%                      names that can be interpreted by letter2rgb or 
+%                      ttclrr.
 %     brighten         Scalar between -1 and 1. Shift intensities of all 
 %                      colors in the colormap. If <0, then colormap will be
 %                      darkened, and if >0, it will be brightened.
@@ -152,10 +152,10 @@ function rgb = imageschs(DEM,A,options)
 %     to shaded relief representation. Computers & Geosciences, 29,
 %     1137-1142.
 %
-% See also: GRIDobj/hillshade, imagesc
+% See also: GRIDobj/hillshade, imagesc, ttclrr, letter2rgb
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 30. August, 2024
+% Date: 10. December, 2024
 
 
 % Change log
@@ -171,6 +171,7 @@ function rgb = imageschs(DEM,A,options)
 % 06.4.2018: new example
 % 04.6.2024: changed to be fit for TopoToolbox 3
 % 30.8.2024: arguments block
+% 10.12.2024: better handling of colors
 
 
 %% Input argument parsing
@@ -346,6 +347,13 @@ if ~isa(A,'logical')
     
 else
     ncolors = 2;
+    % Convert letters to rgb
+    if ischar(falsecol) || isstring(falsecol)
+        falsecol = getclr(falsecol);
+    end
+    if ischar(truecol) || isstring(truecol)
+        truecol = getclr(truecol);
+    end
     cmap = [falsecol; truecol];
 	nans = false;
     alims = [0 1];
@@ -367,6 +375,9 @@ IND  = uint16(H+1) + nhs*uint16(A) + 1;
 
 % handle NaNs
 if nans
+    if ischar(nancolor) || isstring(nancolor)
+        nancolor = getclr(nancolor);
+    end
     cmapnan   = bsxfun(@times,nancolor,linspace(0,1,nhs)');
     IND(Inan) = uint16(H(Inan)) + nhs*(ncolors) +1;% unclear if this is ok...
     cmap      = [cmap;cmapnan];
@@ -431,3 +442,16 @@ if nargout == 0
 elseif nargout == 1
     rgb = RGB;
 end
+end
+
+
+function clr = getclr(str)
+% This function retrieves a color triplet based on a character or string
+% input
+try 
+    clr = letter2rgb(str);
+catch
+    clr = ttclrr(str);
+end
+end
+
