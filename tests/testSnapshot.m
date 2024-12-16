@@ -1,4 +1,4 @@
-classdef testSnapshot < matlab.unittest.TestCase
+classdef testSnapshot < matlab.perftest.TestCase
     % testSnapshot Snapshot testing using topotoolbox3 as a reference
     % The data for the snapshot tests are available as versioned releases
     % in the TopoToolbox/snapshot_data repository. This repository is added
@@ -109,7 +109,9 @@ classdef testSnapshot < matlab.unittest.TestCase
     methods (Test)
         % Test methods
         function fillsinks(testCase,dataset, uselibtt)
+            testCase.startMeasuring();
             demf = testCase.dem.fillsinks(uselibtt=uselibtt);
+            testCase.stopMeasuring();
 
             result_file = fullfile("snapshots/data/",dataset,"fillsinks.tif");
 
@@ -124,7 +126,10 @@ classdef testSnapshot < matlab.unittest.TestCase
 
         function identifyflats(testCase, dataset, uselibtt)
             demf = testCase.dem.fillsinks(uselibtt=uselibtt);
+
+            testCase.startMeasuring();
             [FLATS, SILLS, CLOSED] = demf.identifyflats();
+            testCase.stopMeasuring();
 
             flats_file = fullfile("snapshots/data/",dataset,"identifyflats_flats.tif");
             sills_file = fullfile("snapshots/data/",dataset,"identifyflats_sills.tif");
@@ -153,7 +158,9 @@ classdef testSnapshot < matlab.unittest.TestCase
         end
 
         function acv(testCase,dataset)
+            testCase.startMeasuring();
             A = testCase.dem.acv();
+            testCase.stopMeasuring();
 
             result_file = fullfile("snapshots/data/",dataset,"acv.tif");
 
@@ -168,11 +175,14 @@ classdef testSnapshot < matlab.unittest.TestCase
 
         function auxtopo(testCase, dataset, uselibtt)
             D = testCase.dem;
+
+            testCase.startMeasuring();
             D.Z = single(createAuxiliaryTopo(testCase.dem, ...
                 'preprocess', 'carve', ...
                 'uselibtt',uselibtt, ...
                 'verbose', false, ...
                 'internaldrainage',false));
+            testCase.stopMeasuring();
 
             result_file = fullfile("snapshots/data/",dataset,"auxtopo.tif");
 
