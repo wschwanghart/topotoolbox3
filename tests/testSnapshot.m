@@ -78,6 +78,10 @@ classdef testSnapshot < matlab.unittest.TestCase
         dataset
     end
 
+    properties (TestParameter)
+        uselibtt = {false, true};
+    end
+
     methods (TestParameterDefinition,Static)
         function dataset = findDatasets()
             % Find all the existing snapshot datasets
@@ -104,12 +108,12 @@ classdef testSnapshot < matlab.unittest.TestCase
 
     methods (Test)
         % Test methods
-        function fillsinks(testCase,dataset)
-            demf = testCase.dem.fillsinks();
+        function fillsinks(testCase,dataset, uselibtt)
+            demf = testCase.dem.fillsinks(uselibtt=uselibtt);
 
             result_file = fullfile(dataset,"fillsinks.tif");
 
-            if ~isfile(result_file)
+            if ~isfile(result_file) && ~uselibtt
                 % Write the result to the directory
                 demf.GRIDobj2geotiff(result_file);
             else
@@ -118,29 +122,29 @@ classdef testSnapshot < matlab.unittest.TestCase
             end
         end
 
-        function identifyflats(testCase, dataset)
-            demf = testCase.dem.fillsinks();
+        function identifyflats(testCase, dataset, uselibtt)
+            demf = testCase.dem.fillsinks(uselibtt=uselibtt);
             [FLATS, SILLS, CLOSED] = demf.identifyflats();
 
             flats_file = fullfile(dataset,"identifyflats_flats.tif");
             sills_file = fullfile(dataset,"identifyflats_sills.tif");
             closed_file = fullfile(dataset,"identifyflats_closed.tif");
 
-            if ~isfile(flats_file)
+            if ~isfile(flats_file) && ~uselibtt
                 FLATS.GRIDobj2geotiff(flats_file);
             else
                 flats_result = GRIDobj(flats_file);
                 testCase.verifyEqual(logical(flats_result.Z),FLATS.Z);
             end
 
-            if ~isfile(sills_file)
+            if ~isfile(sills_file) && ~uselibtt
                 SILLS.GRIDobj2geotiff(sills_file);
             else
                 sills_result = GRIDobj(sills_file);
                 testCase.verifyEqual(logical(sills_result.Z),SILLS.Z);
             end
 
-            if ~isfile(closed_file)
+            if ~isfile(closed_file) && ~uselibtt
                 CLOSED.GRIDobj2geotiff(closed_file);
             else
                 closed_result = GRIDobj(closed_file);
@@ -162,17 +166,17 @@ classdef testSnapshot < matlab.unittest.TestCase
             end
         end
 
-        function auxtopo(testCase, dataset)
+        function auxtopo(testCase, dataset, uselibtt)
             D = testCase.dem;
             D.Z = single(createAuxiliaryTopo(testCase.dem, ...
                 'preprocess', 'carve', ...
-                'uselibtt',true, ...
+                'uselibtt',uselibtt, ...
                 'verbose', false, ...
                 'internaldrainage',false));
 
             result_file = fullfile(dataset,"auxtopo.tif");
 
-            if ~isfile(result_file)
+            if ~isfile(result_file) && ~uselibtt
                 D.GRIDobj2geotiff(result_file);
             else
                 D_result = GRIDobj(result_file);
