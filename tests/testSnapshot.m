@@ -85,7 +85,7 @@ classdef testSnapshot < matlab.unittest.TestCase
     methods (TestParameterDefinition,Static)
         function dataset = findDatasets()
             % Find all the existing snapshot datasets
-            available_datasets = [{},struct2table(dir("snapshots/data/*/dem.tif")).folder];
+            [~,available_datasets,~] = fileparts([{},struct2table(dir("snapshots/data/*/dem.tif")).folder]);
             if ~isempty(available_datasets)
                 dataset = available_datasets;
             else
@@ -97,7 +97,7 @@ classdef testSnapshot < matlab.unittest.TestCase
     methods (TestClassSetup)
         % Shared setup for the entire test class
         function read_data(testCase,dataset)
-            data_file = fullfile(dataset,"dem.tif");
+            data_file = fullfile("snapshots/data/",dataset,"dem.tif");
             testCase.dem = GRIDobj(data_file);
         end
     end
@@ -111,7 +111,7 @@ classdef testSnapshot < matlab.unittest.TestCase
         function fillsinks(testCase,dataset, uselibtt)
             demf = testCase.dem.fillsinks(uselibtt=uselibtt);
 
-            result_file = fullfile(dataset,"fillsinks.tif");
+            result_file = fullfile("snapshots/data/",dataset,"fillsinks.tif");
 
             if ~isfile(result_file) && ~uselibtt
                 % Write the result to the directory
@@ -126,9 +126,9 @@ classdef testSnapshot < matlab.unittest.TestCase
             demf = testCase.dem.fillsinks(uselibtt=uselibtt);
             [FLATS, SILLS, CLOSED] = demf.identifyflats();
 
-            flats_file = fullfile(dataset,"identifyflats_flats.tif");
-            sills_file = fullfile(dataset,"identifyflats_sills.tif");
-            closed_file = fullfile(dataset,"identifyflats_closed.tif");
+            flats_file = fullfile("snapshots/data/",dataset,"identifyflats_flats.tif");
+            sills_file = fullfile("snapshots/data/",dataset,"identifyflats_sills.tif");
+            closed_file = fullfile("snapshots/data/",dataset,"identifyflats_closed.tif");
 
             if ~isfile(flats_file) && ~uselibtt
                 FLATS.GRIDobj2geotiff(flats_file);
@@ -155,7 +155,7 @@ classdef testSnapshot < matlab.unittest.TestCase
         function acv(testCase,dataset)
             A = testCase.dem.acv();
 
-            result_file = fullfile(dataset,"acv.tif");
+            result_file = fullfile("snapshots/data/",dataset,"acv.tif");
 
             if ~isfile(result_file)
                 % Write the result to the directory
@@ -174,7 +174,7 @@ classdef testSnapshot < matlab.unittest.TestCase
                 'verbose', false, ...
                 'internaldrainage',false));
 
-            result_file = fullfile(dataset,"auxtopo.tif");
+            result_file = fullfile("snapshots/data/",dataset,"auxtopo.tif");
 
             if ~isfile(result_file) && ~uselibtt
                 D.GRIDobj2geotiff(result_file);
