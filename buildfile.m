@@ -6,6 +6,8 @@ function plan = buildfile
         Dependencies = ["check" "test"], ...
         Actions = @packageToolbox);
 
+    plan("benchmark").Dependencies = "compile";
+
     plan.DefaultTasks = ["check" "test" "package"];
 end
 
@@ -64,4 +66,12 @@ function compileTask(~)
     system(strcat(cmake," -S bindings/ -B build -DCMAKE_BUILD_TYPE=Release"));
     system(strcat(cmake," --build build --config Release"));
     system(strcat(cmake," --install build --prefix toolbox/internal/mex --component Runtime"));
+end
+
+function benchmarkTask(~)
+    oldpath = addpath(genpath("toolbox"));
+    finalize = onCleanup(@()(path(oldpath)));
+
+    results = runperf("tests/testSnapshot.m");
+    disp(sampleSummary(results));
 end
