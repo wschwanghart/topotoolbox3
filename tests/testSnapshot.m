@@ -128,7 +128,7 @@ classdef testSnapshot < matlab.perftest.TestCase
             demf = testCase.dem.fillsinks(uselibtt=uselibtt);
 
             testCase.startMeasuring();
-            [FLATS, SILLS, CLOSED] = demf.identifyflats();
+            [FLATS, SILLS, CLOSED] = demf.identifyflats(uselibtt=uselibtt);
             testCase.stopMeasuring();
 
             flats_file = fullfile("snapshots/data/",dataset,"identifyflats_flats.tif");
