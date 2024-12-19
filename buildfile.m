@@ -72,6 +72,47 @@ function benchmarkTask(~)
     oldpath = addpath(genpath("toolbox"));
     finalize = onCleanup(@()(path(oldpath)));
 
-    results = runperf("tests/testSnapshot.m");
-    disp(sampleSummary(results));
+    tr = runperf("tests/testSnapshot.m");
+
+    results = vertcat(tr.Samples);
+
+    % Extract site and function under test
+    pat = '\[dataset=(?<Site>\w*)\]\/(?<Function>\w*)';
+    results = [results struct2table(cell2mat(regexp(string(results.Name),pat,'names')))];
+
+    % Extract libtopotoolbox flag
+    % Not every function has a uselibtt argument
+    v = zeros(size(results,1),1,'logical');
+    pat3 = '\(uselibtt=(?<UseLibTT>\w*)\)';
+    s = regexp(string(results.Name),pat3,'names');
+    haslibtt = cellfun(@(x) length(x) == 1, s);
+    v(haslibtt) = cell2mat(arrayfun(@(x) x.UseLibTT == "true",cell2mat(s),'UniformOutput',false));
+    results.UseLibTT = v;
+
+    % Summarize samples with min, median and max.
+    T = groupsummary(results, ...
+        ["Site","Function","UseLibTT","RunIdentifier"], {"min","median","max"},"MeasuredTime");
+
+    T = renamevars(T,["GroupCount","min_MeasuredTime","median_MeasuredTime","max_MeasuredTime"], ...
+        ["SampleSize","Min","Median","Max"]);
+
+    % Add information about the commit and benchmark run to the table
+    runinfo = table;
+    lastCommit = gitrepo().LastCommit;
+    runinfo.LastCommit = lastCommit.ID;
+    runinfo.CommitDate = lastCommit.CommitterDate;
+    runinfo.RunDate = datetime;
+    runinfo = [runinfo tr(1).Samples(1,"RunIdentifier")];
+    results = join(T,runinfo);
+
+    % Append new run to the results file
+    resultsfile = "tests/results/benchmark.csv";
+    if ~isfolder(fileparts(resultsfile))
+        mkdir(fileparts(resultsfile))
+    end
+    if isfile(resultsfile)
+        results = [readtable(resultsfile);results];
+    end
+
+    writetable(results,resultsfile);
 end
