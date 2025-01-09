@@ -47,7 +47,7 @@ function rgb = imageschs(DEM,A,options)
 %     percentclip      scalar prc (%) that truncates the displayed range to
 %                      the prc's and 100%-prc's percentile of the data in
 %                      A. This parameter is ignored if 'caxis' is defined.
-%                      Default is prc=0.
+%                      Default is prc=0. (see GRIDobj/prcclip)
 %     truecolor        three element vector (rgb) with values between 0 and
 %                      1 that indicates how true values are plotted if A is
 %                      logical. This option also takes color names that can
@@ -152,7 +152,7 @@ function rgb = imageschs(DEM,A,options)
 %     to shaded relief representation. Computers & Geosciences, 29,
 %     1137-1142.
 %
-% See also: GRIDobj/hillshade, imagesc, ttclrr, letter2rgb
+% See also: GRIDobj/hillshade, imagesc, ttclrr, letter2rgb, GRIDobj/prcclip
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 10. December, 2024
@@ -249,29 +249,22 @@ end
 % check if input matrices align
 validatealignment(DEM,A)
 
+% any percentile clipping?
+if ~isempty(options.percentclip)
+    if ~isa(A,'GRIDobj')
+        A = GRIDobj(DEM,A);
+    end
+    [clims,A] = prcclip(A,options.percentclip);
+end
+
 if isa(A,'GRIDobj')
     A = A.Z;
 end
-    
+
 % constrain color range to values given in caxis
-if ~clims
+if ~isempty(clims)
     A(A<clims(1)) = clims(1);
     A(A>clims(2)) = clims(2);
-end
-
-% percentile clipping
-if ~isempty(options.percentclip)
-    qclip = options.percentclip/100;
-    [n,edges] = histcounts(A(~isnan(A(:))),'Normalization','cdf');
-    lval = edges(find(n>=qclip,1,'first'));
-    uval = edges(find(n<(1-qclip),1,'last'));
-    if lval == uval
-        warning('TopoToolbox:imageschs','percent clip returns flat matrix');
-        A(:,:) = lval;
-    else
-        A = max(A,lval);
-        A = min(A,uval);
-    end      
 end
 
 % coordinate vector

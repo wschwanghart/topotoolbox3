@@ -312,7 +312,7 @@ methods
       
         case 'dinf'
             % This part may need some additional work
-            R = dem_flow(DEM.Z);
+            R = dem_flow(DEM.Z,DEM.cellsize,DEM.cellsize);
             M = flow_matrix(DEM.Z,R,DEM.cellsize,DEM.cellsize);
             M = -M';
 

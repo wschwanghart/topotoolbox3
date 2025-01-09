@@ -1,4 +1,4 @@
-function [lims,A] = prcclip(A,prc,symmetric)
+function [lims,A] = prcclip(A,prc,symmetric,options)
 
 %PRCCLIP Percentile clipping
 %
@@ -60,45 +60,53 @@ arguments
     A    GRIDobj
     prc  = 2
     symmetric (1,1) = false
+    options.usehistcounts = false
+
 end
     
-qclip = prc/100;
-if numel(qclip) == 1
-    qclip = [qclip 1-qclip];
+% Check input arguments
+if numel(prc) == 1
+    validateattributes(prc,{'numeric'},{'scalar','>=',0,'<',50},'GRIDobj/prcclip','prc',2)
+    prc(2) = 100-prc;
+elseif numel(prc) == 2
+    validateattributes(prc,{'numeric'},{'numel',2,'>=',0,'<=',100,'increasing'},'GRIDobj/prcclip','prc',2)
+else
+    error('TopoToolbox:wrongInput','prc must be a scalar or a two-element vector')
 end
 
-qclip = sort(qclip);
+% quantiles
+qclip = prc/100;
 
+% detect nans
 I = ~isnan(A.Z);
 
-[n,edges] = histcounts(A.Z(I(:)),'Normalization','cdf');
-lval = edges(find(n>=qclip(1),1,'first'));
-uval = edges(find(n<(qclip(2)),1,'last'));
-if lval == uval
-    warning('TopoToolbox:imageschs','percent clip returns flat matrix');
-
+if options.usehistcounts
+    [n,edges] = histcounts(A.Z(I(:)),sort(A.Z(I(:)),'ascend'),'Normalization','cdf');
+    lval = edges(find(n>=qclip(1),1,'first'));
+    uval = edges(find(n<(qclip(2)),1,'last'));
 else
+    Q = quantile(A.Z(I(:)),qclip);
+    lval = Q(1);
+    uval = Q(2);
+end
+
+if lval == uval
+    warning('TopoToolbox:imageschs','Percent clip returns flat matrix');
+    lims = [lval,uval];
     if nargout == 2
-        A.Z(I) = max(A.Z(I),lval);
-        A.Z(I) = min(A.Z(I),uval);
+        A.Z(I) = lval;
+    end
+else
+
+    lims = [lval,uval];
+    if symmetric       
+        lims = max(abs(lims));
+        lims = [-lims lims];      
+    end
+        
+    if nargout == 2
+        A.Z(I) = max(A.Z(I),lims(1));
+        A.Z(I) = min(A.Z(I),lims(2));
     end
     
 end
-
-lims = [lval,uval];
-
-if symmetric
-    lims = max(abs(lims));
-    lims = [-lims lims];
-end
-
-% if nargout == 2
-%     if flatmatrix
-%         A(:,:) = lval;
-%     else
-%         A = max(A,lims(1));
-%         A = min(A,lims(2));
-%     end
-% end
-    
-    

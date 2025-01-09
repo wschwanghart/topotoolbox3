@@ -8,6 +8,7 @@ function tf = isEqualGeoreference(A,B)
 % If A and B have no referencing objects, their reference is
 % assumed to be the same.
 
+% tf = false;
 
 
 % Both GRIDobjs do not have referencing objects

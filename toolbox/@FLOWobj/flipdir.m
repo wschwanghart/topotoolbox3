@@ -14,7 +14,7 @@ function FD = flipdir(FD,options)
 %     multiple flow directions.
 %
 %     Since formerly incoming edges in the flow network become outgoing
-%     edges, the fraction along these edges needs to be computed. Moreover,
+%     edges, the fractions along these edges need to be computed. Moreover,
 %     they need to normalized, so that they add to one for each pixel. How
 %     these weights are determined is controlled by the parameter value
 %     'weights'. By default, weights are determined according to the flow
@@ -104,9 +104,9 @@ FD.ixc = ix;
 % flip ordering
 FD.ix  = FD.ix(end:-1:1);
 FD.ixc = FD.ixc(end:-1:1);
-
 FD.fraction = w(end:-1:1);
 
+% normalize fractions
 FD = multi_normalize(FD);
 
 
