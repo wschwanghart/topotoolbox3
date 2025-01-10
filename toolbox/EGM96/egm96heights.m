@@ -33,6 +33,10 @@ function DEM = egm96heights(DEM)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 24. June, 2024
 
+arguments
+    DEM  GRIDobj
+end
+
 if isProjected(DEM)
     [x,y] = getcoordinates(DEM,'mat');
     [lat,lon] = projinv(DEM.georef.ProjectedCRS,x(:),y(:));

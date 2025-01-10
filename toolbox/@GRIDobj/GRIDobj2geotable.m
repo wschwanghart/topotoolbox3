@@ -5,6 +5,7 @@ function [GT,x,y] = GRIDobj2geotable(DB,options)
 % Syntax
 %
 %     GT = GRIDobj2geotable(DB)
+%     GT = GRIDobj2geotable(DB,pn,pv,...)
 %
 % Description
 %
@@ -47,7 +48,7 @@ function [GT,x,y] = GRIDobj2geotable(DB,options)
 %     GT = GRIDobj2geotable(C);
 %     geoplot(GT)
 %
-% See also: GRIDobj/reclassify
+% See also: GRIDobj/reclassify, GRIDobj/GRIDobj2polygon
 % 
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 17. June, 2024 
@@ -78,6 +79,8 @@ conn      = options.conn;
 multipart = options.multipart;
 prj       = DB.georef.ProjectedCRS;
 geographic = options.geographic;
+simple     = options.simplify;
+simpletol  = options.tol;
 
 if options.holes
     holes = true;
@@ -185,6 +188,11 @@ parfor (uv = 1:nuniqueval,poolsize)
     % get coordinates    
     XY = cellfun(@(cr)(wf*[cr-1 ones(size(cr,1),1)]')',REG,...
         'UniformOutput',false);
+
+    % Simplify %% Does not work yet
+    % if simple
+    %     XY = cellfun(@(xy) dpsimplify(xy,simpletol),XY,'UniformOutput',false);
+    % end
 
     if geographic
         [X,Y] = cellfun(@(xy) projinv(prj,xy(:,1),xy(:,2)),XY,...

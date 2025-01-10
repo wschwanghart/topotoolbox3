@@ -73,7 +73,7 @@ function [ps,ix] = dpsimplify(p,tol)
 
 arguments
     p
-    tol {mustBeNumeric,mustBeNonnegative}
+    tol (1,1) {mustBeNumeric,mustBeNonnegative}
 end
 
 

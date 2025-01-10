@@ -36,6 +36,13 @@ function [D] = dist2line(DEM,x0,y0,alpha)
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
 % Date: 23. June 2024
 
+arguments 
+    DEM  GRIDobj
+    x0 (1,1) {mustBeNumeric}
+    y0 (1,1) {mustBeNumeric}
+    alpha (1,1) {mustBeNumeric}
+end
+
 [x,y] = getcoordinates(DEM);
 [X,Y] = meshgrid(x,y);
 x = X(:);
