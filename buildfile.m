@@ -46,7 +46,7 @@ function testTask(~)
     oldpath = addpath(genpath("toolbox"));
     finalize = onCleanup(@()(path(oldpath)));
 
-    results = runtests("IncludeSubfolders",true);
+    results = runtests("tests","IncludeSubfolders",true);
     disp(results);
     assertSuccess(results);
 end
@@ -115,4 +115,11 @@ function benchmarkTask(~)
     end
 
     writetable(results,resultsfile);
+end
+
+function docTask(~)
+    oldpath = addpath(genpath("toolbox"));
+    finalize = onCleanup(@()(path(oldpath)));
+
+    publishtthelp2html;
 end
