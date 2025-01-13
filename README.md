@@ -87,23 +87,27 @@ Earth Surface Dynamics, 8, 261-274. [DOI: 10.5194/esurf-8-261-2020](http://dx.do
 - Schwanghart, W., Molkenthin, C., & Scherler, D. (2020). A systematic approach and software for the analysis 
 of point patterns on river networks. Earth Surface Processes and Landforms, 46, 9, 1847-1862. [DOI: 10.1002/esp.5127](http://dx.doi.org/10.1002/esp.5127)
 
-## Getting started
+## Installation
 
-Before working with TopoToolbox the directories and functions must be on the search 
-path of Matlab. Enter following code into the command line:
+### Download release and install
 
+If you are a user, download the `topotoolbox.mltbx` file from the [GitHub repository releases area](https://github.com/TopoToolbox/topotoolbox3/releases). Double-click on the downloaded file to run the MATLAB add-on installer. This will copy the files to your MATLAB add-ons area and add `TopoToolbox` to your MATLAB search path.
+
+Later, you can use the [MATLAB Add-On Manager](https://www.mathworks.com/help/matlab/matlab_env/get-add-ons.html) to uninstall.
+
+### Download code
+
+Alternatively, you can download the code and save it to some folder your harddrive. Before working with TopoToolbox the directories and functions must be on the search path of Matlab. Enter following code into the command line:
         addpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox'))
 		
 To remove .git-folders from the path, run
-
         rmpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox\.git'));
 		
 To make these paths permanent, use the command
 
 		savepath
 
-Type `doc` in the command line to open the main documentation page. You'll 
-find the TopoToolbox documentation in the section Supplemental Software.  
+Type `doc` in the command line to open the main documentation page. You'll find the TopoToolbox documentation in the section Supplemental Software.  
 The documentation contains several user's guides that will help you 
 getting started. In addition, TopoToolbox functions have extensive help 
 sections (e.g. `help gradient8` or `help STREAMobj/modify`. An additional 
