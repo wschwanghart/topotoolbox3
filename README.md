@@ -98,10 +98,12 @@ Later, you can use the [MATLAB Add-On Manager](https://www.mathworks.com/help/ma
 ### Download code
 
 Alternatively, you can download the code and save it to some folder your harddrive. Before working with TopoToolbox the directories and functions must be on the search path of Matlab. Enter following code into the command line:
-        addpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox'))
+
+		addpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox'))
 		
 To remove .git-folders from the path, run
-        rmpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox\.git'));
+
+		rmpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox\.git'));
 		
 To make these paths permanent, use the command
 
