@@ -70,7 +70,7 @@ catch ME
     % a tif file will be written to the disk together with a worldfile
     % .tfw-file.
     [pathstr, name, ~] = fileparts(file);
-    dlmwrite(fullfile(pathstr,[name '.tfw']),DEM.wf(:),'precision', '%.10f');
+    dlmwrite(fullfile(pathstr,[name '.tfw']),A.wf(:),'precision', '%.10f');
     A = A.Z;
      
     siz = size(A);
