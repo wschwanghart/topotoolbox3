@@ -27,7 +27,9 @@ function DEMr = project(SOURCE,TARGET,varargin)
 %                    Alternatively, target can be a raster reference object
 %                    (MapCellReference, GeoCellReference, ...) or it can be
 %                    a EPSG number which is accepted by the function
-%                    projcrs or geocrs.
+%                    projcrs or geocrs. Note that there are also projection
+%                    IDs from the authority ESRI. In this case, use
+%                    projcrs(number,'authority','ESRI').
 %
 %     Parameter name/value pairs
 %     
@@ -205,8 +207,8 @@ end
 if p.Results.align && targetisGRIDobj
     % If aligned, this is easy. The transformed GRIDobj will be perfectly
     % aligned with TARGET
-    DEMr = TARGET;
-    DEMr.Z = flipud(Znew);
+    DEMr = GRIDobj(TARGET,Znew);
+    % DEMr.Z = flipud(DEMr.Z);
 else
     % We have calculated the imtransform with 'ColumnsStartFrom' south. 
     % GRIDobjs use 'ColumnsStartFrom' north
