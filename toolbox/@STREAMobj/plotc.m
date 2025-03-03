@@ -29,6 +29,9 @@ function h = plotc(S,DEM,options)
 %     'xyscale'    scalar. Scales the x and y coordinates by a factor.
 %                  Default = 1.
 %     'linewidth'  Default = 1.5
+%     'latlon'     {false} or true. If true, and if S has a projected
+%                  coordinate system, plotc will plot the stream network
+%                  with geographic coordinates.
 %
 % Output arguments
 %
@@ -65,9 +68,14 @@ arguments
     options.xoffset (1,1) = 0
     options.yoffset (1,1) = 0
     options.linewidth (1,1) {mustBeNumeric,mustBePositive} = 1.5
+    options.latlon (1,1) = false
 end
 
-[x,y,c] = STREAMobj2XY(S,DEM);
+if isProjected(S) && options.latlon
+    [y,x,c] = STREAMobj2latlon(S,DEM);
+else
+    [x,y,c] = STREAMobj2XY(S,DEM);
+end
 x = (x + options.xoffset)*options.xyscale;
 y = (y + options.yoffset)*options.xyscale;
 
