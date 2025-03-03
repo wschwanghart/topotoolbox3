@@ -152,10 +152,11 @@ function rgb = imageschs(DEM,A,options)
 %     to shaded relief representation. Computers & Geosciences, 29,
 %     1137-1142.
 %
-% See also: GRIDobj/hillshade, imagesc, ttclrr, letter2rgb, GRIDobj/prcclip
+% See also: GRIDobj/hillshade, imagesc, ttclrr, letter2rgb,
+%     GRIDobj/prcclip, adjustgeoaspectratio 
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 10. December, 2024
+% Date: 3. March, 2025
 
 
 % Change log

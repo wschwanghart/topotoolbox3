@@ -1,4 +1,4 @@
-function [DEMr,zone] = reproject2utm(DEM,res,varargin)
+function [DEMr,zone] = reproject2utm(DEM,res,options)
 
 %REPROJECT2UTM Reproject DEM with WGS84 coordinate system to UTM-WGS84 
 %
@@ -40,19 +40,40 @@ function [DEMr,zone] = reproject2utm(DEM,res,varargin)
 %
 % See also: GRIDobj, imtransform, utmzone, GRIDobj/project
 %           
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 31. May, 2024
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 27. February, 2025
+
+arguments
+    DEM  GRIDobj
+    res
+    options.zone = []
+    options.method {mustBeMember(options.method,{'linear','bilinear','bicubic','nearest'})} = 'bilinear'
+    options.hemisphere {mustBeMember(options.hemisphere,{'N','S',''})} = ''
+end
+
+% If no resolution but a GRIDobj is provided, that's easy. Just invoke
+% project
+if isa(res,'GRIDobj')
+    DEMr = project(DEM,res,'method',options.method);
+    zone = [];
+    return
+end
 
 
+% Otherwise, we need to determine the epsg-code of the zone 
 
-if ~isa(res,'GRIDobj')
-    % get latitude and longitude vectors
-    [lon,lat] = getcoordinates(DEM);
-    % and calculate centroid of DEM. The centroid is used to
-    % get the utmzone
-    lonc = sum(lon([1 end]))/2;
-    latc = sum(lat([1 end]))/2;
+% get latitude and longitude vectors
+[lon,lat] = getcoordinates(DEM);
+
+% and calculate centroid of DEM. The centroid is used to
+% get the utmzone
+lonc = sum(lon([1 end]))/2;
+latc = sum(lat([1 end]))/2;
+    
+% If no zone is provided, then we'll determine it using utmzone
+if isempty(options.zone)
     zone        = utmzone(latc,lonc);
+ 
     if double(upper(zone(end)))>=78
         hemisphere = 'N';
     else
@@ -60,49 +81,27 @@ if ~isa(res,'GRIDobj')
     end
     zone = str2double(zone(1:end-1));
 else
-    zone = [];
-    hemisphere = []; 
-end
-
-% parse input arguments 
-p = inputParser;
-validmethods = {'cubic','linear','nearest'}; 
-p.FunctionName = 'GRIDobj/reproject2UTM';
-% required
-addRequired(p,'DEM',@(x) isa(x,'GRIDobj'));
-addRequired(p,'res',@(x) (~isa(x,'GRIDobj') && isscalar(x) && x > 0) || isa(x,'GRIDobj'));
-% optional
-addParameter(p,'zone',zone,@(x) ischar(x) || validateattributes(x,{'numeric'},{'scalar','>=',0,'<=',60}));
-addParameter(p,'hemisphere',hemisphere,@(x) ischar(validatestring(x,{'N','S'})))
-addParameter(p,'method','linear',@(x) ischar(validatestring(x,validmethods)));
-
-parse(p,DEM,res,varargin{:});
-
-if isa(p.Results.res,'GRIDobj')
-    DEMr = project(DEM,p.Results.res,'method',p.Results.method);
-    zone = [];
-else
-
-    % Calculate EPSG-code from zone
-    % If on southern hemisphere, 32700 + zone
-    % If on northern hemisphere, 32600 + zone
-    zone = p.Results.zone;
-    if isstring(zone) | ischar(zone)
-        zone = str2double(zone(1:end-1));
-
-        if double(upper(zone(end)))>=78
-            epsg = 32600 + zone;
-        else
-            epsg = 32700 + zone;
-        end
+    zone = str2double(options.zone(1:end-1));
+    if double(upper(options.zone(end)))>=78
+        hemisphere = 'N';
     else
-        switch lower(p.Results.hemisphere)
-            case 'n'
-                epsg = 32600 + zone;
-            case 's'
-                epsg = 32700 + zone;
-        end
+        hemisphere = 'S';
     end
-    DEMr = project(DEM,epsg,'res',p.Results.res,'method',p.Results.method);
 end
+
+% Any hemisphere preferred?
+if ~isempty(options.hemisphere)
+    hemisphere = options.hemisphere;
+end
+
+% Calculate epsg-code
+switch lower(hemisphere)
+    case 'n'
+        epsg = 32600 + zone;
+    case 's'
+        epsg = 32700 + zone;
+end
+
+DEMr = project(DEM,epsg,'res',res,'method',options.method);
+
 
