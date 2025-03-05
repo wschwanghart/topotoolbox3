@@ -204,9 +204,11 @@ methods
                 % linear index
                 IXgrid     = options.PP;
                 [II,P.PP]   = ismember(IXgrid,P.S.IXgrid);
-                if ~all(II) && p.Results.warning
+                if ~all(II) && options.warning
                     warning([num2str(numel(II)-nnz(II)) ' of ' num2str(numel(II)) ...
                         ' points are not on the stream network'])
+                    P.PP = P.PP(II);
+                else
                     P.PP = P.PP(II);
                 end
 
