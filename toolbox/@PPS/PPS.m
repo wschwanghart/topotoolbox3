@@ -38,7 +38,10 @@ classdef PPS
 %     there are nodes in stream network.
 %
 %     P = PPS(S,'runif',n,...) creates a spatially uniformly distributed 
-%     point pattern of n points on the stream network S.
+%     point pattern of n points on the stream network S. Since there is a
+%     finite number of possible locations, locations on the network are
+%     sampled without replacement, which warrants that there are no
+%     duplicate locations. 
 %
 %     P = PPS(S,'rpois',lambda,...) creates a point pattern on S which is
 %     completely spatial random (CSR) (Poisson distribution) with intensity
