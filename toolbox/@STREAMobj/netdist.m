@@ -63,8 +63,8 @@ function d = netdist(S,a,options)
 %
 % See also: STREAMobj/distance, 
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 31. March, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. March, 2025
 
 arguments
     S  STREAMobj

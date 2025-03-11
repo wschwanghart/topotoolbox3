@@ -60,8 +60,13 @@ function varargout = intersectlocs(S1,S2)
 %
 % See also: STREAMobj, STREAMobj/intersect
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 15. September, 2014
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. March, 2025
+
+arguments
+    S1   STREAMobj
+    S2   STREAMobj
+end
 
 
 

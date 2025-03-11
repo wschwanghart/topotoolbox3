@@ -5,13 +5,13 @@ function varargout = densify(S,spacing)
 % Syntax
 %
 %     [x,y] = densify(S,spacing)
-%     MS    = densify(S,spacing)
+%     GT    = densify(S,spacing)
 %
 % Description
 %
 %     This function increases the number of vertices in a stream network
 %     (STREAMobj) using spline interpolation. The function returns either
-%     nan-separated lists of x- and y-coordinates or a mapstruct (MS) which
+%     nan-separated lists of x- and y-coordinates or a geotable (GT) which
 %     can be exported to a shapefile using the function shapewrite
 %     (requires the mapping toolbox).
 %
@@ -28,10 +28,8 @@ function varargout = densify(S,spacing)
 %
 % See also: STREAMobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 16. Octobre, 2014
-
-
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. March, 2025
 
 if nargout == 2
     I = streampoi(S,'co','logical');
@@ -93,7 +91,7 @@ else
         MS(r).Y = [xxyy(:,2);nan];
         
     end
-    varargout{1} = MS;
+    varargout{1} = mapstruct2geotable(MS,'CoordinateReferenceSystem',parseCRS(S));
 end
         
     

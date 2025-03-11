@@ -23,8 +23,9 @@ function x = ezgetnal(S,x,cl)
 %     function getnal. If val is a node-attribute list, x equals val.
 %     However, by default, x is converted to class double.
 %
-%     ezgetnal(S,val,class) lets you define the output class (e.g. double,
-%     single, logical).
+%     ezgetnal(S,val,class) lets you define the output class (e.g. 'double',
+%     'single', 'logical'). The keyword 'same' will set the output class to
+%     the input underlying class.
 %
 %   
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
@@ -34,6 +35,11 @@ arguments
     S    STREAMobj
     x    = 0
     cl   = 'double'
+end
+
+switch cl
+    case 'same'
+        cl = underlyingType(x);
 end
 
 if isa(x,'GRIDobj')

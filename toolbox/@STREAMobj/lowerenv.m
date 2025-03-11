@@ -24,7 +24,7 @@ function z = lowerenv(S,z,ix)
 %
 % Output arguments
 %
-%     zl     node-attribute list with elevations
+%     zl     node-attribute list with elevations (double)
 %
 % Example
 %

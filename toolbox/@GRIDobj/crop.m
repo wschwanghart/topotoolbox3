@@ -86,7 +86,7 @@ elseif nargin >= 2
         % MASK = bwperim(MASK);
         IX  = find(MASK);
         
-        if numel(IX) <= 2
+        if numel(IX) < 2
             error('Mask must have at least two true pixels')
         end
 

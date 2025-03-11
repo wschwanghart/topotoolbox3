@@ -83,7 +83,7 @@ function opts = toolboxOptions
 
     opts.Summary = "A MATLAB software for the analysis of digital elevation models";
 
-    opts.AuthorName = "Wolfgang Schwanghart, Dirk Scherler";
+    opts.AuthorName = "Wolfgang Schwanghart, Dirk Scherler, Will Kearney";
 
     opts.AuthorEmail = "schwangh@uni-potsdam.de";
 

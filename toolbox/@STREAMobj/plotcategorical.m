@@ -1,4 +1,4 @@
-function [h,hcb] = plotcategorical(S,c,varargin)
+function [h,hcb] = plotcategorical(S,c,options)
 
 %PLOTCATEGORICAL Plot categorical variable along a single river
 %
@@ -11,7 +11,7 @@ function [h,hcb] = plotcategorical(S,c,varargin)
 %     This function plots a categorical variable c along a single river
 %     stored in the STREAMobj S. c can be a node-attribute list or a
 %     GRIDobj. By default, the function will plot patches of contiguous
-%     values along the upstream distance of the river. Y-values are set to
+%     values along the upstream distance of the river. Y-limits are set to
 %     0 and 1, by default. 
 %     
 % Input arguments
@@ -63,38 +63,36 @@ function [h,hcb] = plotcategorical(S,c,varargin)
 %
 % See also: STREAMobj/plotdz, STREAMobj/plotc
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 24. May, 2014
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. March, 2025
 
-p = inputParser;
-p.FunctionName = 'STREAMobj/plotcategorical';
+arguments
+    S  {mustBeSingleStream}
+    c  {mustBeGRIDobjOrNal(c,S)}
+    options.colormap = @parula
+    options.colorbar = true
+    options.distance = S.distance
+    options.dunit    = 'm'
+    options.EdgeColor = 'none'
+    options.FaceAlpha = 1
+    options.parent = gca
+    options.alphagrad = false
+    options.ztop {mustBeGRIDobjOrNalOrScalar(options.ztop,S)} = 1
+    options.zbot {mustBeGRIDobjOrNalOrScalar(options.zbot,S)} = 0
+end
 
-addRequired(p,'S',@(x) isa(x,'STREAMobj') && info(S,'nrchan')==1)
-addRequired(p,'c',@(x) isa(x,'GRIDobj') || isnal(S,x))
-addParameter(p,'colormap',@parula)
-addParameter(p,'colorbar',false)
-addParameter(p,'distance',S.distance)
-addParameter(p,'dunit','m')
-addParameter(p,'EdgeColor','none')
-addParameter(p,'FaceAlpha',1)
-addParameter(p,'parent',gca)
-addParameter(p,'alphagrad',false)
-addParameter(p,'ztop',1,@(x) isnal(S,x) || isscalar(x))
-addParameter(p,'zbot',0,@(x) isnal(S,x) || isscalar(x))
 
-parse(p,S,c,varargin{:})
-
-d = p.Results.distance;
-ax = p.Results.parent;
+d = options.distance;
+ax = options.parent;
 if ~ishold(ax)
     ax = newplot(ax);
 end
 
-switch lower(p.Results.dunit)
+switch lower(options.dunit)
     case 'm'
-        dunit = p.Results.dunit;
+        dunit = options.dunit;
     case 'km'
-        dunit = p.Results.dunit;
+        dunit = options.dunit;
         d = d/1000;
     otherwise
         warning('Distance unit not known.')
@@ -107,22 +105,22 @@ else
     c = getnal(S,c);
 end
 
-if ~isnal(S,p.Results.ztop)
-    ztop = getnal(S)+p.Results.ztop;
+if ~isnal(S,options.ztop)
+    ztop = getnal(S)+options.ztop;
     zvar = false;
 else
-    ztop = p.Results.ztop;
+    ztop = options.ztop;
     if numel(unique(ztop)) == 0
         zvar = false;
     else
         zvar = true;
     end
 end
-if ~isnal(S,p.Results.zbot)
-    zbot = getnal(S)+p.Results.zbot;
+if ~isnal(S,options.zbot)
+    zbot = getnal(S)+options.zbot;
     zvar2 = false;
 else
-    zbot = p.Results.zbot;
+    zbot = options.zbot;
     if numel(unique(zbot)) == 0
         zvar2 = false;
     else
@@ -150,13 +148,13 @@ zbot = zbot(1:end-1);
 
 
 % Function 
-if isa(p.Results.colormap,"function_handle")
-    clr = p.Results.colormap(nClasses);
-elseif ischar(p.Results.colormap)
-    clr = str2func(p.Results.colormap);
+if isa(options.colormap,"function_handle")
+    clr = options.colormap(nClasses);
+elseif ischar(options.colormap)
+    clr = str2func(options.colormap);
     clr = clr(nClasses);
 else
-    clr = p.Results.colormap;
+    clr = options.colormap;
     validateattributes(clr,{'numeric'},{'nrows',nClasses,'ncols',3,'>=',0,'<=',1})
 end
 
@@ -166,8 +164,8 @@ I(end) = true;
 ix = find(I);
 
 % FaceVertexAlphaData
-if ~(p.Results.alphagrad)
-    fa  = p.Results.FaceAlpha;
+if ~(options.alphagrad)
+    fa  = options.FaceAlpha;
     fag = [];
     usefag = false;
 else
@@ -188,7 +186,7 @@ if ~zvar
         end
         hout(r) = patch(ax,X(:),Y(:),clr(c(ixl),:),...
             'FaceAlpha',fa,...
-            'EdgeColor',p.Results.EdgeColor,...
+            'EdgeColor',options.EdgeColor,...
             'FaceVertexAlphaData',fag);
     end
 else
@@ -204,7 +202,7 @@ else
         end
         hout(r) = patch(ax,X(:),Y(:),clr(c(ixl),:),...
             'FaceAlpha',fa,...
-            'EdgeColor',p.Results.EdgeColor,...
+            'EdgeColor',options.EdgeColor,...
             'FaceVertexAlphaData',fag);
         if usefag
             set(hout(r),'FaceAlpha','interp')
@@ -217,7 +215,7 @@ end
 set(ax,'Layer','Top')
 
 % Make colorbar
-if p.Results.colorbar
+if options.colorbar
     colormap(ax,clr)
     clim(ax,[0.5 max(c)+0.5]);
     hcbout = colorbar(ax,"eastoutside",'Xtick',1:max(c),...

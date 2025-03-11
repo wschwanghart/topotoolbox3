@@ -1,11 +1,12 @@
-function z = cummaxupstream(S,DEM)
+function z = cummaxupstream(S,z,cl)
 
-%CUMMAXUPSTREAM cumulative maximum in upstream direction
+%CUMMAXUPSTREAM Cumulative maximum in upstream direction
 %
 % Syntax
 %
 %     zm = cummaxupstream(S,DEM)
 %     zm = cummaxupstream(S,z)
+%     zm = cummaxupstream(S,z,class)
 %
 % Description
 %
@@ -15,9 +16,10 @@ function z = cummaxupstream(S,DEM)
 %
 % Input arguments
 %
-%     S     STREAMobj
-%     DEM   GRIDobj
-%     z     node-attribute list
+%     S       STREAMobj
+%     DEM     GRIDobj
+%     z       node-attribute list
+%     class   Output class. Default is 'same' (see ezgetnal). 
 %
 % Output arguments
 %
@@ -38,19 +40,16 @@ function z = cummaxupstream(S,DEM)
 %
 % See also: STREAMobj/imposemin, cummax
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. May, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. March, 2025
 
-narginchk(2,2)
-
-if isa(DEM,'GRIDobj')
-    validatealignment(S,DEM);
-    z = getnal(S,DEM);
-elseif isnal(S,DEM)
-    z = DEM;
-else
-    error('Imcompatible format of second input argument')
+arguments
+    S  STREAMobj
+    z {mustBeGRIDobjOrNal(z,S)}
+    cl = 'same'
 end
+
+z = ezgetnal(S,z,cl);
 
 ix = S.ix;
 ixc = S.ixc;

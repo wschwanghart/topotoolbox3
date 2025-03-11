@@ -1,6 +1,6 @@
 function varargout = getnal(S,varargin)
 
-%GETNAL get node-attribute list
+%GETNAL Get node-attribute list
 %
 % Syntax
 %
@@ -49,10 +49,10 @@ function varargout = getnal(S,varargin)
 %     nal = getnal(S,DEM,A,'struct');
 %     chiplot(S,nal.DEM,nal.A);
 %
-% See also: STREAMobj/isnal
+% See also: STREAMobj/isnal, STREAMobj/ezgetnal
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. March, 2025
 
 if nargin == 1
     % return nal of zeros (double)

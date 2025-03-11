@@ -1,6 +1,6 @@
-function val = getvalue(S,nal,varargin)
+function val = getvalue(S,nal,options)
 
-%GETVALUE retrieve value from node-attribute list
+%GETVALUE Retrieve value from node-attribute list
 %
 % Syntax
 %
@@ -60,35 +60,35 @@ function val = getvalue(S,nal,varargin)
 %            
 % See also: STREAMobj, STREAMobj/distance, STREAMobj/getnal
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 21. January, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. March, 2025
 
+arguments
+    S    STREAMobj
+    nal  
+    options.distance = []
+    options.coordinates = []
+    options.IXgrid   = []
+end
 
 narginchk(4,4)
-p = inputParser;         
-p.FunctionName = 'STREAMobj/getvalue';
 
-addParameter(p,'distance',[]);
-addParameter(p,'coordinates',[]);
-addParameter(p,'IXgrid',[]);
 
-parse(p,varargin{:});
 
 if isa(nal,'GRIDobj')
-    nal = getnal(S,nal);
+    nal = ezgetnal(S,nal);
+
 elseif iscell(nal)
-    % nal is a cell array of GRIDobjs
-    nal = cellfun(@(x) getnal(S,x),nal,'UniformOutput',false);
+    % nal is a cell array of GRIDobjs or nals
+    nal = cellfun(@(x) ezgetnal(S,x),nal,'UniformOutput',false);
     nal = horzcat(nal{:});
 end
     
-
-
 if ~isnal(S,nal(:,1))
     error('TopoToolbox:getvalue','nal is not a valid node-attribute list')
 end
 
-if ~isempty(p.Results.distance)
+if ~isempty(options.distance)
     if info(S,'nrchannelheads') > 1
         error('TopoToolbox:getvalue',...
             ['The STREAMobj S must be a single stream. It must not have \n' ...
@@ -104,14 +104,14 @@ if ~isempty(p.Results.distance)
     d(end) = [];
     nal(end,:) = [];
     
-    val = interp1(d,nal,p.Results.distance(:));
+    val = interp1(d,nal,options.distance(:));
     
     % d = S.distance;
-    % [~,ix] = min(abs(d - p.Results.distance));
+    % [~,ix] = min(abs(d - options.distance));
     % val    = nal(ix,:);
     
-elseif ~isempty(p.Results.coordinates)
-    [~,~,IX,res] = snap2stream(S,p.Results.coordinates(:,1),p.Results.coordinates(:,2));
+elseif ~isempty(options.coordinates)
+    [~,~,IX,res] = snap2stream(S,options.coordinates(:,1),options.coordinates(:,2));
     [~,locb] = ismember(IX,S.IXgrid);
     val = nal(locb,:);
     
@@ -122,12 +122,10 @@ elseif ~isempty(p.Results.coordinates)
     end
     
     
-elseif ~isempty(p.Results.IXgrid)
-    [I,locb] = ismember(p.Results.IXgrid,S.IXgrid);
-    val = nan(numel(p.Results.IXgrid),size(nal,2));
+elseif ~isempty(options.IXgrid)
+    [I,locb] = ismember(options.IXgrid,S.IXgrid);
+    val = nan(numel(options.IXgrid),size(nal,2));
     val(I,:) = nal(locb(I),:);
-    
-    
     
 end
 
