@@ -35,7 +35,7 @@ function zi = interp(S,d,z,varargin)
 %     
 % See also: STREAMobj, STREAMobj/trunk, demo_modifystreamnet
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 18. February, 2019
 
 

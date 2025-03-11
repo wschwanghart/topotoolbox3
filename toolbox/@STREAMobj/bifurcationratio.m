@@ -45,7 +45,7 @@ function [Rb,Ns,s] = bifurcationratio(S)
 %
 % See also: STREAMobj, STREAMobj/streamorder
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 6. May, 2024
 
 arguments

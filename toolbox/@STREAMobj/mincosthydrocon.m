@@ -53,8 +53,8 @@ function z = mincosthydrocon(S,DEM,method,fillp)
 %
 % See also: STREAMobj, STREAMobj/plotdz
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 24. June, 2014
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. March, 2025
 
 arguments
     S    STREAMobj

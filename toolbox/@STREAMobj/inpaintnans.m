@@ -1,6 +1,6 @@
 function z = inpaintnans(S,DEM,varargin)
 
-%INPAINTNANS inpaint missing values (nans) in a node attribute list
+%INPAINTNANS Inpaint missing values (nans) in a node attribute list
 %
 % Syntax
 %
@@ -59,8 +59,8 @@ function z = inpaintnans(S,DEM,varargin)
 % Reference: 
 % http://blogs.mathworks.com/steve/2015/06/17/region-filling-and-laplaces-equation/
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. February, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. March, 2025
 
 if nargin > 3
     p = inputParser;

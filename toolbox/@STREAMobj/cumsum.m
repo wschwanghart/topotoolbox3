@@ -1,6 +1,6 @@
-function c = cumsum(S,c,direction)
+function c = cumsum(S,c,direction,cl)
 
-%CUMSUM cumulative sum on stream network
+%CUMSUM Cumulative sum on stream network
 %
 % Syntax
 %
@@ -35,26 +35,17 @@ function c = cumsum(S,c,direction)
 %
 % See also: STREAMobj/cumtrapz
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 19. August 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. March 2025
 
-narginchk(2,3)
-
-if isa(c,'GRIDobj')
-    c = getnal(S,c);
-else
-    if ~isnal(S,c)
-        error('The second input argument must be a node attribute list.')
-    end
+arguments
+    S  STREAMobj
+    c {mustBeGRIDobjOrNal(c,S)}
+    direction {mustBeMember(direction,'upstream','downstream')} = 'downstream'
+    cl = 'double'
 end
 
-c = double(c);
-
-if nargin <= 2
-    direction = 'downstream';
-else 
-    direction = validatestring(direction,{'upstream','downstream'},'STREAMobj/cumsum','direction',3);
-end
+c = ezgetnal(S,c,cl);
 
 % get sorted edge list 
 ix  = S.ix;

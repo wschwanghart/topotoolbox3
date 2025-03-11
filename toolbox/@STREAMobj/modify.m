@@ -146,8 +146,8 @@ function [Sout,nalix] = modify(S,varargin)
 % See also: STREAMobj, STREAMobj/trunk, STREAMobj/subgraph, 
 %           demo_modifystreamnet
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 4. June, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. March, 2025
 
 narginchk(3,3)
 

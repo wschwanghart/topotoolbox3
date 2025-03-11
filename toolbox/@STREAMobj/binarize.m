@@ -41,24 +41,18 @@ function S = binarize(S,a)
 %
 % See also: STREAMobj/streamorder, STREAMobj/modify
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 22. May, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. March, 2025
     
-
-if nargin == 1
-    a = distance(S,'max_from_ch');
-else
-    if isa(a,'GRIDobj')
-        a = getnal(S,a);
-    else
-        if ~isnal(S,a)
-            error('TopoToolbox:binarize',...
-                'The second input argument must be a valid node-attribute list.')
-        end
-    end
+arguments
+    S   STREAMobj
+    a   {mustBeGRIDobjOrNal(a,S)} = distance(S,'max_from_ch')
 end
 
-% Calculate the number of upstream pixels
+a = ezgetnal(S,a);
+% a is now a node attribute list with distances or upstream areas.
+
+
 n = numel(S.x);
 
 ix = accumarray(S.ixc,S.ix,[n 1],@(ix)getnonbinaryneighbors(ix));

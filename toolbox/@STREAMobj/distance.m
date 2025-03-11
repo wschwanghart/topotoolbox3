@@ -1,6 +1,6 @@
 function d = distance(S,type)
 
-%DISTANCE return node attribute list with distances along the stream network
+%DISTANCE Compute distances along the stream network
 %
 % Syntax
 %
@@ -85,8 +85,8 @@ function d = distance(S,type)
 %
 % See also: STREAMobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 9. August, 2018
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. Marcg, 2025
 
 if nargin == 1
     d = S.distance;
