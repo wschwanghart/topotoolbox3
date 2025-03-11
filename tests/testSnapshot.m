@@ -193,5 +193,20 @@ classdef testSnapshot < matlab.perftest.TestCase
                 testCase.verifyEqual(D_result.Z, D.Z);
             end
         end
+
+        function hillshade(testCase, dataset, uselibtt)
+            testCase.startMeasuring();
+            H = hillshade(testCase.dem);
+            testCase.stopMeasuring();
+
+            result_file = fullfile("snapshots/data/", dataset, "hillshade.tif");
+
+            if ~isfile(result_file) && ~uselibtt
+                H.GRIDobj2geotiff(result_file)
+            else
+                H_result = GRIDobj(result_file);
+                testCase.verifyEqual(H_result.Z, H.Z);
+            end
+        end
     end
 end
