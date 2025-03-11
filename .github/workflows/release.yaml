@@ -89,6 +89,6 @@ jobs:
         run: gh release delete latest --yes --cleanup-tag
       - name: Create release
         run: |
-          gh release create latest --target ci-toolboxes --generate-notes --latest -F .github/latest_release.md
+          gh release create latest --target main --generate-notes --latest -F .github/latest_release.md
       - name: Upload toolbox assets        
         run: gh release upload --repo $GITHUB_REPOSITORY latest release/*
