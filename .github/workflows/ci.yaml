@@ -8,7 +8,7 @@ jobs:
   build:
     name: Run MATLAB checks and tests
     env:
-      snapshot_version: v1.5.0
+      snapshot_version: v1.6.0
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -22,6 +22,7 @@ jobs:
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
         with:
+          cache: true
           products: >
             Mapping_Toolbox
             Image_Processing_Toolbox
