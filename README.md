@@ -1,6 +1,6 @@
 # TopoToolbox v3 - a set of MATLAB functions for topographic analysis
 
-<img src="https://github.com/wschwanghart/topotoolbox/blob/master/topotoolbox.jpg" align="center" height="100">
+<img src="images/topotoolbox3.png" align="center" height="100">
 
 [![View TopoToolbox on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://de.mathworks.com/matlabcentral/fileexchange/50124-topotoolbox)
 
