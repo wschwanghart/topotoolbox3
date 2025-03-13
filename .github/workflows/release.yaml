@@ -5,6 +5,7 @@ on:
 
 jobs:
   docs:
+    if: github.repository == 'TopoToolbox/topotoolbox3'
     name: Build docs
     runs-on: windows-latest
     steps:
@@ -36,6 +37,7 @@ jobs:
           name: toolbox-docs
           path: toolbox/docs/html
   package:
+    if: github.repository == 'TopoToolbox/topotoolbox3'
     name: Package toolbox
     needs: docs
     runs-on: ${{ matrix.os }}
@@ -72,6 +74,7 @@ jobs:
           name: toolbox-${{ matrix.os }}-${{ matrix.release }}
           path: release/TopoToolbox_*.mltbx
   release:
+    if: github.repository == 'TopoToolbox/topotoolbox3'
     name: Update release
     needs: package
     runs-on: ubuntu-latest
