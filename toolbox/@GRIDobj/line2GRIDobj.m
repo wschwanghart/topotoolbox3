@@ -1,4 +1,4 @@
-function L = line2GRIDobj(DEM,varargin)
+function L = line2GRIDobj(DEM,x,y)
 
 %LINE2GRIDOBJ Convert line to a grid
 %
@@ -6,6 +6,7 @@ function L = line2GRIDobj(DEM,varargin)
 %
 %     L = line2GRIDobj(DEM,x,y)
 %     L = line2GRIDobj(DEM,MS)
+%     L = line2GRIDobj(DEM,GT)
 %
 % Description
 %
@@ -27,7 +28,7 @@ function L = line2GRIDobj(DEM,varargin)
 %     L      gridded line (GRIDobj). Grid has the same extent and cellsize
 %            as DEM.
 %
-% Example
+% Example 1
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     x = [381819  406059];
@@ -35,6 +36,16 @@ function L = line2GRIDobj(DEM,varargin)
 %     L = line2GRIDobj(DEM,x,y);
 %     L = dilate(L,ones(5));
 %     imageschs(DEM,L)
+%
+% Example 2
+%
+%     S = shaperead('landareas.shp','UseGeoCoords',true);
+%     x = -200:200;
+%     y = -100:100;
+%     Z = false(numel(y),numel(x));
+%     DEM = GRIDobj(x,y',Z);
+%     L = line2GRIDobj(DEM,S);
+%     imagesc(L)
 %
 % See also: GRIDobj/coord2ind, GRIDobj/sub2coord, GRIDobj/getcoordinates
 %
@@ -44,15 +55,14 @@ function L = line2GRIDobj(DEM,varargin)
 % 26/8/2018 line2GRIDobj now deals with lines that have their start and end
 % points outside the grid borders.
 
-
-narginchk(1,3)
+arguments
+    DEM   GRIDobj
+    x 
+    y = []
+end
 
 if nargin==2
-    x = [varargin{1}.X];
-    y = [varargin{1}.Y];
-else
-    x = varargin{1};
-    y = varargin{2};
+    [x,y] = shape2nanpunctuatedcoords(x);
 end
 
 %%
