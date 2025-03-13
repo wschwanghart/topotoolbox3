@@ -4,11 +4,13 @@
 
 [![View TopoToolbox on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://de.mathworks.com/matlabcentral/fileexchange/50124-topotoolbox)
 
-[TopoToolbox](http://topotoolbox.wordpress.com) provides a set of Matlab functions that support the analysis
-of relief and flow pathways in digital elevation models. The major 
+[TopoToolbox](http://topotoolbox.wordpress.com) provides a set of MATLAB functions that support the analysis
+of relief and flow pathways in digital elevation models (DEMs). The major 
 aim of TopoToolbox is to offer helpful analytical GIS utilities in a 
 non-GIS environment in order to support the simultaneous application
 of GIS-specific and other quantitative methods.
+
+Primary uses of TopoToolbox are in the field of geomorphology, hydrology, structural geology and tectonics, but there are many other applications ranging from meteorology to glaciology.
 
 If you have any questions or remarks, please contact the authors:
 
@@ -42,7 +44,7 @@ If you are using version 1, then please refer to this publication:
 functions for topographic analysis. Environmental Modelling & Software, 
 25, 770-781. DOI: [10.1016/j.envsoft.2009.12.002](http://dx.doi.org/10.1016/j.envsoft.2009.12.002)
 
-In addition, various models and algorithms used in TopoToolbox have been published in the following articles. 
+In addition, various models and algorithms implemented in TopoToolbox have been published in the following articles. 
 
 ### DEM preprocessing and carving
 
