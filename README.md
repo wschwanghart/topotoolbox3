@@ -1,14 +1,16 @@
 # TopoToolbox v3 - a set of MATLAB functions for topographic analysis
 
-<img src="https://github.com/wschwanghart/topotoolbox/blob/master/topotoolbox.jpg" align="center" height="100">
+<img src="images/topotoolbox3.png" align="center">
 
 [![View TopoToolbox on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://de.mathworks.com/matlabcentral/fileexchange/50124-topotoolbox)
 
-[TopoToolbox](http://topotoolbox.wordpress.com) provides a set of Matlab functions that support the analysis
-of relief and flow pathways in digital elevation models. The major 
+[TopoToolbox](http://topotoolbox.wordpress.com) provides a set of MATLAB functions that support the analysis
+of relief and flow pathways in digital elevation models (DEMs). The major 
 aim of TopoToolbox is to offer helpful analytical GIS utilities in a 
 non-GIS environment in order to support the simultaneous application
 of GIS-specific and other quantitative methods.
+
+Primary uses of TopoToolbox are in the field of geomorphology, hydrology, structural geology and tectonics, but there are many other applications ranging from meteorology to glaciology.
 
 If you have any questions or remarks, please contact the authors:
 
@@ -21,11 +23,9 @@ If you have any questions or remarks, please contact the authors:
 ## Requirements
 
 TopoToolbox v3 is plat-form independent and requires
-Matlab 2023b or higher and the Image Processing Toolbox. The Mapping
-Toolbox is not mandatory, but good to have to facilitate easy data
-exchange with GIS software. Some functions support parallelisation using the 
-Parallel Toolbox. Few functions require the Optimization or Statistics
-and Machine Learning Toolbox.
+**MATLAB 2023b or higher** and the **Image Processing Toolbox**. The **Mapping Toolbox** is not mandatory, but good to have to facilitate easy data exchange with GIS software. Some functions support parallelisation using the  Parallel Toolbox. Few functions require the Optimization or Statistics and Machine Learning Toolbox.
+
+If you are using an older version of MATLAB, use [TopoToolbox 2](https://github.com/topoToolbox/topotoolbox).
 
 ## References
 
@@ -42,7 +42,7 @@ If you are using version 1, then please refer to this publication:
 functions for topographic analysis. Environmental Modelling & Software, 
 25, 770-781. DOI: [10.1016/j.envsoft.2009.12.002](http://dx.doi.org/10.1016/j.envsoft.2009.12.002)
 
-In addition, various models and algorithms used in TopoToolbox have been published in the following articles. 
+In addition, various models and algorithms implemented in TopoToolbox have been published in the following articles. 
 
 ### DEM preprocessing and carving
 
@@ -91,30 +91,27 @@ of point patterns on river networks. Earth Surface Processes and Landforms, 46, 
 
 ### Download release and install
 
-If you are a user, download the `topotoolbox.mltbx` file from the [GitHub repository releases area](https://github.com/TopoToolbox/topotoolbox3/releases). Double-click on the downloaded file to run the MATLAB add-on installer. This will copy the files to your MATLAB add-ons area and add `TopoToolbox` to your MATLAB search path.
+The easiest way to get started with TopoToolbox 3 is to download the `topotoolbox.mltbx` file from the [GitHub repository releases area](https://github.com/TopoToolbox/topotoolbox3/releases). Double-click on the downloaded file to run the MATLAB add-on installer. This will copy the files to your MATLAB add-ons area and add `TopoToolbox` to your MATLAB search path.
 
 Later, you can use the [MATLAB Add-On Manager](https://www.mathworks.com/help/matlab/matlab_env/get-add-ons.html) to uninstall.
 
+As a developer, we recommend to fork and clone the [TopoToolbox3 GitHub repository](https://github.com/TopoToolbox/topotoolbox3). Start by navigating to the [original repository on GitHub](https://github.com/TopoToolbox/topotoolbox3) and clicking the Fork button in the top right. This creates a copy of the repository in your own GitHub account. Next, clone the forked repository to your computer. Please read here more about how to contribute code to TopoToolbox.
+
 ### Download code
 
-Alternatively, you can download the code and save it to some folder your harddrive. Before working with TopoToolbox the directories and functions must be on the search path of Matlab. Enter following code into the command line:
+Alternatively, you can download the repository and save it to some folder on your harddrive. Before working with TopoToolbox the directories and functions must be on the search path of MATLAB. To do this, navigate your working directory to the `topotoolbox/toolbox` folder and run the command:
 
-		addpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox'))
-		
-To remove .git-folders from the path, run
+		tt2path
 
-		rmpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox\.git'));
-		
-To make these paths permanent, use the command
+To make these paths permanent, use the command (this may require system administrator privileges).
 
 		savepath
 
-Type `doc` in the command line to open the main documentation page. You'll find the TopoToolbox documentation in the section Supplemental Software.  
-The documentation contains several user's guides that will help you 
-getting started. In addition, TopoToolbox functions have extensive help 
-sections (e.g. `help gradient8` or `help STREAMobj/modify`. An additional 
-resource for code and examples is the [TopoToolbox blog](http://topotoolbox.wordpress.com).
+The documentation will not be included in the code. To build the documentation, go to the folder `docs` and run the command
 
+		publishtthelp2html
+
+This will build html-files that can be viewed in MATLABs documentation. You'll find the TopoToolbox documentation in the section Supplemental Software, once you restart MATLAB. The documentation contains several user's guides that will help you getting started. In addition, TopoToolbox functions have extensive help sections (e.g. `help gradient8` or `help STREAMobj/modify`. An additional resource for code and examples is the [TopoToolbox blog](http://topotoolbox.wordpress.com).
 
 ***
 ## Version History

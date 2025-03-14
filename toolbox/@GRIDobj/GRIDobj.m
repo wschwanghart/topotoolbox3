@@ -6,6 +6,7 @@ classdef GRIDobj
 %
 %     DEM = GRIDobj(Z)
 %     DEM = GRIDobj(Z,cs)
+%     DEM = GRIDobj(Z,R)
 %     DEM = GRIDobj(X,Y,Z) 
 %     DEM = GRIDobj('ESRIasciiGrid.txt')
 %     DEM = GRIDobj('GeoTiff.tif')
@@ -38,6 +39,10 @@ classdef GRIDobj
 %
 %     DEM = GRIDobj(Z,cs) creates a GRIDobj from the elevations stored in 
 %     the matrix Z. cs is a positive scalar and is the spatial resolution. 
+%
+%     DEM = GRIDobj(Z,R) creates a GRIDobj from the elevations stored in 
+%     the matrix Z. R is a MapCellsReference, MapPostingsReference,
+%     GeographicCellsReference or GeoGeographicPostingsReference object.
 %
 %     DEM = GRIDobj(X,Y,Z) creates a GRIDobj from the coordinate matrices
 %     or vectors X and Y and the matrix Z. The elements of Z refer to the
