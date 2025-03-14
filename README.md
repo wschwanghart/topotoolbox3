@@ -23,11 +23,9 @@ If you have any questions or remarks, please contact the authors:
 ## Requirements
 
 TopoToolbox v3 is plat-form independent and requires
-Matlab 2023b or higher and the Image Processing Toolbox. The Mapping
-Toolbox is not mandatory, but good to have to facilitate easy data
-exchange with GIS software. Some functions support parallelisation using the 
-Parallel Toolbox. Few functions require the Optimization or Statistics
-and Machine Learning Toolbox.
+**MATLAB 2023b or higher** and the **Image Processing Toolbox**. The **Mapping Toolbox** is not mandatory, but good to have to facilitate easy data exchange with GIS software. Some functions support parallelisation using the  Parallel Toolbox. Few functions require the Optimization or Statistics and Machine Learning Toolbox.
+
+If you are using an older version of MATLAB, use [TopoToolbox 2](https://github.com/topoToolbox/topotoolbox).
 
 ## References
 
@@ -93,30 +91,27 @@ of point patterns on river networks. Earth Surface Processes and Landforms, 46, 
 
 ### Download release and install
 
-If you are a user, download the `topotoolbox.mltbx` file from the [GitHub repository releases area](https://github.com/TopoToolbox/topotoolbox3/releases). Double-click on the downloaded file to run the MATLAB add-on installer. This will copy the files to your MATLAB add-ons area and add `TopoToolbox` to your MATLAB search path.
+The easiest way to get started with TopoToolbox 3 is to download the `topotoolbox.mltbx` file from the [GitHub repository releases area](https://github.com/TopoToolbox/topotoolbox3/releases). Double-click on the downloaded file to run the MATLAB add-on installer. This will copy the files to your MATLAB add-ons area and add `TopoToolbox` to your MATLAB search path.
 
 Later, you can use the [MATLAB Add-On Manager](https://www.mathworks.com/help/matlab/matlab_env/get-add-ons.html) to uninstall.
 
+As a developer, we recommend to fork and clone the [TopoToolbox3 GitHub repository](https://github.com/TopoToolbox/topotoolbox3). Start by navigating to the [original repository on GitHub](https://github.com/TopoToolbox/topotoolbox3) and clicking the Fork button in the top right. This creates a copy of the repository in your own GitHub account. Next, clone the forked repository to your computer. Please read here more about how to contribute code to TopoToolbox.
+
 ### Download code
 
-Alternatively, you can download the code and save it to some folder your harddrive. Before working with TopoToolbox the directories and functions must be on the search path of Matlab. Enter following code into the command line:
+Alternatively, you can download the repository and save it to some folder on your harddrive. Before working with TopoToolbox the directories and functions must be on the search path of MATLAB. To do this, navigate your working directory to the `topotoolbox/toolbox` folder and run the command:
 
-		addpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox'))
-		
-To remove .git-folders from the path, run
+		tt2path
 
-		rmpath(genpath('C:\path\to\wherever\you\installed\this\TopoToolbox\.git'));
-		
-To make these paths permanent, use the command
+To make these paths permanent, use the command (this may require system administrator privileges).
 
 		savepath
 
-Type `doc` in the command line to open the main documentation page. You'll find the TopoToolbox documentation in the section Supplemental Software.  
-The documentation contains several user's guides that will help you 
-getting started. In addition, TopoToolbox functions have extensive help 
-sections (e.g. `help gradient8` or `help STREAMobj/modify`. An additional 
-resource for code and examples is the [TopoToolbox blog](http://topotoolbox.wordpress.com).
+The documentation will not be included in the code. To build the documentation, go to the folder `docs` and run the command
 
+		publishtthelp2html
+
+This will build html-files that can be viewed in MATLABs documentation. You'll find the TopoToolbox documentation in the section Supplemental Software, once you restart MATLAB. The documentation contains several user's guides that will help you getting started. In addition, TopoToolbox functions have extensive help sections (e.g. `help gradient8` or `help STREAMobj/modify`. An additional resource for code and examples is the [TopoToolbox blog](http://topotoolbox.wordpress.com).
 
 ***
 ## Version History
