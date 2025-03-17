@@ -237,13 +237,13 @@ classdef GRIDobj
 
                 % ........................................................
                 %% Case two: Input one is text (either filename or folder)
-                if ~isempty(strfind(varargin{1},'.'))
+                if isfolder(varargin{1}) || isempty(varargin{1})
+                    DEM = GRIDobj(openRasterDialog(varargin{1}));
+                    return 
+                else
                     % Case 2a
                     % Text is filename (image)
-                    [Z,R,wf] = createRasterFromFile(varargin{:});
-                elseif isfolder(varargin{1}) || isempty(varargin{1})
-                    DEM = GRIDobj(openRasterDialog(varargin{1}));
-                    return                  
+                    [Z,R,wf] = createRasterFromFile(varargin{:});                             
                 end
 
             elseif isa(varargin{1},'GRIDobj') || ...

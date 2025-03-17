@@ -11,7 +11,7 @@ function [Z,R,wf] = createRasterFromFile(filename,options)
 %
 
 arguments
-    filename
+    filename 
     options.OutputType = 'single'
     options.Bands = 1
     options.CoordinateSystemType = 'auto'
