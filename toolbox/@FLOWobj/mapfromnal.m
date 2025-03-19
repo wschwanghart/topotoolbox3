@@ -44,7 +44,7 @@ function [V,IX] = mapfromnal(FD,S,nal,cl)
 arguments
     FD    FLOWobj
     S     STREAMobj
-    nal   {mustBeGRIDobjOrNal}
+    nal   {mustBeGRIDobjOrNal(nal,S)}
     cl = 'single'
 end
 
