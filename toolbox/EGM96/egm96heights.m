@@ -22,11 +22,22 @@ function DEM = egm96heights(DEM)
 %
 %     EGM96    GRIDobj with geoid heights
 %
-% Example
+% Example 1
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     EGM96 = egm96heights(DEM);
 %     imageschs(DEM,EGM96)
+%
+% Example 2
+%
+%     R = georefcells([-90 90],[-180 180],2,2);
+%     G = GRIDobj(zeros(R.RasterSize),R);
+%     G = egm96heights(G);
+%     surf(G);
+%     exaggerate(gca,0.1);
+%     colormap(ttscm('roma'));
+%     caxis([-100 100])
+%     camlight; material dull
 %
 % See also: GRIDobj, egm96geoid
 %
