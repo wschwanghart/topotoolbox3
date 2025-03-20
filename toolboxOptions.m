@@ -30,6 +30,7 @@ function opts = toolboxOptions
         fullfile('toolbox','EGM96'),...
         fullfile('toolbox','GIStools'),...
         fullfile('toolbox','graphics'),...
+        fullfile('toolbox','internal','mex'),...
         fullfile('toolbox','internal','spherical'),...
         fullfile('toolbox','internal','validationFcns'),...
         fullfile('toolbox','internal'),...
@@ -50,7 +51,7 @@ function opts = toolboxOptions
     % .mltbx extension, MATLAB appends the extension automatically when it
     % creates the file.
 
-    opts.OutputFile = fullfile("release","TopoToolbox");
+    opts.OutputFile = fullfile("release",['TopoToolbox_' computer('arch')]);
     
     % Latest MATLAB release that the toolbox is compatible with, specified
     % as a string using the format RXXXXx, for example, "R2023a". If there
@@ -82,7 +83,7 @@ function opts = toolboxOptions
 
     opts.Summary = "A MATLAB software for the analysis of digital elevation models";
 
-    opts.AuthorName = "Wolfgang Schwanghart, Dirk Scherler";
+    opts.AuthorName = "Wolfgang Schwanghart, Dirk Scherler, Will Kearney";
 
     opts.AuthorEmail = "schwangh@uni-potsdam.de";
 

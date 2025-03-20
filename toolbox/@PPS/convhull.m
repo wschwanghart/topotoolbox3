@@ -48,8 +48,8 @@ function h = convhull(P,varargin)
 %
 % See also: PPS, PPS/cluster, PPS/aggregate
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. February, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 4. November, 2024
 
 bbox = info(P.S,'boundingbox');
 maxext  = max(bbox(2)-bbox(1),bbox(4)-bbox(3));

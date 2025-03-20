@@ -1,12 +1,12 @@
 function varargout = contour(DEM,varargin)
 
-%CONTOUR contour plot of an instance of GRIDobj
+%CONTOUR Contour plot of an instance of GRIDobj
 %
 % Syntax
 %
 %     contour(DEM,n)
 %     contour(DEM,levels)
-%     MS = ...
+%     GT = ...
 %     [x,y,z] = ...
 %
 % Description
@@ -23,8 +23,8 @@ function varargout = contour(DEM,varargin)
 %  
 % Output arguments
 %
-%     MS        structure array (can be exported using shapewrite or
-%               plotted using mapshow, requires the Mapping Toolbox)
+%     GT        geotable with contour lines. GT can be exported using
+%               shapewrite and requires the mapping toolbox.
 %     [x,y,z]   nan-punctuated vectors for 2d and 3d plotting
 %
 % Example
@@ -39,8 +39,9 @@ function varargout = contour(DEM,varargin)
 %
 % See also: GRIDobj, GRIDobj/imageschs, GRIDobj/griddedcontour, contourc
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 6. August, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 17. October, 2024
+
 
 [Z,x,y] = GRIDobj2mat(DEM);
 if nargout == 0   
@@ -60,12 +61,13 @@ while IXs(counter) < size(c,2)
 end
 IXs(end) = [];
 
-if isempty(IXs);
-    if nargout == 1;
+if isempty(IXs)
+    if nargout == 1
         varargout{1} = struct('Geometry','Line',...
         'X',{},...
         'Y',{},...
         'elev',{});
+
     else
         varargout{1} = [];
         varargout{2} = [];
@@ -112,6 +114,11 @@ elseif nargout == 1
         'Y',cellfun(@(s,e) y(s:e),IXs,IXe,'UniformOutput',false),...
         'elev',num2cell(elev));
 end
+
+if nargout == 1
+    varargout{1} = mapstruct2geotable(varargout{1},'CoordinateReferenceSystem',parseCRS(DEM));
+end
+
     
 
 

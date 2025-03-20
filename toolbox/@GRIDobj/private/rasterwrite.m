@@ -23,7 +23,7 @@ function rasterwrite(filename,X,Y,Z)
 
 narginchk(3, 4)
 
-if nargin == 4;
+if nargin == 4
     validateattributes(filename, {'char'}, {},'rasterwrite', 'filename')
 else
     Z = Y;
@@ -66,7 +66,7 @@ fclose(fid);
 
 Z(isnan(Z)) = nodata;
 
-if cellsize<0;
+if cellsize<0
     Z        = flipud(Z);
 end
 

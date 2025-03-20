@@ -209,7 +209,7 @@ classdef SWATHobj
                     d0 = getdistance(x0,y0);
                 else
                     validateattributes(d,{'numeric'},{'vector','size',size(x)});
-                    if ~all(diff(d)>0) || ~all(diff(d)<0)
+                    if ~(all(diff(d)>0) || all(diff(d)<0))
                         error('Distances (3rd input variable) must be increasing or decreasing')
                     end
                     d0 = d;

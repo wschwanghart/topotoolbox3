@@ -6,6 +6,7 @@ classdef GRIDobj
 %
 %     DEM = GRIDobj(Z)
 %     DEM = GRIDobj(Z,cs)
+%     DEM = GRIDobj(Z,R)
 %     DEM = GRIDobj(X,Y,Z) 
 %     DEM = GRIDobj('ESRIasciiGrid.txt')
 %     DEM = GRIDobj('GeoTiff.tif')
@@ -39,6 +40,10 @@ classdef GRIDobj
 %     DEM = GRIDobj(Z,cs) creates a GRIDobj from the elevations stored in 
 %     the matrix Z. cs is a positive scalar and is the spatial resolution. 
 %
+%     DEM = GRIDobj(Z,R) creates a GRIDobj from the elevations stored in 
+%     the matrix Z. R is a MapCellsReference, MapPostingsReference,
+%     GeographicCellsReference or GeoGeographicPostingsReference object.
+%
 %     DEM = GRIDobj(X,Y,Z) creates a GRIDobj from the coordinate matrices
 %     or vectors X and Y and the matrix Z. The elements of Z refer to the
 %     elevation of each pixel.
@@ -46,7 +51,8 @@ classdef GRIDobj
 %     DEM = GRIDobj('ESRIasciiGrid.txt') creates a GRIDobj from an ESRI 
 %     Ascii grid exported from other GI systems. 
 %
-%     DEM = GRIDobj('GeoTiff.tif') creates a GRIDobj from a Geotiff.
+%     DEM = GRIDobj('GeoTiff.tif') creates a GRIDobj from a Geotiff. Note
+%     that reading image files may not reliably detect missing data.
 %
 %     DEM = GRIDobj(filename) tries to create a GRIDobj from other formats
 %     supported by the Mapping Toolbox function readgeoraster.
@@ -231,13 +237,13 @@ classdef GRIDobj
 
                 % ........................................................
                 %% Case two: Input one is text (either filename or folder)
-                if ~isempty(strfind(varargin{1},'.'))
+                if isfolder(varargin{1}) || isempty(varargin{1})
+                    DEM = GRIDobj(openRasterDialog(varargin{1}));
+                    return 
+                else
                     % Case 2a
                     % Text is filename (image)
-                    [Z,R,wf] = createRasterFromFile(varargin{:});
-                elseif isfolder(varargin{1}) || isempty(varargin{1})
-                    DEM = GRIDobj(openRasterDialog(varargin{1}));
-                    return                  
+                    [Z,R,wf] = createRasterFromFile(varargin{:});                             
                 end
 
             elseif isa(varargin{1},'GRIDobj') || ...

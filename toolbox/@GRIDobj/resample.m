@@ -1,4 +1,4 @@
-function DEMr = resample(DEM,target,options)
+function DEMr = resample(DEM,target,method,options)
 
 %RESAMPLE Change spatial resolution of a GRIDobj
 %
@@ -34,22 +34,21 @@ function DEMr = resample(DEM,target,options)
 %     DEMr = resample(DEM,100);
 %     imagesc(DEMr)
 %
-%
 % See also: griddedInterpolant, imtransform
 %        
 % Author:  Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 1. June, 2024 
+% Date: 18. February, 2025 
 
 % check also mapresize, georesize
 
 arguments
     DEM   GRIDobj
     target  {mustBeGRIDobjOrPositiveScalar}
-    options.method   = "bilinear"
+    method = "bilinear"
     options.crop     = true
 end
 
-method = validatestring(options.method,{'cubic', 'bilinear', 'nearest' },...
+method = validatestring(method,{'cubic', 'bilinear', 'nearest' },...
     'GRIDobj/resample','method',3);
 
 
@@ -72,8 +71,13 @@ if ~isa(target,'GRIDobj')
         scale = DEM.cellsize / target;
         [B,RB] = georesize(DEM.Z,DEM.georef,scale,method);        
     else
-        % no mapping toolbox seems to be available
-        error("Function requires mapping toolbox and georef information to be available.")
+        if ~isempty(DEM.georef)
+            scale = DEM.cellsize / target;
+            [B,RB] = mapresize(DEM.Z,DEM.georef,scale,method);
+        else
+            % no mapping toolbox seems to be available
+            error("Function requires mapping toolbox and georef information to be available.")
+        end
     end
     DEMr = GRIDobj(B,RB);
 else
@@ -92,11 +96,11 @@ else
         Rnew = target.georef;
 
         DEMr = target;
-        DEMr.Z = imtransform(DEM.Z,T,method,...
+        DEMr.Z = flipud(imtransform(flipud(DEM.Z),T,method,...
         'Udata',R.XWorldLimits,'Vdata',R.YWorldLimits,...
         'Xdata',Rnew.XWorldLimits,'Ydata',Rnew.YWorldLimits,...
         'Size',Rnew.RasterSize,...
-        'FillValues',fillval);
+        'FillValues',fillval));
         
     else
         error("Function requires mapping toolbox")

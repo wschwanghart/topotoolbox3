@@ -98,7 +98,7 @@ nrnames = numel(names);
 
 try
 fseek(fid,0,'bof');
-for r = 1:nrnames ;
+for r = 1:nrnames 
     headertext = fgetl(fid);
     [headertext, headernum] = strtok(headertext,' ');
     I = cellfun(@(x,y) strcmpi(x(1:4),y(1:4)),names,repmat({headertext},nrnames,1));

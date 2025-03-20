@@ -1,6 +1,6 @@
 function clr = magmacolor(n)
 
-%MAGMACOLOR magma color as used in MATPLOTLIB
+%MAGMACOLOR Magma color as used in MATPLOTLIB
 %
 % Syntax
 %
@@ -33,11 +33,11 @@ function clr = magmacolor(n)
 %
 % See also: landcolor, flowcolor
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 19. November, 2024
 
-if nargin == 0
-    n = 255;
+arguments
+    n (1,1) {mustBePositive,mustBeInteger} = 255
 end
 
 magma_data = [[0.001462, 0.000466, 0.013866];...
@@ -297,7 +297,7 @@ magma_data = [[0.001462, 0.000466, 0.013866];...
                [0.987387, 0.984288, 0.742002];...
                [0.987053, 0.991438, 0.749504]];
            
-if n == 256;
+if n == 256
     clr = magma_data;
 else
     % interpolate

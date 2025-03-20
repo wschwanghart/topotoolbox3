@@ -1,4 +1,4 @@
-function varargout = getlocation(S,d0,varargin)
+function varargout = getlocation(S,d0,options)
 
 %GETLOCATION Get locations along a stream network
 %
@@ -113,30 +113,23 @@ function varargout = getlocation(S,d0,varargin)
 %            
 % See also: STREAMobj, STREAMobj/distance, STREAMobj/getvalue
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 21. November, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 29. October, 2024
 
-% Valid output
-validoutput = {'xy','xcyc','ix','PPS','mappoint',...
-               'geopoint','mapstruct','cell'};
-
-% Parse input
-p = inputParser;
-addParameter(p,'value',S.distance,@(x) isa(x,'GRIDobj') || isnal(S,x));
-addParameter(p,'output','xy')
-addParameter(p,'z',[])
-parse(p,varargin{:});
-
-% Validate output
-output = validatestring(p.Results.output,validoutput);
-
-% Handle value grid or node-attribute list
-d = p.Results.value;
-if isa(d,'GRIDobj')
-    d = getnal(S,d); 
+arguments
+    S
+    d0
+    options.value {mustBeGRIDobjOrNal(options.value,S)} = S.distance
+    options.output {mustBeMember(options.output, ...
+                        {'xy','xcyc','ix','PPS','mappoint',...
+                         'geopoint','mapstruct','cell'})} = 'xy'
+    options.z {mustBeGRIDobjOrNalOrEmpty(options.z,S)} = []
 end
 
-% Is val an function handle?
+% Handle value grid or node-attribute list
+d = ezgetnal(S,options.value);
+
+% Is val a function handle?
 if isa(d0,'function_handle')
     d0 = d0(d);
 end
@@ -148,7 +141,7 @@ outlet = streampoi(S,'outlet','logical');
 [x,y,c] = cellfun(@getlocation_sub, num2cell(d0),'UniformOutput',false);
 
 
-switch lower(output)
+switch lower(options.output)
     case 'cell'
     otherwise     
         x = vertcat(x{:});
@@ -157,7 +150,7 @@ switch lower(output)
 end
 
 % Prepare output
-switch lower(output)
+switch lower(options.output)
     case {'xy','xcyc'}
         varargout{1} = x;
         varargout{2} = y;
@@ -171,17 +164,17 @@ switch lower(output)
         varargout{1} = struct('Geometry','Point',...
             'X',num2cell(x),'Y',num2cell(y),'value',num2cell(c));
     case 'pps'
-        if isempty(p.Results.z)
+        if isempty(options.z)
             varargout{1} = PPS(S,'PP',[x y]);
         else
-            varargout{1} = PPS(S,'PP',[x y],'z',p.Results.z);
+            varargout{1} = PPS(S,'PP',[x y],'z',options.z);
         end
         varargout{2} = c;
         
     case 'mappoint'
         varargout{1} = mappoint(x,y,'value',c);
     case 'geopoint'
-        [lat,lon] = minvtran(S.georef.mstruct,x,y);
+        [lat,lon] = projinv(parseCRS(S),x,y);
         varargout{1} = ygeopoint(lat,lon,'value',c);
     case 'cell'
         varargout{1} = x;
@@ -193,7 +186,7 @@ function [x,y,c] = getlocation_sub(d0)
 f = (d0-d(S.ixc)) ./ (d(S.ix)-d(S.ixc));
 I = (f>0) & (f <=1) | (outlet(S.ixc) & (f == 0));
 
-switch lower(output)
+switch lower(options.output)
     case {'xcyc','ix','pps'} 
             f = round(f);
 end

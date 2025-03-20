@@ -56,14 +56,14 @@ function [D,L] = distance(DEM,varargin)
 
 narginchk(2,3);
 
-if nargin == 2;
+if nargin == 2
     if isnumeric(varargin{1})
         ix = varargin{1};
-    elseif isa(varargin{1},'GRIDobj');
+    elseif isa(varargin{1},'GRIDobj')
         ix = varargin{1}.Z~=0;
-    elseif isa(varargin{1},'STREAMobj');
+    elseif isa(varargin{1},'STREAMobj')
         ix = varargin{1}.IXgrid;
-    elseif isstruct(varargin{1});
+    elseif isstruct(varargin{1})
         MS = varargin{1};
         
         switch lower(MS(1).Geometry)
@@ -71,7 +71,7 @@ if nargin == 2;
                 % possible fieldnames
                 possfnx = {'x' 'X' 'lon' 'Lon'};
                 possfny = {'y' 'Y' 'lat' 'Lat'};
-                for counter = 1:numel(possfnx);
+                for counter = 1:numel(possfnx)
                     
                     try
                         x = [MS.(possfnx{counter})];

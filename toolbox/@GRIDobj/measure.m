@@ -31,8 +31,8 @@ function measure(DEM,varargin)
 % 
 % See also: IMDISTLINE, IMROI, IMPOLY, GRIDobj/DEMPROFILE
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 12. February, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 18. October, 2024
 
 % 24. November, 2014: added structure field nodes if profile is saved to
 % workspace. This allows to continue working with the measure tool with an
@@ -59,11 +59,7 @@ ymin  = min(Y);
 defpos = [xmin + (xmax-xmin)*[1/3; 2/3] ymin + (ymax-ymin)*[2/3; 1/3]];
 
 % choose colormap
-if license('test', 'map_toolbox')
-    cmap = demcmap([max(DEM) min(DEM)]-1,255);
-else
-    cmap = parula(255);
-end
+cmap = landcolor(255);
 
 p = inputParser;
 

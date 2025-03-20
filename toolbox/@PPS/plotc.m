@@ -1,6 +1,6 @@
 function [hl,hp] = plotc(P,cova,varargin)
 
-%PLOTC plot a colored stream network
+%PLOTC Plot a colored stream network and points
 %
 % Syntax
 %      
@@ -38,7 +38,7 @@ function [hl,hp] = plotc(P,cova,varargin)
 % Date: 6. November, 2015
 
 p = inputParser;         
-p.FunctionName = 'STREAMobj/plotc';
+p.FunctionName = 'PPS/plotc';
 addParameter(p,'linewidth',1.5);
 parse(p,varargin{:});
 

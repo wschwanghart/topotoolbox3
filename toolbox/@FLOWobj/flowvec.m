@@ -38,7 +38,7 @@ function [U,V] = flowvec(FD,L)
 
 arguments
     FD FLOWobj
-    L  GRIDobj
+    L  GRIDobj = GRIDobj(FD)+1
 end
 
 U = GRIDobj(FD);

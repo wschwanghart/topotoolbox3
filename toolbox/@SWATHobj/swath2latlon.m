@@ -27,42 +27,22 @@ function [OUT] = swath2latlon(SW)
 %
 %
 % Author: Dirk Scherler (scherler[at]caltech.edu)
-% Date: June, 2013
+% Date: June, 2024
 
-
-
-if strcmp(SW.georef.ModelType,'ModelTypeGeographic')
-    warning('Warning: ModelType of SWATHobj data appears to be in geographic coordinates already. Nothing done.')
-    
-else
-    
-    OUT = SW;
-    
-    % coordinate vectors for SWATHobj
-    nrrows = SW.georef.Height;
-    nrcols = SW.georef.Width;
-    R = SW.georef.RefMatrix;
-    x = [ones(nrcols,1) (1:nrcols)' ones(nrcols,1)]*R;
-    x = x(:,1)';
-    y = [(1:nrrows)' ones(nrrows,2)]*R;
-    y = y(:,2);
-    
-    for i = 1 : length(SW.xy0)
-        % convert swath data to lat,lon
-        [lat0,lon0] = projinv(SW.georef,SW.xy0{i}(:,1),SW.xy0{i}(:,2));
-        OUT.xy0{i} = [lon0,lat0];
-
-        [lat,lon] = projinv(SW.georef,SW.xy{i}(:,1),SW.xy{i}(:,2));
-        OUT.xy{i} = [lon,lat];
-
-        ix = find(SW.X{i});
-        [LAT,LON] = projinv(SW.georef,SW.X{i}(ix),SW.Y{i}(ix));
-        OUT.X{i}(ix) = LON(ix);
-        OUT.Y{i}(ix) = LAT(ix);
-    end
-    
-    % still need to change georef!
-    OUT.georef = [];
-    
+if ~isProjected(SW)
+    error('TopoToolbox:wrongInput',...
+        'SWATHobj has a geographic or no projected coordinate system');
 end
+
+CRS = parseCRS(SW);
+    
+[SW.xy0(:,2),SW.xy0(:,1)] = projinv(CRS,SW.xy0(:,1),SW.xy0(:,2));
+[SW.xy(:,2),SW.xy(:,1)] = projinv(CRS,SW.xy(:,1),SW.xy(:,2));
+[y,x] = projinv(CRS,SW.X(:),SW.Y(:));
+SW.X  = reshape(x,size(SW.X));
+SW.Y  = reshape(y,size(SW.Y));
+
+OUT   = SW;
+OUT.georef = [];
+OUT.georef.GeographicCRS = geocrs(4326);
     

@@ -1,4 +1,4 @@
-function [MS,CCL] = tfactor(FD,S,varargin)
+function [MS,CCL] = tfactor(FD,S,options)
 
 %TFACTOR Transverse topographic symmetry (T-)factor
 %
@@ -34,20 +34,23 @@ function [MS,CCL] = tfactor(FD,S,varargin)
 %            drainage basins colored with the tfactor, the centerlines and
 %            the trunk rivers.
 %     'waitbar' {true} or false
-%
+%     'geotable' {true} or false. If true, MS and CL will be geotables.
+%            Otherwise, the function will return map structures. geotables
+%            contain referencing information and thus can be plotted using
+%            geoplot and exported as shapefiles including a .prj-file.
 %
 % Output arguments
 %
-%     MS     Mapping structure of drainage basins including the field
-%            'tfactor'. MS contains the following fields:
+%     MS     Mapping structure (or geotables) of drainage basins including 
+%            the field 'tfactor'. MS contains the following fields:
 %            .Geometry - Geometry type required for export to shapefile
 %            .X, .Y    - Coordinates
 %            .areapx   - Area in pixels
 %            .Dd       - Distance to divides
 %            .Da       - Distance to stream
 %            .tfactor  - Da/Dd
-%     CL     Structure array with centerlines. CL contains the following
-%            fields:
+%     CL     Structure array (or geotable) with centerlines. CL contains 
+%            the following fields (or variables):
 %            .Geometry - Geometry type required for export to shapefile
 %            .X, .Y    - Coordinates
 %            .DistToDivide - Distance to divide from centerline
@@ -70,21 +73,23 @@ function [MS,CCL] = tfactor(FD,S,varargin)
 % See also: dbasymmetry, STREAMobj/removeedgeeffects, STREAMobj/smooth
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 5. July, 2022
+% Date: 15. November, 2024
+
+arguments
+    FD FLOWobj
+    S  STREAMobj
+    options.K  (1,1) {mustBeNumeric,mustBeNonnegative} = 0
+    options.plot (1,1) = false
+    options.waitbar (1,1) = false
+    options.geotable (1,1) = true
+end
 
 
-p = inputParser;
-p.FunctionName = 'tfactor';
+if ~istrunk(S)
+    error('TopoToolbox:wrongInput','S must be a network of trunk rivers.')
+end
 
-addRequired(p,'FD');
-addRequired(p,'S',@istrunk)
-addParameter(p,'K',0,@(x) validateattributes(x,{'numeric'},{'scalar','>=',0}));
-addParameter(p,'plot',false)
-addParameter(p,'waitbar',false)
-
-parse(p,FD,S,varargin{:})
-
-K = p.Results.K;
+K = options.K;
 
 %%
 CS  = STREAMobj2cell(S);
@@ -108,7 +113,7 @@ CCL  = struct('Geometry',repmat({'Line'},nrbasins,1),...
 MS  = struct('Geometry',repmat({'Polygon'},nrbasins,1),...
              'tfactor',0, ...
              'areapx',0);
-wb  = p.Results.waitbar;
+wb  = options.waitbar;
 if wb
 h   = waitbar(0,'Please wait'); 
 end
@@ -134,14 +139,14 @@ for r = 1:nrbasins
     D.Z(isinf(D.Z)) = nan;
     
     % Get centerline
-    FDCL   = FLOWobj(D,'preprocess','c');
+    FDCL   = FLOWobj(D,'preprocess','carve');
     DDIST  = flowdistance(FDCL);
     
     [~,ix] = max(DDIST.Z(:));
     CL   = STREAMobj(FDCL,'chan',ix);
 
     % Smooth centerline
-    if p.Results.K ~= 0
+    if options.K ~= 0
         x = smooth(CL,CL.x,'K',K);
         y = smooth(CL,CL.y,'K',K);
     else
@@ -203,7 +208,14 @@ if wb
     close(h)
 end
 
-if p.Results.plot
+if options.geotable
+    MS  = mapstruct2geotable(MS,"coordinateSystemType","planar",...
+        "CoordinateReferenceSystem",parseCRS(S));
+    CCL =  mapstruct2geotable(CCL,"coordinateSystemType","planar",...
+        "CoordinateReferenceSystem",parseCRS(S));
+end
+
+if options.plot
     figure
     
     colorRange = makesymbolspec('Polygon',...
@@ -214,7 +226,7 @@ if p.Results.plot
     mapshow(CCL,'color','k')
     
     colormap(summer(10))
-    caxis([0 1])
+    clim([0 1])
     h = colorbar;
     h.Label.String = 'T-factor';
 end

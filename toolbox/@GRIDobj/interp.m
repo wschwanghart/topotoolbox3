@@ -39,7 +39,7 @@ function zi = interp(DEM,xi,yi,method)
 % See also: griddedInterpolant
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 3. June, 2024
+% Date: 21. February, 2025
 
 arguments
     DEM   GRIDobj
@@ -53,8 +53,14 @@ method = validatestring(method,...
 
 % created griddedInterpolant class
 [x,y] = getcoordinates(DEM);
+
 % flip y to get monotonic increasing grid vectors
-y     = y(end:-1:1);
+if x(1)<x(2)
+    flip = false;
+else
+    flip = true;
+    y     = y(end:-1:1);
+end
 
 if isUnderlyingInteger(DEM) || isUnderlyingType(DEM,'logical')
     cla   = class(DEM.Z);
@@ -68,7 +74,11 @@ else
     convoutput = false;
 end
 
-F     = griddedInterpolant({x,y},flipud(DEM.Z)',method); 
+if flip 
+    F     = griddedInterpolant({x,y},flipud(DEM.Z)',method); 
+else
+    F     = griddedInterpolant({x,y},DEM.Z',method);
+end
 
 % interpolate
 zi     = F(xi,yi);

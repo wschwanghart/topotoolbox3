@@ -61,7 +61,7 @@ p = zeros(nrc,1);
 p(1:ixpwrite) = ixnoparent;
 
 % create vector to index into vertices
-if nargout <= 2;
+if nargout <= 2
     [ixchild,ix] = find(M');
 else 
     [ixchild,ix,m] = find(M');
@@ -74,8 +74,8 @@ ixix         = zeros(nrc,1);
 % vectors are already sorted. In addition the first location of occurrence 
 % is returned 
 t = 0;
-for r = 1:numel(ix);
-    if ix(r)>t;
+for r = 1:numel(ix)
+    if ix(r)>t
         ixix(ix(r)) = r;
         t = ix(r);
     end
@@ -87,10 +87,10 @@ end
 ixpread   = 1;
 ixpwrite  = ixpwrite+1;
 keepgoing = true;
-while keepgoing;
+while keepgoing
     
     % identify childs current parentless index
-    if ixix(p(ixpread))==0;
+    if ixix(p(ixpread))==0
         % node has no childs, do nothing
     else
         % ixt -> index in ix and ixchild
@@ -98,7 +98,7 @@ while keepgoing;
         keepgoing2 = true;
         while keepgoing2
             nrparent(ixchild(ixt)) = nrparent(ixchild(ixt)) - 1;
-            if nrparent(ixchild(ixt)) <= 0;
+            if nrparent(ixchild(ixt)) <= 0
                 p(ixpwrite) = ixchild(ixt);
                 ixpwrite = ixpwrite + 1;
             end
@@ -122,7 +122,7 @@ end
 
 
 % prepare output
-if nargout == 1;
+if nargout == 1
     varargout{1} = p;
 else
     clear ix ixchild
@@ -138,7 +138,7 @@ else
     varargout{1} = ixp;
     varargout{2} = ixchild;
     
-    if nargout == 3;
+    if nargout == 3
         varargout{3} = m;
     end
 end

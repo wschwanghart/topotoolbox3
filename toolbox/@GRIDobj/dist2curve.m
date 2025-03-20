@@ -1,5 +1,5 @@
 function [OUT] = dist2curve(DEM,x0,y0,alpha,mindist,maxdist)
-%DIST2CURVE labels pixels in a GRIDobj by their directed distance to a curved line
+%DIST2CURVE Labels pixels in a GRIDobj by their directed distance to a curved line
 %
 % Syntax
 %
@@ -44,6 +44,14 @@ function [OUT] = dist2curve(DEM,x0,y0,alpha,mindist,maxdist)
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
 % Date: 25. June, 2014, updated 30. March, 2017;
 
+arguments
+    DEM GRIDobj
+    x0 
+    y0
+    alpha
+    mindist (1,1) = -inf
+    maxdist (1,1) = inf
+end
 
 f = 10;
 cs = DEM.cellsize;
@@ -64,11 +72,10 @@ allY = repmat(disty',1,nx) .* repmat(dy.*ones(1,nx),ny,1) + repmat(yt',ny,1);
 allD = repmat(disty',1,nx) .* step;
 
 F = scatteredInterpolant(allX(:),allY(:),allD(:),'linear','none');
-[x,y] = getcoordinates(DEM);
-[X,Y] = meshgrid(x,y);
+[X,Y] = getcoordinates(DEM,'matrix');
 qz = F(X(:),Y(:));
 
-OUT = DEM;
-OUT.Z(:) = qz;
+
+OUT = GRIDobj(DEM,resize(qz,DEM.size));
 OUT.Z(OUT.Z>maxdist | OUT.Z<mindist) = nan;
 

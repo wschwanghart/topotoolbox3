@@ -58,8 +58,8 @@ classdef ScaleBar < handle
 % References: The function uses plotboxpos by Kelly Kearney. The function
 % is available here: https://github.com/kakearney/plotboxpos-pkg
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 8. September, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 4. November 2024
 
     properties(SetAccess = 'private')
         scale
@@ -80,21 +80,21 @@ classdef ScaleBar < handle
     
     methods
         
-        function SB = ScaleBar(varargin)
+        function SB = ScaleBar(options)
+
+            arguments
+                options.parent {mustBeA(options.parent,'matlab.graphics.axis.Axes')} = gca
+                options.xyunit = 'm'
+                options.displayunit = 'auto'
+                options.color = 'k'
+                options.rellength (1,1) {mustBeNumeric,mustBePositive} = 0.2
+                options.backgroundcolor = 'none'
+                options.fontsize (1,1) {mustBePositive} = 10
+                options.location {mustBeMember(options.location,{'northwest','southwest','northeast','southeast'})} = 'southeast'
+            end
             
-            % Parse inputs
-            p = inputParser;
-            addParameter(p,'parent',gca);
-            addParameter(p,'xyunit','m');
-            addParameter(p,'displayunit','auto');
-            addParameter(p,'color','k');
-            addParameter(p,'rellength',0.2);
-            addParameter(p,'backgroundcolor','none');
-            addParameter(p,'fontsize',10);
-            addParameter(p,'location','southeast',@(x) ischar(validatestring(x,{'northwest','southwest','northeast','southeast'})));
-            parse(p,varargin{:});
             
-            params = p.Results;
+            params = options;
             
             % set initial location of scalebar
             x1 = 0;

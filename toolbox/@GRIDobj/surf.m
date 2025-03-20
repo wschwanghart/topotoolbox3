@@ -1,6 +1,6 @@
 function ht = surf(DEM,varargin)
 
-%SURF surface plot for GRIDobj
+%SURF Surface plot for GRIDobj
 %
 % Syntax
 %
@@ -54,7 +54,10 @@ function ht = surf(DEM,varargin)
 % Example 2
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     surf((DEM-800)*2,'block',true,'baselevel',-900*2,'sea',true,'exaggerate',1); camlight; colormap(ttcmap((DEM-800)*2,'cmap','france'))
+%     surf((DEM-800)*2,'block',true,'baselevel',-900*2,...
+%                      'sea',true,'exaggerate',1); 
+%     camlight; 
+%     colormap(ttcmap((DEM-800)*2,'cmap','france'))
 %     ax = gca;
 %     ax.Clipping = 'off';
 %     axis off
@@ -65,6 +68,15 @@ function ht = surf(DEM,varargin)
 %     S  = modify(S,'upstreamto',(DEM-800)>0);
 %     hold on
 %     plot3(S,DEM-800,'b');
+%
+% Example 3: Overlay with hillshade
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     G   = arcslope(DEM);
+%     h = surf(DEM);
+%     RGB = GRIDobj2rgb(G,"clim",[0 1],"colormap",flipud(magmacolor));
+%     h.CData = RGB;
+%     camlight
 %
 % See also: GRIDobj/imageschs
 %
@@ -258,7 +270,6 @@ if sea
     h = surf(x,y,+I,'FaceAlpha',seaalpha,'FaceColor',facecolor,'EdgeColor','none');
     hold off
     
-    
     set(pa,'FaceLighting','none')
     
     if ~isempty(baselevel)
@@ -266,10 +277,6 @@ if sea
     axislim(5) = baselevel;
     axis(axislim)
     end
-    
-    
-    
-
 end
     
 if nargout == 1

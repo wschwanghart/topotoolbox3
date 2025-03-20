@@ -69,17 +69,30 @@ function varargout = as(P,outtype)
 % See also: GRIDobj, FLOWobj, STREAMobj, PPS/shapewrite,
 %           STREAMobj/STREAMobj2mapstruct, STREAMobj/STREAMobj2XY
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 10. January, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 28. October, 2024
+
+arguments
+    P   PPS
+    outtype {mustBeMember(outtype,{'STREAMobj','GRIDobj','mapstruct',...
+        'mapshape','geotable','nanpunctuated','graph','digraph','nal',...
+        'logical'})} = 'STREAMobj'
+end
 
 switch lower(outtype)
     case 'streamobj'
         varargout{1} = P.S;
+        if nargout == 2
+            varargout{2} = [];
+        end
     case 'gridobj'
         G = GRIDobj(P.S);
         G.Z(P.S.IXgrid) = 1;
         G.Z(P.S.IXgrid(P.PP)) = 2;
         varargout{1} = G;
+        if nargout == 2
+            varargout{2} = [];
+        end
     case 'mapstruct'
         varargout{1} = STREAMobj2mapstruct(P.S);
         
@@ -96,6 +109,15 @@ switch lower(outtype)
         [MSS,MSP] = as(P,'mapstruct');
         varargout{1} = mapshape(MSS);
         varargout{2} = mapshape(MSP);
+    case 'geotable'
+        varargout{1} = STREAMobj2geotable(P.S);
+        if nargout == 2
+            [x,y] = points(P,'xy');
+            t = table(x,y,(1:numel(x))','VariableNames',{'x','y','ID'});
+            t = table2geotable(t,'planar',["x" "y"],"CoordinateReferenceSystem",parseCRS(P),...
+                "GeometryType","point");
+            varargout{2} = t;
+        end
     case 'nanpunctuated'
         [varargout{1},varargout{2}] = STREAMobj2XY(P.S);
         [varargout{3},varargout{4}] = points(P);

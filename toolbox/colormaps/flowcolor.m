@@ -1,5 +1,5 @@
 function y = flowcolor(n)
-% colormap for the display of flow accumulation
+%FLOWCOLOR Colormap for the display of flow accumulation
 %
 % Syntax
 %
@@ -10,11 +10,20 @@ function y = flowcolor(n)
 %     flowcolor provides a nice colormap for the display of flow 
 %     accumulation grids draped over digital elevation models.
 %
-% Example
+% Input arguments
 %
+%     n   number of colors
+% 
+% Output arguments
+%
+%     y   n-by-3 matrix with rgb-values
 %
 % Author: Francois Beauducel <beauducel@ipgp.fr>
 % Date: 2012/05/17
+
+arguments
+    n (1,1) {mustBePositive,mustBeInteger} = 255
+end
 
 
 J = [ ...
@@ -277,7 +286,8 @@ J = [ ...
 ];
 
 l = length(J);
-if nargin < 1
-	n = 255;
+if n ~= l
+    y = interp1(1:l,J,linspace(1,l,n),'*linear');
+else
+    y = J;
 end
-y = interp1(1:l,J,linspace(1,l,n),'*linear');

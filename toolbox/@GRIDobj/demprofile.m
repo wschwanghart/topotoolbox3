@@ -37,6 +37,13 @@ function [dn,z,x,y] = demprofile(DEM,n,x,y)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 18. June, 2024
 
+arguments
+    DEM GRIDobj
+    n  = []
+    x  = []
+    y  = []
+end
+
 
 % interactive
 if nargin <= 2
@@ -66,6 +73,7 @@ if nargin <= 2
     end
     
 else
+    
     if n ~= numel(x)
         x = x(:);
         y = y(:);

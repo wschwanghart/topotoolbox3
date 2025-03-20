@@ -54,8 +54,8 @@ function h = ploteffects(P,mdl,varargin)
 % Note: The function includes the numSubplots by Rob Campbell (2022). 
 % https://www.mathworks.com/matlabcentral/fileexchange/26310-numsubplots-neatly-arrange-subplots 
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 28. December, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. November, 2024
 
 %% Parse inputs
 p = inputParser;
@@ -111,10 +111,8 @@ if ~isempty(IsCat)
     end
 end
 
-
 d   = distance(P.S,'node_to_node');
 d   = mean(d);
-
 
 for r = 1:nvars
 

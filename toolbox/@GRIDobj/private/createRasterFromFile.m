@@ -11,7 +11,7 @@ function [Z,R,wf] = createRasterFromFile(filename,options)
 %
 
 arguments
-    filename
+    filename 
     options.OutputType = 'single'
     options.Bands = 1
     options.CoordinateSystemType = 'auto'
@@ -24,6 +24,18 @@ if license('test','MAP_Toolbox')
         'Bands',options.Bands,...
         'CoordinateSystemType',options.CoordinateSystemType);
     wf = worldFileMatrix(R);
+
+    % handle nans
+    try
+        tiffinfo = imfinfo(filename);
+        if isfield(tiffinfo,'GDAL_NODATA')
+            nodata_val = str2double(tiffinfo.GDAL_NODATA);
+            Z(Z==nodata_val) = nan;
+        end
+    catch
+        % do nothing
+    end
+
 
     % [~,~,ext] = fileparts(filename);
     % switch lower(ext)

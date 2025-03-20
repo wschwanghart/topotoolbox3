@@ -60,8 +60,13 @@ function varargout = intersectlocs(S1,S2)
 %
 % See also: STREAMobj, STREAMobj/intersect
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 15. September, 2014
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 7. March, 2025
+
+arguments
+    S1   STREAMobj
+    S2   STREAMobj
+end
 
 
 
@@ -80,12 +85,12 @@ if nargout > 1
     II = false(size(S2.x));
     II(S2.ixc(I)) = true;
     % get network upstream to locations
-    for r = numel(S2.ix):-1:1;
+    for r = numel(S2.ix):-1:1
         if II(S2.ixc(r))
             II(S2.ix(r)) = II(S2.ixc(r)) & ~SharedNetworkNodes(S2.ix(r));
         end
     end
-    if ~isempty(II);
+    if ~isempty(II)
 
         L = II;
         I = L(S2.ixc) & L(S2.ix);

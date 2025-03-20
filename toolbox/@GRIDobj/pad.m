@@ -98,7 +98,18 @@ if ~isempty(DEM.georef)
         R = DEM.georef;
         Rnew = georasterref(DEM.wf,DEM.size,R.RasterInterpretation);
         Rnew.GeographicCRS = R.GeographicCRS;
+
+    else 
+        R = DEM.georef;
+        
+        switch class(R) 
+            case 'map.rasterref.MapCellsReference'
+                Rnew = maprasterref(DEM.wf,DEM.size,R.RasterInterpretation);
+            case 'map.rasterref.GeographicCellsReference'
+            Rnew = georasterref(DEM.wf,DEM.size,R.RasterInterpretation);
+        end
     end
+
     DEM.georef = Rnew;
     
     % Now check whether DEM.size == DEM.georef.RasterSize

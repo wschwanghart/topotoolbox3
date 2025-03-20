@@ -34,3 +34,12 @@ codegen/
 
 # API keys
 *.apikey
+
+# CMake build directory
+build/
+
+# Internal folder for compiled MEX files
+toolbox/internal/mex/
+
+# Compiled documentation
+toolbox/docs/html/

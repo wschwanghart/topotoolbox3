@@ -48,7 +48,7 @@ function nal2 = nal2nal(S2,S1,nal1,fillval)
 %
 % See also: STREAMobj2GRIDobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 17. June, 2024
 
 arguments
@@ -60,7 +60,7 @@ end
 
 % Handle input nal
 if isa(nal1,'GRIDobj')
-    nal1 = ezgetnal(S,nal1,underlyingType(nal1));
+    nal1 = ezgetnal(S,nal1,'same');
 end
 
 % Handle output nal

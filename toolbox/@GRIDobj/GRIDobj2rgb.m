@@ -1,4 +1,4 @@
-function [RGB,x,y] = GRIDobj2rgb(DEM,varargin)
+function [RGB,x,y] = GRIDobj2rgb(DEM,options)
 
 %GRIDobj2RGB Convert GRIDobj to RGB image
 %
@@ -47,7 +47,7 @@ function [RGB,x,y] = GRIDobj2rgb(DEM,varargin)
 %
 % Example 3: Add cast shadows
 %
-%     C = castshadow(DEM,'azi',135,'alt',15);
+%     C = castshadow(DEM,135,15);
 %     RGB4 = GRIDobj2rgb(C,'colormap',ttscm("grayC",255,[0 70]));
 %     RGB5 = uint8(single(RGB3) .* (single(RGB4)/255));
 %     image(x,y,RGB5)
@@ -55,36 +55,29 @@ function [RGB,x,y] = GRIDobj2rgb(DEM,varargin)
 % See also: GRIDobj/imageschs, GRIDobj/GRIDobj2im
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 6. June, 2024
+% Date: 17. October, 2024
 
-% Parse input
-p = inputParser;
-p.FunctionName   = 'GRIDobj2rgb';
-addParameter(p,'colormap',parula,@(x) ...
-    validateattributes(x,'numeric',{'2d','ncols',3,'>=',0,'<=',1}))
-addParameter(p,'nancolor',[1 1 1],@(x) ...
-    validateattributes(x,'numeric',{'numel',3}))
-addParameter(p,'clim',[],@(x) ...
-    validateattributes(x,'numeric',{'increasing','numel',2}))
-parse(p,varargin{:})
+arguments
+    DEM GRIDobj
+    options.colormap (:,3) {mustBeInRange(options.colormap,0,1)} = parula
+    options.nancolor (1,3) {mustBeInRange(options.nancolor,0,1)} = [1 1 1]
+    options.clim     (1,2) = [min(DEM) max(DEM)]
+    options.class    {mustBeMember(options.class,{'double','uint8'})} = 'uint8'
+end
+
+validateattributes(options.clim,'numeric',{'increasing','numel',2})
+
 
 % Any nans?
 I = isnan(DEM);
 
 % Colormap
-clr = p.Results.colormap;
+clr = options.colormap;
 Z   = DEM.Z;
 
-if isempty(p.Results.clim)
-    
-    minval = min(Z(:));
-    maxval = max(Z(:));
-else
-    
-    minval = p.Results.clim(1);
-    maxval = p.Results.clim(2);
-end
-
+% minimum and maximum value    
+minval = options.clim(1);
+maxval = options.clim(2);
 
 valuesatclr = linspace(minval,...
                        maxval,...
@@ -93,10 +86,10 @@ valuesatclr = linspace(minval,...
 RGB = interp1(valuesatclr,clr,Z(:),'linear'); 
 
 % map nancolor to nan-pixels
-RGB(I.Z(:),:) = repmat(p.Results.nancolor(:)',nnz(I.Z),1);
+RGB(I.Z(:),:) = repmat(options.nancolor(:)',nnz(I.Z),1);
 
 % apply limits
-if ~isempty(p.Results.clim)
+if ~isempty(options.clim)
     I = DEM(:)<minval;
     RGB(I.Z(:),:) = repmat(clr(1,:),nnz(I.Z),1);
     I = DEM(:)>maxval;
@@ -105,8 +98,11 @@ end
 
 RGB = reshape(RGB,DEM.size(1),DEM.size(2),3);
 
-RGB = RGB*255;
-RGB = uint8(RGB);
+switch options.class
+    case 'uint8'
+        RGB = RGB*255;
+        RGB = uint8(RGB);
+end
 
 if nargout > 1
     [x,y] = getcoordinates(DEM);

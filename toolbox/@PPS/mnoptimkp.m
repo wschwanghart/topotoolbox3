@@ -1,4 +1,4 @@
-function results = mnoptimkp(P,FD,varargin)
+function results = mnoptimkp(P,FD,options)
 
 %MNOPTIMKP Find optimal mn ratio based on knickpoint locations
 %
@@ -84,35 +84,37 @@ function results = mnoptimkp(P,FD,varargin)
 %          'split',false,...
 %          'verbose',false,...
 %          'plot',false);
+%      dz = kp.dz(kp.z < 1000);
 %      P = PPS(S,'PP',kp.IXgrid,'z',DEM);
 %      P.PP(~(DEM.Z(S.IXgrid(P.PP)) < 1000)) = [];
 %      
 %      results = mnoptimkp(P,FD,'method','deviance',...
 %                          't',1e6,'mn0',0.5,...
-%                          'sigmat,1e5);
+%                          'sigmat',1e5);
 %
 %
 % See also: PPS, knickpointfinder, STREAMobj/mnoptim, STREAMobj/mnoptimvar
 %  
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. April, 2024
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. November, 2024
 
-p = inputParser;
-addParameter(p,'method','robustvar')
-addParameter(p,'a0',1e6);
-addParameter(p,'mn0',0.45);
-addParameter(p,'optimizemn',true)
-addParameter(p,'weights',[],@(x) numel(x) == npoints(P));
-addParameter(p,'t',10000);
-addParameter(p,'sigmat',0)
-addParameter(p,'K0',1e-4);
-addParameter(p,'RobustWgtFun',[]);
-addParameter(p,'inletix',[]);
-addParameter(p,'inletA0',0);
-addParameter(p,'inletfraction',[]);
-addParameter(p,'Kint',[0.025 0.975])
+arguments
+    P   PPS
+    FD  FLOWobj
+    options.method = 'robustvar'
+    options.a0 (1,1) {mustBePositive} = 1e6
+    options.mn0 (1,1) {mustBePositive} = 0.45
+    options.optimizemn (1,1) = true
+    options.weights = []
+    options.t (1,1) {mustBePositive} = 10000
+    options.sigmat (1,1) {mustBeNonnegative} = 0
+    options.K0 (1,1) {mustBePositive} = 1e-4
+    options.RobustWgtFun = []
+    options.inletix = []
+    options.inletfraction = []
+    options.Kint (1,2) {mustBeInRange(options.Kint,0,1,"exclusive")} = [0.025 0.975]
+end
 
-parse(p,varargin{:});
 
 A = flowacc(FD);
 
@@ -125,104 +127,104 @@ else
 end
 
 % Anonymous function to calculate chi with mn as input
-chifun = @(mn) chitransform(P.S,a,'mn',mn,'a0',p.Results.a0);
+chifun = @(mn) chitransform(P.S,a,'mn',mn,'a0',options.a0);
 
 
-switch lower(p.Results.method)
+switch lower(options.method)
     case 'robustvar'
         % Robust variance
         varfun  = @robustcov;
-        results = exp(fminsearch(@(mn) chicov(exp(mn)),log(p.Results.mn0))); 
+        results = exp(fminsearch(@(mn) chicov(exp(mn)),log(options.mn0))); 
     case 'var'
         % Variance
         varfun  = @var;
-        results = exp(fminsearch(@(mn) chicov(exp(mn)),log(p.Results.mn0))); 
+        results = exp(fminsearch(@(mn) chicov(exp(mn)),log(options.mn0))); 
     case {'mad0','mad1'}
-        v = str2double(p.Results.method(end));
+        v = str2double(options.method(end));
         % mean absolute deviations (mad0)
         % median absolute deviations (mad1)
         results = exp(fminsearch(@(mn) mad(getmarks(P,...
-            chifun(exp(mn))/max(chifun(exp(mn)))),v),log(p.Results.mn0)));
+            chifun(exp(mn))/max(chifun(exp(mn)))),v),log(options.mn0)));
 
     case 'nlinfit'
         % using nlinfit requires t to be known
         % Either use observation weights or RobustWgtFun
         
         % Set options and weights
-        if isempty(p.Results.weights)
-            options     = statset('RobustWgtFun',p.Results.RobustWgtFun);
+        if isempty(options.weights)
+            statoptions     = statset('RobustWgtFun',options.RobustWgtFun);
             weightinput = cell(0); 
         else
-            options     = cell(0);
-            weightinput = {'weights',p.Results.weights};
+            statoptions     = cell(0);
+            weightinput = {'weights',options.weights};
         end
         
         % Function for nlinfit
-        nlinfun = @(b,X) getmarks(P,chifun(exp(b(1)))./(exp(b(2)).*(p.Results.a0^exp(b(1)))));
+        nlinfun = @(b,X) getmarks(P,chifun(exp(b(1)))./(exp(b(2)).*(options.a0^exp(b(1)))));
         [beta,R,J,CovB,MSE,ErrorModelInfo] = ...
-            nlinfit(zeros(npoints(P),1),zeros(npoints(P),1)+p.Results.t,...
+            nlinfit(zeros(npoints(P),1),zeros(npoints(P),1)+options.t,...
             nlinfun,...
-            [log(p.Results.mn0) log(p.Results.K0)],options,...
+            [log(options.mn0) log(options.K0)],statoptions,...
             weightinput{:});
         
         % Write output to structure
         results.mn = exp(beta(1));
         results.K  = exp(beta(2));
-        results.tau = chifun(results.mn) / (results.K * p.Results.a0^results.mn);
+        results.tau = chifun(results.mn) / (results.K * options.a0^results.mn);
         results.taures = R;
         results.J   = J;
         results.CovB = CovB;
         results.MSE  = MSE;
         results.ErrorModelInfo = ErrorModelInfo;
-        results.RMSE = sqrt(mean((R-p.Results.t).^2));
+        results.RMSE = sqrt(mean((R-options.t).^2));
         
         
     case 'deviance'
         % using a second-order loglinear model, minimizing deviance of the
         % model
         
-        if isempty(p.Results.weights)
+        if isempty(options.weights)
             weightinput = cell(0); 
         else
-            weightinput = {'weights',p.Results.weights};
+            weightinput = {'weights',options.weights};
         end
         
-        if isempty(p.Results.inletix)
-            if p.Results.optimizemn
+        if isempty(options.inletix)
+            if options.optimizemn
                 mn = exp(fminsearch(@(mn) fitloglinear(P,chifun(exp(mn)),...
                     'model','poly2',weightinput{:}).Deviance,...
-                    log(p.Results.mn0)));
+                    log(options.mn0)));
             else 
-                mn = p.Results.mn0;
+                mn = options.mn0;
             end
             c  = chifun(mn);
             [mdl,int,locmax,sigmalocmax] = fitloglinear(P,c,...
                 'model','poly2',weightinput{:});
         else
-            ix    = p.Results.inletix; % linear index into grid
+            ix    = options.inletix; % linear index into grid
             [onnetwork,ix]    = ismember(ix,P.S.IXgrid); % ix is now linear index into nal
             if ~all(onnetwork)
                 error('Some inlet indices are not located on the stream network.')
             end
             a   = hillslopearea(P.S,FD) + 1; % hillslope area + area of each stream pixel
             add = getnal(P.S);
-            if ~isempty(p.Results.inletfraction)
-                add(ix) = p.Results.inletfraction;
+            if ~isempty(options.inletfraction)
+                add(ix) = options.inletfraction;
             else
                 add(ix) = ones(numel(ix),1)/numel(ix);
             end
-            chifun = @(mn,addA) chitransform(P.S,cumsum(P.S,a + add*addA,'downstream'),'mn',mn,'a0',p.Results.a0);
+            chifun = @(mn,addA) chitransform(P.S,cumsum(P.S,a + add*addA,'downstream'),'mn',mn,'a0',options.a0);
                 
-            if p.Results.optimizemn
+            if options.optimizemn
                 mna = fminsearchbnd(@(mna) fitloglinear(P,chifun(exp(mna(1)),mna(2)),...
                     'model','poly2',weightinput{:}).Deviance,...
-                    [log(p.Results.mn0) (p.Results.inletA0/(P.S.cellsize^2))]);
+                    [log(options.mn0) (options.inletA0/(P.S.cellsize^2))]);
                 mna(1) = exp(mna(1));
             else
-                mn  = p.Results.mn0;
+                mn  = options.mn0;
                 mna = fminsearch(@(mna) fitloglinear(P,chifun(mn,mna),...
                     'model','poly2',weightinput{:}).Deviance,...
-                    (p.Results.inletA0/(P.S.cellsize^2)));
+                    (options.inletA0/(P.S.cellsize^2)));
                 mna = [mn mna];
             end
             c      = chifun(mna(1),mna(2));
@@ -236,7 +238,7 @@ switch lower(p.Results.method)
         results.mn  = mn;
         results.chi = c;
         results.chifun = chifun;
-        if ~isempty(p.Results.inletix)
+        if ~isempty(options.inletix)
             results.addA_pix = addA;
             results.addA_m2  = addA*P.S.cellsize^2;
             results.addA_km2 = results.addA_m2 / 1e6;
@@ -245,10 +247,10 @@ switch lower(p.Results.method)
         results.int = int;
         results.chimax = locmax;
         
-        if ~isempty(p.Results.t)
-            tini = p.Results.t; % onset of incision
-            stini = p.Results.sigmat; % standard deviation of the onset
-            a0    = p.Results.a0;
+        if ~isempty(options.t)
+            tini = options.t; % onset of incision
+            stini = options.sigmat; % standard deviation of the onset
+            a0    = options.a0;
             mn    = results.mn;
 
             results.K      = results.chimax/(tini * a0^mn);
@@ -259,7 +261,7 @@ switch lower(p.Results.method)
                 % With error of incision
                 results.Ksigma = hypot(stini/tini,sigmalocmax/results.chimax) * results.K;
             end
-            cdfvals      = p.Results.Kint;
+            cdfvals      = options.Kint;
             results.Kint = results.Ksigma*icdf('normal',cdfvals,0,1) + results.K;
             % results.Kint = (results.chimax + results.Ksigma*icdf('normal',cdfvals,0,1))/(tini *a0^mn); 
             results.tau = results.chi / (results.K * a0^mn);
@@ -462,7 +464,7 @@ F=zeros(size(x));
 if rem(n,2) == 0
   s = x>0;
   k = 0;
-  for jj = 0:n/2-1;
+  for jj = 0:n/2-1
     k = k + (x(s)/2).^jj/factorial(jj);
   end
   F(s) = 1-exp(-x(s)/2).*k;
@@ -521,7 +523,7 @@ for ii=1:length(varargin)
       error('Propery names must be character strings');
     end
     f = find(strcmp(prop_names, arg));
-    if length(f) == 0
+    if isempty(f)
       error('%s ',['invalid property ''',arg,'''; must be one of:'],prop_names{:});
     end
     TargetField = arg;
@@ -762,7 +764,7 @@ x = xtransform(xu,params);
 % final reshape to make sure the result has the proper shape
 x = reshape(x,xsize);
 % Use a nested function as the OutputFcn wrapper
-  function stop = outfun_wrapper(x,varargin);
+  function stop = outfun_wrapper(x,varargin)
     % we need to transform x first
     xtrans = xtransform(x,params);
     

@@ -70,7 +70,7 @@ end
 end
 
 %% --- Switch selection ----
-function switchselection(hh,~)
+function switchselection(~,~)
     for r2 = 1:numel(h)
         if isequal(h(r2).Color,clr_sel)
             h(r2).Color = clr_nonsel;
@@ -81,10 +81,10 @@ function switchselection(hh,~)
 end
 
 %% --- Export to workspace ----
-function exporttoworkspace(hh,~)
+function exporttoworkspace(~,~)
 
     I = false(nc,1);
-    for r2 = 1:numel(h);
+    for r2 = 1:numel(h)
         I(r2) = isequal(h(r2).Color,clr_sel);
     end
     n = nnz(I);

@@ -1,6 +1,6 @@
 function [ixchannel,d,x,y] = flowpathextract(FD,ixchannel,A,stopcrit)
 
-%FLOWPATHEXTRACT extract linear indices of a single flowpath in a DEM
+%FLOWPATHEXTRACT Extract linear indices of a single flowpath in a DEM
 %
 % Syntax
 %
@@ -34,7 +34,7 @@ function [ixchannel,d,x,y] = flowpathextract(FD,ixchannel,A,stopcrit)
 %
 % Input
 %
-%     FD            flow direction object (FlowDirObj)
+%     FD            flow direction object (FLOWobj)
 %     channelstart  linear index (scalar) where channel starts
 %     A             weight grid (GRIDobj) as obtained by flowacc. If
 %                   supplied, the flow path will be extracted in upstream

@@ -43,10 +43,10 @@ function [xy,Adj] = label2poly(L,X,Y,c)
 
 
 
-if nargin == 1 || isempty(X) || isempty(Y);
+if nargin == 1 || isempty(X) || isempty(Y)
     [X,Y] = meshgrid(1:size(L,2),1:size(L,1));
 end
-if nargin<4;
+if nargin<4
     c = 'k';
 end
 
@@ -71,7 +71,7 @@ L(~I) = nan;
 
 % call ixneighbor, which will connect all border pixels within an
 % 8-neighborhood
-[neighb(:,1) neighb(:,2)] = ixneighbors(L,I,8);
+[neighb(:,1), neighb(:,2)] = ixneighbors(L,I,8);
 
 % remove double edges 
 neighb = unique(sort(neighb,2),'rows');
@@ -111,10 +111,10 @@ j = [loc1(I1);loc2(I2)];
 Adj = sparse(i,j,1,nrxy,nrxy);
 
 % if no output arguments, plot using gplot
-if nargout == 0;
+if nargout == 0
     label2polygplot(Adj,xy,gca,c);
     clear xy
-elseif nargout == 1;
+elseif nargout == 1
     xy = label2polygplot(Adj,xy);
 end
 

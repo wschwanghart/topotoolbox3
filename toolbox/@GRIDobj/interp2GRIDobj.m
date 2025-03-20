@@ -1,4 +1,4 @@
-function A = interp2GRIDobj(DEM,x,y,v,varargin)
+function A = interp2GRIDobj(DEM,x,y,v,method,extrapmethod)
 
 %INTERP2GRIDobj Interpolate scattered data to GRIDobj
 %
@@ -42,20 +42,18 @@ function A = interp2GRIDobj(DEM,x,y,v,varargin)
 %
 % See also: scatteredInterpolant, GRIDobj/interp, GRIDobj
 %        
-% Author:  Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 8. August, 2015 
+% Author:  Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 8. October, 2024 
 
-
-% check input arguments
-narginchk(4,6)
-validmethods    = {'linear','nearest','natural'};
-validextmethods = {'linear','nearest','none'};
-
-p = inputParser;
-p.FunctionName = 'interp2GRIDobj';
-addOptional(p,'method','linear',@(x) ischar(validatestring(x,validmethods)));
-addOptional(p,'extrapolationmethod','none',@(x) ischar(validatestring(x,validextmethods)));
-parse(p,varargin{:});
+arguments
+    DEM   GRIDobj
+    x     {isnumeric}
+    y     {isnumeric}
+    v
+    method {mustBeMember(method,{'linear','nearest','natural'})} = 'linear'
+    extrapmethod ...
+        {mustBeMember(extrapmethod,{'linear','nearest','none'})} = 'none'
+end
 
 if ~isequal(size(x),size(y),size(v))
     error('TopoToolbox:interp2GRIDobj','The input vectors must have same size')
@@ -68,7 +66,7 @@ end
 A   = DEM;
 
 % interpolate using scatteredInterpolant
-F   = scatteredInterpolant(x,y,v,p.Results.method,p.Results.extrapolationmethod);
+F   = scatteredInterpolant(x,y,v,method,extrapmethod);
 Z   = F({xi,yi});
 
 % Transpose output

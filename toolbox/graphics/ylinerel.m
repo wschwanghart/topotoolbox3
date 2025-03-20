@@ -89,7 +89,7 @@ function updatedata
     h.XData(2:3:end) = xhigh;
 
 end
-function upondelete(scr,evt,hlist)
+function upondelete(~,~,hlist)
 
         delete(hlist)
 

@@ -57,19 +57,18 @@ else
     title('Draw rectangle');
 end
 
-if ~options.rect
-    ext = getextent(DEM);
+ext = getextent(DEM);
+cs4 = DEM.cellsize/4;
+ext = ext + cs4*[1 -1 1 -1];
 
+if ~options.rect
     h = drawpolygon('DrawingArea',...
         [ext(1) ext(3) ext(2)-ext(1) ext(4)-ext(3)]);
-    pos = customWait(h);
 else
-    ext = getextent(DEM);
-
     h = drawrectangle('DrawingArea',...
         [ext(1) ext(3) ext(2)-ext(1) ext(4)-ext(3)]);
-    pos = customWait(h);
 end
+customWait(h);
 
 MASK = DEM;
 MASK.name = 'mask';
@@ -81,7 +80,7 @@ delete(h);
 hold on
 plot(pos([1:end 1],1),pos([1:end 1],2));
 hold off
-title('done');
+title('Done');
 
 
 end

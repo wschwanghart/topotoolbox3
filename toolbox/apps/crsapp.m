@@ -196,19 +196,19 @@ pexpp = uicontrol(hp,'Style','pushbutton','String','Export parameters',...
                 'Enable','off',...
                 'TooltipString',s);  
 
-function display_MGslider_value(hObject,callbackdata)
+function display_MGslider_value(hObject,~)
    newval = num2str(hObject.Value);
    set(cmgtext,'String',['Minimum gradient = ' newval]);
 end
-function display_Kslider_value(hObject,callbackdata)
+function display_Kslider_value(hObject,~)
    newval = num2str(10.^(hObject.Value));
    set(cKtext,'String',['K = ' newval]);
 end
-function display_Tauslider_value(hObject,callbackdata)
+function display_Tauslider_value(hObject,~)
    newval = num2str(hObject.Value);
    set(cTautext,'String',['Tau = ' newval]);
 end
-function activateGradientMonotinicity(hObject,callbackdata)
+function activateGradientMonotinicity(hObject,~)
     newval = hObject.Value;
     if ~newval
         set(cmg,'Enable','off');
@@ -216,7 +216,7 @@ function activateGradientMonotinicity(hObject,callbackdata)
         set(cmg,'Enable','on');
     end
 end
-function smoothnetwork(hObject,callbackdata)
+function smoothnetwork(~,~)
     set(pbh,'Enable','off','String','Please wait ...');
     set(pexp,'Enable','off')
     set(pexpp,'Enable','off')
@@ -245,7 +245,7 @@ function smoothnetwork(hObject,callbackdata)
     set(pexpp,'Enable','on')
 end
 
-function exportnal(hObject,callbackdata)
+function exportnal(~,~)
         
         if ~isempty(zs)
             
@@ -264,7 +264,7 @@ function exportnal(hObject,callbackdata)
         end
 end
 
-function exportparams(hObject,callbackdata)
+function exportparams(~,~)
         if isfield(params,'Tau')
             
             

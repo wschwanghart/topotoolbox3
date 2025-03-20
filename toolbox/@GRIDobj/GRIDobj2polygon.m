@@ -1,4 +1,4 @@
-function [MS,x,y] = GRIDobj2polygon(DB,varargin)
+function [MS,x,y] = GRIDobj2polygon(DB,options)
 
 %GRIDobj2polygon Conversion from drainage basin grid to polygon or polyline
 %
@@ -69,31 +69,26 @@ function [MS,x,y] = GRIDobj2polygon(DB,varargin)
 % Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
 % Date: 14. June, 2022
 
+arguments
+    DB   GRIDobj
+    options.simplify (1,1) = false
+    options.tol (1,1) {mustBeNonnegative,mustBeNumeric} = 0
+    options.minarea (1,1) {mustBeNonnegative,mustBeNumeric} = 0
+    options.geometry {mustBeMember(options.geometry,{'Polygon','PolyLine','Line'})} = 'Polygon'
+    options.multipart (1,1) = false
+    options.holes (1,1) = false
+    options.waitbar (1,1) = false
+end
 
-
-% check input arguments
-narginchk(1,inf)
-p = inputParser;
-p.FunctionName = 'GRIDobj/GRIDobj2polygon';
-validgeoms  = {'Polygon','PolyLine','Line'};
-addRequired(p,'DB');
-addParamValue(p,'simplify',false, @(x) isscalar(x));
-addParamValue(p,'tol',0, @(x) isnumeric(x) && isscalar(x) && x>=0);
-addParamValue(p,'minarea',0, @(x) isnumeric(x) && isscalar(x) && x>=0);
-addParamValue(p,'geometry','Polygon',@(x) ischar(validatestring(x,validgeoms)));
-addParamValue(p,'multipart',false,@(x) isscalar(x));
-addParamValue(p,'holes',false,@(x) isscalar(x));
-addParamValue(p,'waitbar',false,@(x) isscalar(x));
-parse(p,DB,varargin{:});
 
 % read parsed arguments
-simp  = logical(p.Results.simplify);
-tol   = p.Results.tol;
-minarea = p.Results.minarea;
-geom  = validatestring(p.Results.geometry,validgeoms);
-mp    = p.Results.multipart;
-holes = p.Results.holes;
-waitb = p.Results.waitbar;
+simp    = logical(options.simplify);
+tol     = options.tol;
+minarea = options.minarea;
+geom    = options.geometry;
+mp      = options.multipart;
+holes   = options.holes;
+waitb   = options.waitbar;
 
 % check underlying class of the grid
 if isfloat(DB.Z)
@@ -118,12 +113,12 @@ ndb = numel(STATS);
 if waitb; h = waitbar(0,'please wait'); end
     
 counter = 0;
-for r = 1:ndb;
+for r = 1:ndb
     % show waitbar
     if waitb; waitbar(r/ndb,h); end
     
     % check if Area is larger than minimum area
-    if STATS(r).Area <= minarea;
+    if STATS(r).Area <= minarea
         continue
     else
         counter = counter+1;
@@ -163,8 +158,8 @@ for r = 1:ndb;
 end
 
 % create coordinate vectors if more than one output
-if nargout > 1;
-    for r=1:numel(MS);
+if nargout > 1
+    for r=1:numel(MS)
         if ~isnan(MS(r).X(end))
             MS(r).X(end+1) = nan;
             MS(r).Y(end+1) = nan;
@@ -185,7 +180,7 @@ end
 
 function C = bw2poly(BW,mp,holes)
 
-if islogical(BW);
+if islogical(BW)
     [r,c] = find(BW);
 else
     r = BW(:,1);
@@ -226,7 +221,7 @@ if mp
         C = cellfun(@(x) modifynodelist(x),C,'UniformOutput',false);
     else
         [C,~,N] = bwboundaries(B,4,'holes');
-        for iter2=1:numel(C);
+        for iter2=1:numel(C)
             if iter2<=N
                 C{iter2} = modifynodelist(C{iter2});
             else

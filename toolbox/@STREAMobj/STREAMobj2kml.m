@@ -4,8 +4,8 @@ function STREAMobj2kml(S,filename,options)
 %
 % Syntax
 %
-%     STREAMobj2kml(S)
-%     STREAMobj2kml(S,'pn','pv',...)
+%     STREAMobj2kml(S,filename)
+%     STREAMobj2kml(S,filename,'pn','pv',...)
 %     k = STREAMobj2kml(...)
 %
 % Description

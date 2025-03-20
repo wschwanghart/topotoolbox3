@@ -1,6 +1,6 @@
 function [x,y] = sub2coord(DEM,r,c)
 
-%SUB2COORD convert subscripts to x and y coordinates
+%SUB2COORD Convert subscripts to x and y coordinates
 %
 % Syntax
 %
@@ -24,6 +24,19 @@ function [x,y] = sub2coord(DEM,r,c)
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 30. May, 2024
+
+arguments
+    DEM  GRIDobj
+    r
+    c 
+end
+
+if numel(r) ~= numel(c)
+    error('TopoToolbox:wronginput','r and c must have the same number of elements')
+end
+
+mustBeInRange(r,1-.6,nrows(DEM)+.6)
+mustBeInRange(c,1-.6,ncols(DEM)+.6)
 
 r = r(:);
 c = c(:);

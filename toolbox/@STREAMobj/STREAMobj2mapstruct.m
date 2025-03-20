@@ -20,6 +20,9 @@ function [GS,x,y] = STREAMobj2mapstruct(S,varargin)
 %     shapewrite available with the Mapping Toolbox. It can be plotted with
 %     the function mapshow.
 %
+%     mapstructs have been replaced by geotable. Consider using
+%     STREAMobj2geotable instead.
+%
 %     When called with following syntax
 %     MS = STREAMobj2mapstruct(S)
 %     then
@@ -81,8 +84,9 @@ function [GS,x,y] = STREAMobj2mapstruct(S,varargin)
 %                   process each individually in parallel. Mostly, there
 %                   will not be a gain in speed as there is a significant
 %                   computational overhead to split the network. Running in 
-%                   may be more efficient if network is very large with 
-%                   numerous connected components.   
+%                   parallel may be more efficient if the stream network is  
+%                   very large with numerous connected components (drainage 
+%                   basins).   
 %      'latlon'     {false} or true. If true, the function will attempt to
 %                   transform coordinates to geographic coordinates. This
 %                   works only if S contains a valid projection. 
@@ -106,10 +110,10 @@ function [GS,x,y] = STREAMobj2mapstruct(S,varargin)
 %
 %     % then export MS as shapefile using shapewrite
 %     
-% See also: shapewrite, STREAMobj2XY
+% See also: shapewrite, STREAMobj2XY, STREAMobj2geotable
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 27. September, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 6. November, 2024
 
 
 
@@ -202,7 +206,11 @@ else
     
     % check the attributes
     attributes   = p.Results.attributes;
+    if mod(numel(attributes),3) ~= 0
+        error('TopoToolbox:wrongInput','Attributes must come as triplets {name values aggregationfunction}.')
+    end
     nrattributes = numel(attributes)/3;
+
     runinpar     = p.Results.parallel;
     seglength    = p.Results.seglength;
     
@@ -387,7 +395,7 @@ end
 if exist('p', 'var')
 if p.Results.latlon
     for r = 1:numel(GS)
-        [GS(r).Y,GS(r).X] = minvtran(S.georef.mstruct,GS(r).X,GS(r).Y);
+        [GS(r).Y,GS(r).X] = projinv(parseCRS(S),GS(r).X,GS(r).Y);
     end
 end
 end
@@ -475,15 +483,15 @@ function [C,RA,RB] = insertrows(A,B,ind)
 
 narginchk(2,3);
 
-if nargin==2,
+if nargin==2
     % just horizontal concatenation, suggested by Tim Davis
     ind = size(A,1) ;
 end
 
 % shortcut when any of the inputs are empty
-if isempty(B) || isempty(ind),    
+if isempty(B) || isempty(ind)    
     C = A ;     
-    if nargout > 1,
+    if nargout > 1
         RA = 1:size(A,1) ;
         RB = [] ;
     end
@@ -493,18 +501,18 @@ end
 sa = size(A) ;
 
 % match the sizes of A, B
-if numel(B)==1,
+if numel(B)==1
     % B has a single argument, expand to match A
     sb = [1 sa(2:end)] ;
     B = repmat(B,sb) ;
 else
     % otherwise check for dimension errors
-    if ndims(A) ~= ndims(B),
+    if ndims(A) ~= ndims(B)
         error('insertrows:DimensionMismatch', ...
             'Both input matrices should have the same number of dimensions.') ;
     end
     sb = size(B) ;
-    if ~all(sa(2:end) == sb(2:end)),
+    if ~all(sa(2:end) == sb(2:end))
         error('insertrows:DimensionMismatch', ...
             'Both input matrices should have the same number of columns (and planes, etc).') ;
     end
@@ -514,11 +522,11 @@ ind = ind(:) ; % make as row vector
 ni = length(ind) ;
 
 % match the sizes of B and IND
-if ni ~= sb(1),
-    if ni==1 && sb(1) > 1,
+if ni ~= sb(1)
+    if ni==1 && sb(1) > 1
         % expand IND
         ind = repmat(ind,sb(1),1) ;
-    elseif (ni > 1) && (sb(1)==1),
+    elseif (ni > 1) && (sb(1)==1)
         % expand B
         B = repmat(B,ni,1) ;
     else
@@ -535,17 +543,17 @@ C = [A ; B] ;
 % 2. sort the respective indices, the first output of sort is ignored (by
 % giving it the same name as the second output, one avoids an extra 
 % large variable in memory)
-[~,abi] = sort([[1:sa(1)].' ; ind(:)]) ;
+[~,abi] = sort([(1:sa(1)).' ; ind(:)]) ;
 % 3. reshuffle the large matrix
 C = C(abi,:) ;
 % 4. reshape as A for nd matrices (nd>2)
-if ismatrix(A),
+if ismatrix(A)
     sc = sa ;
     sc(1) = sc(1)+sb(1) ;
     C = reshape(C,sc) ;
 end
 
-if nargout > 1,
+if nargout > 1
     % additional outputs required
     R = [zeros(sa(1),1) ; ones(sb(1),1)] ;
     R = R(abi) ;
