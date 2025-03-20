@@ -69,7 +69,6 @@ F = scatteredInterpolant(allX(:),allY(:),allD(:),'linear','none');
 qz = F(X(:),Y(:));
 
 OUT = DEM;
-%OUT.Z(:) = nan;
-OUT.Z(:,:) = qz;
+OUT.Z(:) = qz;
 OUT.Z(OUT.Z>maxdist | OUT.Z<mindist) = nan;
 
