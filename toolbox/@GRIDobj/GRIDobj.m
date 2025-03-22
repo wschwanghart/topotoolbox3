@@ -237,7 +237,7 @@ classdef GRIDobj
 
                         % check whether size of Z is same as in referencing
                         % object
-                        tf = isequal(size(Z),R.RasterSize);
+                        tf = sizesMatch(R,Z);
                         assert(tf,"Array size of first argument and referencing matrix differs.")
 
                     end
