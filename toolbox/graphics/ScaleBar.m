@@ -51,7 +51,7 @@ classdef ScaleBar < handle
 %
 %     SB     handle to scale bar
 %
-% Example
+% Example 1
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     imageschs(DEM)
@@ -59,6 +59,16 @@ classdef ScaleBar < handle
 %     SB.location = 'northeast';
 %     SB.color = 'w';
 %     smaller(SB,2)
+%
+% Example 2
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     % Inverse projection to geographic coordinates
+%     DEMll = project(DEM,4326,'res',0.0008);
+%     DEMll = largestinscribedgrid(DEMll);
+%     imageschs(DEMll)
+%     adjustgeoaspectratio
+%     SB = ScaleBar('isgeo',true,'displayunit','auto');
 %
 % References: The function uses plotboxpos by Kelly Kearney. The function
 % is available here: https://github.com/kakearney/plotboxpos-pkg
