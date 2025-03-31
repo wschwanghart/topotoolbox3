@@ -144,7 +144,7 @@ else
 end
 
 % Limits of source grid
-[Rsource,Zsource] = GRIDobj2imref2d(SOURCE,pr2pr || pr2gcs); 
+[Rsource,Zsource,columnsStartNorth] = GRIDobj2imref2d(SOURCE,pr2pr || pr2gcs); 
 
 % get fillvalue
 fillval = p.Results.fillvalue;
@@ -208,7 +208,9 @@ if p.Results.align && targetisGRIDobj
     % If aligned, this is easy. The transformed GRIDobj will be perfectly
     % aligned with TARGET
     DEMr = GRIDobj(TARGET,Znew);
-    % DEMr.Z = flipud(DEMr.Z);
+    if columnsStartNorth 
+        DEMr.Z = flipud(DEMr.Z);
+    end
 else
     % We have calculated the imtransform with 'ColumnsStartFrom' south. 
     % GRIDobjs use 'ColumnsStartFrom' north
@@ -231,6 +233,10 @@ DEMr.name = [SOURCE.name ' (projected)'];
 if ~isequal(DEMr.size,DEMr.georef.RasterSize)
     error("Inconsistent raster size of georef and grid")
 end
+
+% Make sure that columns start north
+DEMr = makeColumnsStartFrom(DEMr,'north');
+
 % function ends here
 
 %% -----------------------------------------------------------------------
@@ -349,7 +355,7 @@ end
 
 %% ----------------------------------------------------------------------
 % functions to create imref2d objects
-function [R,Z] = GRIDobj2imref2d(DEM,isproj)
+function [R,Z,columnsStartNorth] = GRIDobj2imref2d(DEM,isproj)
 RM = DEM.georef;
 if isproj
     R = imref2d(RM.RasterSize,...
@@ -364,11 +370,13 @@ else
         [x,y] = getcoordinates(DEM);
         if y(1) > y(end)
             columnsStartNorth = true;
+        else
+            columnsStartNorth = false;
         end
         R = imref2d(DEM.size,[x(1) x(end)],[min(y) max(y)]);
     end
 end
-if nargout == 2
+if nargout >= 2
 Z = DEM.Z;
 if columnsStartNorth 
     Z = flipud(Z);
