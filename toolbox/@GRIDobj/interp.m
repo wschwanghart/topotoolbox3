@@ -55,7 +55,7 @@ method = validatestring(method,...
 [x,y] = getcoordinates(DEM);
 
 % flip y to get monotonic increasing grid vectors
-if x(1)<x(2)
+if x(1)>x(2)
     flip = false;
 else
     flip = true;
