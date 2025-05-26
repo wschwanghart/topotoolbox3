@@ -47,7 +47,7 @@ function [st,hs] = plotstreamorder(S,options)
 %     h         vector of handles to lineseries objects
 %     hs        stream order of each line handle
 %
-% Example:
+% Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     FD = FLOWobj(DEM,'preprocess','carve');

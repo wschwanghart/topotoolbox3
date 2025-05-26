@@ -79,6 +79,7 @@ arguments
     options.minmaxfacecolor = []
     options.edgecolor = 'none'
     options.meancolor = 'k'
+    options.meanlinewidth = 1
     options.plotminmax (1,1) = true
     options.minmaxcolor = []
     options.minmaxedgecolor = 'none'
@@ -136,7 +137,6 @@ if ishold(ax)
     ISHOLD = true;
 else
     ISHOLD = false;
-    cla(ax, 'reset')
     hold(ax,'on')
     box(ax,'on')
 end
@@ -157,7 +157,7 @@ if (boundedl) %exist('boundedline','file') &&
                   'FaceAlpha',options.facealpha);
     
 
-    hp(1) = plot(dist,z_mean,'color',options.meancolor);
+    hp(1) = plot(dist,z_mean,'color',options.meancolor,'LineWidth',options.meanlinewidth);
 
 else
     hp(1) = plot(dist,z_mean,'-','Color',options.meancolor); 
