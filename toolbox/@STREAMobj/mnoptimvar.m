@@ -1,4 +1,4 @@
-function [mn,cm,zm,zsd] = mnoptimvar(S,DEM,A,options)
+function [mn,cm,zm,zsd,zres] = mnoptimvar(S,DEM,A,options)
 
 %MNOPTIMVAR Optimize the mn ratio using minimum variance method
 %
@@ -7,7 +7,7 @@ function [mn,cm,zm,zsd] = mnoptimvar(S,DEM,A,options)
 %     mn = mnoptimvar(S,DEM,A)
 %     mn = mnoptimvar(S,z,a)
 %     mn = mnoptimvar(...,pn,pv,...)
-%     [mn,cm,zm,zsd] = ...
+%     [mn,cm,zm,zsd,zres] = ...
 %
 % Description
 %
@@ -52,6 +52,7 @@ function [mn,cm,zm,zsd] = mnoptimvar(S,DEM,A,options)
 %     cm    binned chi values
 %     zm    average elevation in chi bins
 %     zsd   standard deviation of elevations in chi bins
+%     zres  node attribute list of residual elevations between zm and z
 %
 % Example
 %
@@ -130,6 +131,8 @@ if nargout > 1 || options.plot
     zm  = accumarray(bin,copyz,[],@mean,0);
     zsd = accumarray(bin,copyz,[],@std,0);
     cm  = accumarray(bin,c,[],@mean,0);
+
+    zres = z - interp1(cm,zm,c,'linear','extrap');
     
 end
 
