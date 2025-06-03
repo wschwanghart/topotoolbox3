@@ -103,6 +103,9 @@ methods
             
             % Dealing with units here
             if ~isGeographic(FD)
+
+                unit = validatestring(unit,{'m', 'km', 'pixels', 'mapunits'});
+
                 switch unit
                     case 'mapunits'
                         minarea = minarea/(FD.cellsize.^2);
