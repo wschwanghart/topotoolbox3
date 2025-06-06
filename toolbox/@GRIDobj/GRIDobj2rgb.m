@@ -20,6 +20,8 @@ function [RGB,x,y] = GRIDobj2rgb(DEM,options)
 %     'colormap'     Colormap. Default is parula.
 %     'nancolor'     Color to be used for nans
 %     'clim'         Color range 
+%     'whiten'       GRIDobj. Colors will become brighter where the grid 
+%                    has high values. 
 %
 % Output arguments
 %
@@ -55,7 +57,7 @@ function [RGB,x,y] = GRIDobj2rgb(DEM,options)
 % See also: GRIDobj/imageschs, GRIDobj/GRIDobj2im
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 17. October, 2024
+% Date: 6. June, 2025
 
 arguments
     DEM GRIDobj
@@ -63,6 +65,7 @@ arguments
     options.nancolor (1,3) {mustBeInRange(options.nancolor,0,1)} = [1 1 1]
     options.clim     (1,2) = [min(DEM) max(DEM)]
     options.class    {mustBeMember(options.class,{'double','uint8'})} = 'uint8'
+    options.whiten   {mustBeGRIDobjOrEmpty} = []
 end
 
 validateattributes(options.clim,'numeric',{'increasing','numel',2})
@@ -97,6 +100,15 @@ if ~isempty(options.clim)
 end
 
 RGB = reshape(RGB,DEM.size(1),DEM.size(2),3);
+
+% Whiten
+if ~isempty(options.whiten)
+    W = options.whiten;
+    W = minmaxnorm(W);
+    for r = 1:3
+        RGB(:,:,r) = (1-W.Z) .* RGB(:,:,r) + W.Z;
+    end
+end
 
 switch options.class
     case 'uint8'
