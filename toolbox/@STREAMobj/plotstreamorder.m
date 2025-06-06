@@ -24,7 +24,6 @@ function [st,hs] = plotstreamorder(S,options)
 %     [h,hs] = streamorder(S,'plot',pn,pv,...)   lets you define various
 %     parameter name/value pairs (see below).
 %     
-%
 % Input
 %   
 %     S         STREAMobj 
@@ -48,18 +47,18 @@ function [st,hs] = plotstreamorder(S,options)
 %     h         vector of handles to lineseries objects
 %     hs        stream order of each line handle
 %
-% Example:
+% Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     FD = FLOWobj(DEM,'preprocess','carve');
 %     S = STREAMobj(FD,'minarea',1000);
-%     plotstreamorder(S,'colormap',ttclr('river',...
+%     plotstreamorder(S,'colormap',ttclr('river'),...
 %                       'LineWidth',max([1 2 3 4 5]/2,1));
 % 
 % See also: STREAMobj, FLOWobj/streamorder, STREAMobj/streamorder
 % 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]uni-potsdam.de)
-% Date: 17. June, 2024
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 21. May, 2025
 
 arguments 
     S    STREAMobj

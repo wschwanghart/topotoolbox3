@@ -1,10 +1,11 @@
-function [OUT] = mapswath(SW,M,varargin)
-%MAPSWATH obtains Z values along a SWATHobj from an arbitrary GRIDobj
+function OUT = mapswath(SW,M,method)
+%MAPSWATH Obtains Z values along a SWATHobj from an arbitrary GRIDobj
 %
 % Syntax
 %
-%     [OUT] = mapswath(SW,M)
-%     [OUT] = mapswath(SW,M,method)
+%     OUT = mapswath(SW,G)
+%     OUT = mapswath(SW,G,method)
+%     OUT = mapswath(SW,S,nal)
 %
 % Description
 %
@@ -16,9 +17,11 @@ function [OUT] = mapswath(SW,M,varargin)
 % Input arguments
 %
 %     SW      instance of SWATHobj
-%     M       instance of GRIDobj
+%     G       instance of GRIDobj
 %     method  interpolation method, can be any of 'linear','nearest',
 %             'spline','pchip','cubic'; by default 'linear'
+%     S       instance of STREAMobj
+%     nal     node-attribute list
 %
 % Output arguments
 %
@@ -32,28 +35,24 @@ function [OUT] = mapswath(SW,M,varargin)
 %     SWG = mapswath(SW,G);
 %     plotdz(SWG)
 %
-% Author: Dirk Scherler (scherler[at]gfz-potsdam.edu)
-% Date: May, 2015
+% Author: Dirk Scherler (scherler[at]gfz-potsdam.de) and
+%         Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: May, 2025
 
-
-narginchk(2,3)
-if nargin == 2
-    method = 'linear';
-else
-    method = validatestring(varargin{1},...
-        {'linear','nearest','spline','pchip','cubic'},'mapswath','method',3);
+arguments
+    SW  SWATHobj
+    M
+    method = 'linear'
 end
+   
+OUT = SW;
+OUT.Z(:) = nan;
 
-% check inputs
-if ~isa(SW,'SWATHobj')
-    error('First input hast to be of class SWATHobj');
-    
-elseif ~isa(M,'GRIDobj')
-    error('Second input hast to be of class GRIDobj');
-    
-else
-    OUT = SW;
-    OUT.Z(:) = nan;
+if isa(M,'GRIDobj')
+
+    method = validatestring(method,...
+        {'linear','nearest','spline','pchip','cubic'},'mapswath','method',3);
+
     ix = find(~isnan(SW.Z));
     OUT.Z(ix) = interp(M,OUT.X(ix),OUT.Y(ix),method);
     
@@ -65,8 +64,24 @@ else
     end
 
     OUT.name = {'SWATHobj created from SWATHobj:';SW.name};
-    OUT.georef = M.georef;
-    
+
+elseif isa(M,'STREAMobj')
+    S = M;
+
+    % Get node attribute list
+    if ~isnal(S,method)
+        error('Third input must be a node-attribute list')
+    else
+        nal = method;
+    end
+
+    % Find nearest swath pixel for each stream pixel
+    [IDX,D] = knnsearch([SW.X(:) SW.Y(:)],[S.x S.y]);
+    I = D< max([SW.dx SW.dy])*2;
+    OUT.Z(IDX(I)) = nal(I);
+
+    OUT.name = {'SWATHobj created from SWATHobj:';SW.name};
+
 end
 
 

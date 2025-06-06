@@ -13,7 +13,7 @@ function varargout = densify(S,spacing)
 %     (STREAMobj) using spline interpolation. The function returns either
 %     nan-separated lists of x- and y-coordinates or a geotable (GT) which
 %     can be exported to a shapefile using the function shapewrite
-%     (requires the mapping toolbox).
+%     (requires the Mapping Toolbox).
 %
 % Input arguments
 %
@@ -25,6 +25,15 @@ function varargout = densify(S,spacing)
 %     x,y      nan-separated coordinate vectors
 %     MS       mapstruct
 %
+% Example
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD = FLOWobj(DEM);
+%     S = STREAMobj(FD,'minarea',1000);
+%     GT = densify(S,5);
+%     plot(S,'color',[.5 .5 .5]);
+%     mapshow(GT)
+%     % Zoom in to compare both plots
 %
 % See also: STREAMobj
 %
@@ -92,16 +101,9 @@ else
         
     end
     varargout{1} = mapstruct2geotable(MS,'CoordinateReferenceSystem',parseCRS(S));
-end
-        
-    
-        
+end     
 
 end
-
-
-
-
 
 function xxyy = splinedensify(d,x,y,dd)
 

@@ -26,7 +26,15 @@ function geotiffextent(filename)
 % See also: GRIDobj, geotiffinfo
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 11. February, 2019
+% Date: 26. February, 2025
+
+arguments
+    filename = '.'
+end
+
+if isempty(filename)
+    filename = '.';
+end
 
 if isfolder(filename)
     files = dir([filename filesep '*.tif']);

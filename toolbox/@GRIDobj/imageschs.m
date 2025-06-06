@@ -315,10 +315,16 @@ if ~isa(A,'logical')
         clear Inan
     end
     
-    if isa(colmapfun,'char')        
+    if ischar(colmapfun) || isstring(colmapfun)        
         ncolors = 256-nans;
-        colmapfun = str2func(lower(colmapfun));
-        cmap = colmapfun(ncolors);
+        try 
+            cmap = ttscm(colmapfun,ncolors);
+        catch
+
+            colmapfun = str2func(lower(colmapfun));
+            cmap = colmapfun(ncolors);
+        end
+        
     else
         ncolors = size(colmapfun,1);
         if nans && (ncolors >= 256)
