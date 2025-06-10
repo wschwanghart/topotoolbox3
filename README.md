@@ -68,9 +68,10 @@ Now plot this data using `imageschs`.
 
 		imageschs(DEM)
 
-Well done. If this works, your TopoToolbox installation should run. Now, check what TopoToolbox has to offer and open the `gettingStarted.mlx` file which is found in the `toolbox` folder. 
+Well done. If this works, your TopoToolbox installation should run. Now, check out the following introductory texts:
 
-Also see these introductory texts: [Getting started](/./md/usersguide_1_intro.md), [How to calculate ksn](/./md/usersguide_2_ksn.md), and [Multiple flow directions](/./md/usersguide_3_mfd.md). 
+| [![Getting started](images/mdlink1.png)](/./md/usersguide_1_intro.md) | [![How to calculate ksn](images/mdlink2.png)](/./md/usersguide_2_ksn.md) | [![Multiple flow directions](images/mdlink3.png)](/./md/usersguide_3_mfd.md) |
+|----------------------------------|----------------------------------|-------------------------------------|
 
 ## References
 
