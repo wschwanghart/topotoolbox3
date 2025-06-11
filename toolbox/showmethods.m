@@ -84,6 +84,7 @@ for r = 1:numel(m)
             disp(['<a href="matlab: doc ' classname '/' methodstr '">' upper(methodstr) '</a>' addblanks ' : ' h1str]);
         end
         else
+            h1str(1) = upper(h1str(1));
             t = {string(upper(methodstr)), string(h1str)};
             OUT = [OUT; cell2table(t,'VariableNames',{'Name','Description'})];
         end

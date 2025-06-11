@@ -4,7 +4,7 @@
 | Name    | Description |
 | -------- | ------- |
 | GRIDOBJ | Create instance of a GRIDobj | 
-| GRIDOBJ2ASCII | write/export GRIDobj to ESRI ArcGIS ASCII file | 
+| GRIDOBJ2ASCII | Write/export GRIDobj to ESRI ArcGIS ASCII file | 
 | GRIDOBJ2GEOTABLE | Convert categorical GRIDobj to geotable (polygon)  | 
 | GRIDOBJ2GEOTIFF | Exports an instance of GRIDobj to a geotiff file | 
 | GRIDOBJ2IM | Create image from GRIDobj | 
@@ -18,10 +18,10 @@
 | ASPECT | Direction of the steepest slope | 
 | CASTSHADOW | Cast shadow calculated from digital terrain | 
 | CELLAREA | Calculate cell areas of a GRIDobj in geographic coordinate system | 
-| CLIP | clip a GRIDobj with a polygon or another GRIDobj | 
+| CLIP | Clip a GRIDobj with a polygon or another GRIDobj | 
 | CONTOUR | Contour plot of an instance of GRIDobj | 
-| COORD2IND | convert x and y coordinates to linear index | 
-| COORD2SUB | convert x and y coordinates to subscripts into a GRIDobj | 
+| COORD2IND | Convert x and y coordinates to linear index | 
+| COORD2SUB | Convert x and y coordinates to subscripts into a GRIDobj | 
 | CREATEMASK | Create a binary mask using polygon mapping | 
 | CROP | Crop an instance of GRIDobj with axis-aligned minimum bounding box | 
 | CURVATURE | Curvature of a digital elevation model  | 
@@ -30,30 +30,30 @@
 | DIFFUSION | Solve the diffusion equation | 
 | DILATE | Morphological dilation | 
 | DIST2CURVE | Labels pixels in a GRIDobj by their directed distance to a curved line | 
-| DIST2LINE | labels pixels in a GRIDobj by their distance to a straight line | 
-| DISTANCE | distance transform | 
+| DIST2LINE | Labels pixels in a GRIDobj by their distance to a straight line | 
+| DISTANCE | Distance transform | 
 | ELEVATEMINIMA | Elevate regional minima in a DEM to their lowest neighbor | 
 | ERODE | Morphological erosion | 
 | EVANSSLOPE | Calculate surface slope using Evans method | 
-| EXCESSTOPOGRAPHY | reconstruct surface with threshold-slope surface | 
+| EXCESSTOPOGRAPHY | Reconstruct surface with threshold-slope surface | 
 | FILLSINKS | Fill/remove pits, sinks or topographic depressions | 
 | FILTER | 2D-filtering of DEMs with different kernels  | 
 | FIND | Find indices of nonzero elements in GRIDobj | 
 | FINDCOORD | Find coordinates of nonzero elements in GRIDobj | 
-| GETCOORDINATES | get coordinate vectors of an instance of GRIDobj | 
-| GETEXTENT | return extent of a GRIDobj | 
+| GETCOORDINATES | Get coordinate vectors of an instance of GRIDobj | 
+| GETEXTENT | Return extent of a GRIDobj | 
 | GETOUTLINE | Get outline of GRIDobj | 
 | GRADIENT8 | 8-connected neighborhood gradient of a digital elevation model | 
-| GRIDDEDCONTOUR | plot contours on grid | 
-| HEXGRID | creates an array of haxagonal points | 
+| GRIDDEDCONTOUR | Plot contours on grid | 
+| HEXGRID | Creates an array of haxagonal points | 
 | HILLSHADE | Calculate hillshading from a digital elevation model | 
 | HISTOGRAM | Plot frequency distribution of values in GRIDobj | 
 | HYDROGRAM | Generate an hydrogram | 
-| HYPSCURVE | plot hypsometric curve of a digital elevation model | 
-| IDENTIFYFLATS | identify flat terrain in a digital elevation model | 
+| HYPSCURVE | Plot hypsometric curve of a digital elevation model | 
+| IDENTIFYFLATS | Identify flat terrain in a digital elevation model | 
 | IMAGESC | Scale data in GRIDobj and display as image object | 
 | IMAGESCHS | Plot hillshade image with overlay | 
-| IND2COORD | convert linear index to x and y coordinates | 
+| IND2COORD | Convert linear index to x and y coordinates | 
 | INFO | Detailed information on GRIDobj instance | 
 | INPAINTNANS | Interpolate or fill missing values in a grid (GRIDobj) | 
 | INTERP | Interpolate to query locations | 
@@ -72,9 +72,9 @@
 | MIN | Minimum value in GRIDobj | 
 | MINMAXNORM | Min-max normalization with optional percent clipping | 
 | MOSAIC | Merge multiple GRIDobjs into a larger GRIDobj | 
-| MPOWER | overloaded power for GRIDobj | 
-| MRDIVIDE | overloaded right division for GRIDobj | 
-| MTIMES | overloaded multiplication for GRIDobj | 
+| MPOWER | Overloaded power for GRIDobj | 
+| MRDIVIDE | Overloaded right division for GRIDobj | 
+| MTIMES | Overloaded multiplication for GRIDobj | 
 | MUSTBEUNDERLYINGINTEGER | Create instance of a GRIDobj | 
 | MUSTBEUNDERLYINGNUMERIC | Create instance of a GRIDobj | 
 | MUSTBEUNDERLYINGTYPE | Create instance of a GRIDobj | 
@@ -94,11 +94,11 @@
 | RESAMPLE | Change spatial resolution of a GRIDobj | 
 | ROUGHNESS | Terrain ruggedness, position and roughness indices of DEMs | 
 | SHUFFLELABEL | Shufflelabel randomly relabels a label matrix | 
-| SNAP2STREAM | snap gauges or pour points to stream raster | 
+| SNAP2STREAM | Snap gauges or pour points to stream raster | 
 | SUB2COORD | Convert subscripts to x and y coordinates | 
 | SURF | Surface plot for GRIDobj | 
 | TANAKACONTOUR | Relief depiction using Tanaka contours | 
-| TOPOSHIELDING | topographic shielding from cosmic rays | 
+| TOPOSHIELDING | Topographic shielding from cosmic rays | 
 | UNDERLYINGTYPE | Create instance of a GRIDobj | 
 | VALIDATEALIGNMENT | Checks validity that two GRIDobj are spatially aligned | 
 | ZSCORE | Standardized z-scores for GRIDobj | 
@@ -109,20 +109,20 @@
 | FLOWOBJ | Create flow direction object | 
 | FLOWOBJ2GRIDOBJ | Create ESRI ArcGIS flow direction grid from FLOWobj | 
 | FLOWOBJ2M | Convert instance of FLOWobj to flow direction matrix  | 
-| FLOWOBJ2CELL | return cell array of FLOWobjs for individual drainage basins | 
+| FLOWOBJ2CELL | Return cell array of FLOWobjs for individual drainage basins | 
 | CLIP | Clip FLOWobj | 
 | COORD2IND | Convert linear indices to world coordinates | 
-| CROP | crop an instance of FLOWobj | 
+| CROP | Crop an instance of FLOWobj | 
 | DBASYMMETRY | Drainage basin asymmetry | 
 | DBENTROPY | Entropy of drainage basin delineation | 
 | DEPENDENCEMAP | Delineate upslope area for specific locations in a DEM | 
-| DRAINAGEBASINS | drainage basin delineation/catchments | 
+| DRAINAGEBASINS | Drainage basin delineation/catchments | 
 | DRAINAGEBASINSTATS | Zonal statistics on drainage basins | 
 | FIND | Find indices and values of edges in the flow direction graph | 
 | FLIPDIR | Flip direction of flow | 
-| FLOWACC | flow accumulation (upslope area, contributing area) | 
+| FLOWACC | Flow accumulation (upslope area, contributing area) | 
 | FLOWCONVERGENCE | Compute flow convergence of a digital elevation model | 
-| FLOWDISTANCE | flow distance in upstream and downstream direction | 
+| FLOWDISTANCE | Flow distance in upstream and downstream direction | 
 | FLOWDIVERGENCE | Calculate the number of downstream neighbors | 
 | FLOWPATHEXTRACT | Extract linear indices of a single flowpath in a DEM | 
 | FLOWTIME | Flow time (and distance) in upstream direction | 
@@ -156,12 +156,12 @@
 | STREAMOBJ | Create stream object (STREAMobj) | 
 | STREAMOBJ2GRIDOBJ | Convert STREAMobj to GRIDobj | 
 | STREAMOBJ2SWATHOBJ | Create swath profile (SWATHobj) from stream network | 
-| STREAMOBJ2XY | convert instance of STREAMobj to NaN-separated X and Y coordinates | 
-| STREAMOBJ2CELL | convert instance of STREAMobj to cell array of stream objects | 
+| STREAMOBJ2XY | Convert instance of STREAMobj to NaN-separated X and Y coordinates | 
+| STREAMOBJ2CELL | Convert instance of STREAMobj to cell array of stream objects | 
 | STREAMOBJ2GEOTABLE | Convert STREAMobj to a geotable | 
 | STREAMOBJ2KML | Convert STREAMobj to kml (Google Earth) | 
-| STREAMOBJ2LATLON | convert instance of STREAMobj to NaN-separated geographic coordinates | 
-| STREAMOBJ2MAPSTRUCT | convert instance of STREAMobj to mapstruct | 
+| STREAMOBJ2LATLON | Convert instance of STREAMobj to NaN-separated geographic coordinates | 
+| STREAMOBJ2MAPSTRUCT | Convert instance of STREAMobj to mapstruct | 
 | AGGREGATE | Summarizing values within segments of the stream network | 
 | BIFURCATIONRATIO | Calculate the bifurcation ratio of a STREAMobj | 
 | BINARIZE | Make a stream network a strictly binary tree | 
@@ -170,17 +170,17 @@
 | CLEAN | Create stream object (STREAMobj) | 
 | CONNCOMPS | Labels of connected components (individual trees) in a stream network | 
 | CRS | Constrained regularized smoothing of the channel length profile | 
-| CRSLIN | constrained regularized smoothing of the channel length profile | 
+| CRSLIN | Constrained regularized smoothing of the channel length profile | 
 | CUMMAXUPSTREAM | Cumulative maximum in upstream direction | 
 | CUMSUM | Cumulative sum on stream network | 
 | CUMTRAPZ | Cumulative trapezoidal numerical integration along a stream network | 
-| CURVATURE | curvature or 2nd derivative of a STREAMobj | 
+| CURVATURE | Curvature or 2nd derivative of a STREAMobj | 
 | DENSIFY | Increase number of vertices in stream network using splines | 
 | DIFF | Differences between adjacent pixels in a stream network | 
 | DISTANCE | Compute distances along the stream network | 
 | DRAINAGEDENSITY | Drainage density of a stream network | 
 | EXTEND2DIVIDE | Grow STREAMobj upstream to extend to the divide | 
-| EXTRACTCONNCOMPS | interactive stream network selection | 
+| EXTRACTCONNCOMPS | Interactive stream network selection | 
 | EZGETNAL | Easy handling and retrieval of node-attribute lists | 
 | FASTSCAPE | Simulate river incision using the stream power incision model | 
 | GETLOCATION | Get locations along a stream network | 
@@ -188,12 +188,12 @@
 | GETVALUE | Retrieve value from node-attribute list | 
 | GRADIENT | Along-stream gradient | 
 | HILLSLOPEAREA | Upslope hillslope area for each stream pixel  | 
-| IDENTIFYFLATS | identify flat sections in a river profile | 
-| IMPOSEMIN | minima imposition (carving) along stream network | 
+| IDENTIFYFLATS | Identify flat sections in a river profile | 
+| IMPOSEMIN | Minima imposition (carving) along stream network | 
 | INFO | Meta information about STREAMobj | 
 | INPAINTNANS | Inpaint missing values (nans) in a node attribute list | 
 | INTERP | Interpolate data on STREAMobj (single river only) | 
-| INTERSECT | intersect different instances of STREAMobj  | 
+| INTERSECT | Intersect different instances of STREAMobj  | 
 | INTERSECTLOCS | Derive locations where two STREAMobj start to have a common network | 
 | ISEMPTY | Determine whether a STREAMobj is empty | 
 | ISEQUAL | Determine whether two STREAMobjs are equal | 
@@ -202,8 +202,8 @@
 | ISTRUNK | Determines whether STREAMobj consists of trunk streams | 
 | KLARGESTCONNCOMPS | Keep k largest connected components in an instance of STREAMobj | 
 | KNICKPOINTFINDER | Find knickpoints in river profiles | 
-| KSN | normalized steepness index | 
-| LABELREACH | create node-attribute list with labelled reaches | 
+| KSN | Normalized steepness index | 
+| LABELREACH | Create node-attribute list with labelled reaches | 
 | LOESSKSN | Loess-smoothed river steepness | 
 | LOWERENV | Lower envelope of a channel length profile | 
 | MAPLATERAL | Map values of regions adjacent to streams to stream network | 
@@ -220,10 +220,10 @@
 | PLOT | Plot instance of STREAMobj | 
 | PLOT3 | 3D-line plot of a STREAMobj | 
 | PLOT3D | 3D plot of a stream network | 
-| PLOTC | plot a colored stream network | 
+| PLOTC | Plot a colored stream network | 
 | PLOTCATEGORICAL | Plot categorical variable along a single river | 
-| PLOTDZ | plot upstream distance version elevation of a stream network | 
-| PLOTDZSHADED | plot upstream distance version elevation of a stream network | 
+| PLOTDZ | Plot upstream distance version elevation of a stream network | 
+| PLOTDZSHADED | Plot upstream distance version elevation of a stream network | 
 | PLOTSEGMENTGEOMETRY | Plot segment geometry obtained from the function networksegment | 
 | PLOTSTREAMORDER | Calculate stream order from STREAMobj | 
 | QUANTCARVE | Quantile carving | 
@@ -233,26 +233,26 @@
 | RMEDGE | Create stream object (STREAMobj) | 
 | RMNODE | Create stream object (STREAMobj) | 
 | SHAREDSTREAMPOWER |  Simulation of the shared stream-power model | 
-| SIDEBRANCHING | side branching classification according to Tokunaga (1978) | 
+| SIDEBRANCHING | Side branching classification according to Tokunaga (1978) | 
 | SINUOSITY | Sinuosity coefficient  | 
-| SLOPEAREA | slope-area relation of a stream network | 
-| SMOOTH | smoothing of node-attribute lists | 
+| SLOPEAREA | Slope-area relation of a stream network | 
+| SMOOTH | Smoothing of node-attribute lists | 
 | SNAP2STREAM | Snap locations to nearest stream location | 
 | SPLIT | Split drainage network at predefined locations | 
 | SPLITBYATTRIBUTE | Create a cell array of STREAMobjs using an attribute | 
-| STACKEDPLOTDZ | plot several stacked variables along the stream networks | 
+| STACKEDPLOTDZ | Plot several stacked variables along the stream networks | 
 | STREAMORDER | Calculate stream order from STREAMobj | 
 | STREAMPOI | Points of interest on the stream network | 
-| STREAMPROJ | project stream elevations based on slope-area scaling | 
+| STREAMPROJ | Project stream elevations based on slope-area scaling | 
 | SUBGRAPH | Create stream object (STREAMobj) | 
-| TRANSFORMCOORDS | transform coordinates of stream network | 
-| TRIBDIR | direction of inflow of tributary | 
+| TRANSFORMCOORDS | Transform coordinates of stream network | 
+| TRIBDIR | Direction of inflow of tributary | 
 | TRUNCATE | Shrink river network by removing links at channelheads or outlets | 
-| TRUNK | extract trunk stream (longest stream)  | 
-| UNION | merge different instances of STREAMobj into a new instance | 
-| VALIDATEALIGNMENT | is an instance of STREAMobj is spatially aligned with another object of TopoToolbox | 
-| WIDENSTREAM | level elevations adjacent to the stream network | 
-| WMPLOT | plot stream network in the webmap browser | 
+| TRUNK | Extract trunk stream (longest stream)  | 
+| UNION | Merge different instances of STREAMobj into a new instance | 
+| VALIDATEALIGNMENT | Is an instance of STREAMobj is spatially aligned with another object of TopoToolbox | 
+| WIDENSTREAM | Level elevations adjacent to the stream network | 
+| WMPLOT | Plot stream network in the webmap browser | 
 | ZEROBASELEVEL | Set base level of stream elevation to zero | 
  
 ## SWATHobj
@@ -262,13 +262,13 @@
 | SWATHOBJ2GRIDOBJ | Create a GRIDobj with swath-specific information | 
 | SWATHOBJ2GDS | Create a geographic data structure from a SWATHobj | 
 | SWATHOBJ2TABLE | Convert SWATHobj to table | 
-| CONVERT2LATLON | converts spatial fields in SWATHobj to lat,lon | 
+| CONVERT2LATLON | Converts spatial fields in SWATHobj to lat,lon | 
 | GETOUTLINE | Get outline of swath | 
 | GETTRACE | Get trace of swath | 
 | MAPSWATH | Obtains Z values along a SWATHobj from an arbitrary GRIDobj | 
 | PLOT | Plot instance of SWATHobj | 
 | PLOTDZ | Creates distance-elevation plot of a SWATHobj | 
-| PLOTDZM | create color-coded distance-elevation plot from SWATHobj and GRIDobj | 
+| PLOTDZM | Create color-coded distance-elevation plot from SWATHobj and GRIDobj | 
 | PROFILES | Calculate profiles from a SWATHobj | 
 | STAT | Calculate statistics for swath profile object (SWATHobj) | 
 | SWATH2LATLON | Convert spatial fields in SWATHobj to geographic coordinates | 
@@ -292,30 +292,30 @@
 | ECDF | Empirical cumulative distribution function of a covariate  | 
 | EXTENDEDNETWORK | Extend network to account for duplicate points | 
 | EXTRACTVALUESAROUNDPOINTS | Extract values around points  | 
-| FITLOGLINEAR | fit loglinear model to point pattern | 
+| FITLOGLINEAR | Fit loglinear model to point pattern | 
 | GENERATEPOINTS | Generate non-random points on stream network | 
 | GETMARKS | Extract point marks | 
 | GFUN | G-function (nearest inter-point distance distribution) | 
 | HASDUPLICATES | Determines whether there are duplicate points | 
 | HISTOGRAM | Histogram of point pattern on stream network | 
 | IDW | Inverse distance weighted interpolation on stream networks | 
-| INTENSITY | calculate intensity (density) of points on the stream network | 
+| INTENSITY | Calculate intensity (density) of points on the stream network | 
 | MNOPTIMKP | Find optimal mn ratio based on knickpoint locations | 
-| MODIFY | modify instance of PPS to meet user-defined criteria | 
+| MODIFY | Modify instance of PPS to meet user-defined criteria | 
 | NETDIST | Shortest network distance | 
 | NPOINTS | Number of points in the point pattern | 
 | PLOT | Plot instance of PPS | 
 | PLOTC | Plot a colored stream network and points | 
-| PLOTDZ | plot upstream distance version elevation or covariate of a PPS | 
+| PLOTDZ | Plot upstream distance version elevation or covariate of a PPS | 
 | PLOTEFFECTS | Plot of slices through a loglinear point process model | 
-| PLOTPOINTS | plot points of PPS | 
+| PLOTPOINTS | Plot points of PPS | 
 | POINTDISTANCES | Inter-point distance calculated on stream network | 
 | POINTS | Extract a list of points from the point pattern | 
 | QUADRATCOUNT | Quadrat count and chi2 test | 
 | RANDOM | Random realisation of a (inhomogeneous) point process | 
 | REMOVEDUPLICATES | Remove duplicate points | 
 | REMOVEPOINTS | Remove points in point pattern | 
-| RHOHAT | nonparametric estimation of point pattern dependence on covariate | 
+| RHOHAT | Nonparametric estimation of point pattern dependence on covariate | 
 | ROC | Receiver-operating characteristics of point pattern | 
 | SHAPEWRITE | Write point pattern to shapefile | 
 | SIMULATE | Simulate point pattern using random thinning | 
@@ -327,16 +327,16 @@
 | Name    | Description |
 | -------- | ------- |
 | DIVIDEOBJ | Create divide object (DIVIDEobj) | 
-| DIVIDEOBJ2MAPSTRUCT | obtain divide properties from GRIDobj | 
+| DIVIDEOBJ2MAPSTRUCT | Obtain divide properties from GRIDobj | 
 | ASYMMETRY | ASYMMETRY   directional asymmetry of divide segments | 
 | CLEANEDGES |   Delete divides on the edges of DEM | 
-| COORD2IND | convert x and y coordinates to linear index | 
-| DIST2NODE | network distance to nodes | 
+| COORD2IND | Convert x and y coordinates to linear index | 
+| DIST2NODE | Network distance to nodes | 
 | DIVDIST | DIVDIST   Assign distance to divide segments | 
 | DIVNET | Create divide object (DIVIDEobj) | 
 | DIVORDER |   Assign order to divide segments | 
 | GETVALUE | Get grid values adjacent to divides | 
-| IND2COORD | convert linear index to x and y coordinates | 
+| IND2COORD | Convert linear index to x and y coordinates | 
 | JCTANGLE | Angles between divide segments at junctions | 
 | JCTCON |  Compute junction connectivity | 
 | PLOT | Plot the divide network  | 
