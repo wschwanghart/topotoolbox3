@@ -21,7 +21,7 @@ oldfolder = cd(f);
 cd("..")
 addpath(genpath('toolbox'))
 
-rmpath(fullfile('toolbox','help'))
+% rmpath(fullfile('toolbox','help'))
 % rmpath(fullfile('toolbox','docs','html'))
 
 cd(oldfolder)

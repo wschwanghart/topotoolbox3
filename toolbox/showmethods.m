@@ -1,6 +1,6 @@
-function showmethods(classname,showlink)
+function varargout = showmethods(classname,showlink)
 
-% displays class method names and H1 lines in the command line
+%SHOWMETHODS Display class method names and H1 lines in the command line
 %
 % Syntax
 %
@@ -38,6 +38,13 @@ m = methods(classname);
 
 C = cellfun(@(x) numel(x),m,'uniformoutput',true);
 
+if nargout == 1
+    IsMakeTable = true;
+    OUT = table([],[],'VariableNames',{'Name','Description'});
+else
+    IsMakeTable = false;
+end
+
 maxmethcharacter = max(C);
 
 for r = 1:numel(m)
@@ -69,11 +76,18 @@ for r = 1:numel(m)
         h1str = tline(2:end);
         ix    = strfind(h1str,' ');
         h1str = h1str(ix(1)+1:end);
+
+        if ~IsMakeTable
         if ~showlink                
             disp([ upper(methodstr) addblanks ' : ' h1str]);
         else
             disp(['<a href="matlab: doc ' classname '/' methodstr '">' upper(methodstr) '</a>' addblanks ' : ' h1str]);
         end
+        else
+            t = {string(upper(methodstr)), string(h1str)};
+            OUT = [OUT; cell2table(t,'VariableNames',{'Name','Description'})];
+        end
+                
         fclose(fileID);
         
     catch
@@ -81,7 +95,11 @@ for r = 1:numel(m)
     end
     
 end
-            
+           
+if nargout == 1
+    varargout{1} = OUT;
+end
+
            
 
 
