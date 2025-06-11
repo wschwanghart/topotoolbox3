@@ -1,6 +1,6 @@
 function [Z,R] = GRIDobj2im(DEM)
 
-% GRIDOBJ2IM Create image from GRIDobj
+%GRIDOBJ2IM Create image from GRIDobj
 %
 % Syntax
 %
