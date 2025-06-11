@@ -48,7 +48,7 @@ end
 maxmethcharacter = max(C);
 
 for r = 1:numel(m)
-    s = which([classname '/' m{r}]);
+    s = which([char(classname) '/' m{r}]);
     fileID = fopen(s,'r');
     H1line = false;
     
