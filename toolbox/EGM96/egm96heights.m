@@ -39,6 +39,16 @@ function DEM = egm96heights(DEM)
 %     caxis([-100 100])
 %     camlight; material dull
 %
+% Example 3
+%
+%     figure
+%     axesm('globe','Grid','on')
+%     view(60,60)
+%     axis off
+%     surfm(lat,lon,G.Z,G.Z/(max(G.Z(:))*5));
+%     colormap(ttscm('roma'));
+%     gridm off
+%
 % See also: GRIDobj, egm96geoid
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)

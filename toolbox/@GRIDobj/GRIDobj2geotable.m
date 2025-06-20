@@ -44,7 +44,7 @@ function [GT,x,y] = GRIDobj2geotable(DB,options)
 %     DEM = clip(DEM,~I);
 %     imageschs(DEM)
 %    
-%     C = reclassify(DEM,'equalint',5);
+%     C = reclassify(DEM,'equalintervals',5);
 %     GT = GRIDobj2geotable(C);
 %     geoplot(GT)
 %

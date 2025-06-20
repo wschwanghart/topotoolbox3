@@ -27,7 +27,7 @@ function [MS,x,y] = GRIDobj2polygon(DB,options)
 %
 %     DB    GRIDobj with drainage basins 
 %     
-% Parameter name/value pairs
+%     Parameter name/value pairs
 %
 %     simplify      true or {false}. Douglas-Peuker simplification. Note
 %                   that for tol>0 (see tol parameter) adjacent polygons

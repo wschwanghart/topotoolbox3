@@ -49,7 +49,7 @@ function GT = mapstruct2geotable(MS,options)
 % See also: table2geotable, parseCRS
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 17. June, 2024
+% Date: 19. June, 2025
 
 arguments
     MS   {mustBeA(MS,'struct')}
@@ -119,6 +119,14 @@ GT = struct2table(MS);
 
 % Convert geo-variable names to two-element string vector
 varnames = string(varnames);
+
+% If all shapes have the same number of vertices, the coordinates will be
+% stored as matrix rather than as cell array. This causes table2geotable to
+% return an error
+if ~iscell(GT.(varnames(1)))
+    GT.(varnames(1)) = num2cell(GT.(varnames(1)),2);
+    GT.(varnames(2)) = num2cell(GT.(varnames(2)),2);
+end
 
 % Get coordinate system type (planar or geographic)
 coordinateSystemType = options.coordinateSystemType;

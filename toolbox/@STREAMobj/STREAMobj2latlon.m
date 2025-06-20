@@ -19,9 +19,9 @@ function [lat,lon,varargout] = STREAMobj2latlon(S,varargin)
 %
 % Input arguments
 %
-%     S       streams (class STREAMobj)
-%     A,B,... grids (class GRIDobj) or node attributes (e.g. as returned by
-%             the function STREAMobj/streamorder
+%     S        streams (class STREAMobj)
+%     A,B,...  grids (class GRIDobj) or node attributes (e.g. as returned 
+%              by the function STREAMobj/streamorder
 %
 % Output arguments
 %

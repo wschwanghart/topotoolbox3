@@ -73,6 +73,17 @@ classdef GRIDobj
 %     referencing) inherited from another instance of a FLOWobj, GRIDobj 
 %     or STREAMobj class. The second input argument Z is written to DEM.Z.
 %
+% Input arguments
+%
+%     Z           matrix
+%     cs          cellsize (scalar)
+%     R           Mapping Toolbox referencing object
+%     X,Y         Coordinate vectors or matrices
+%     
+% Output arguments
+%
+%     DEM         GRIDobj
+%
 % Example 1: Load a DEM
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
