@@ -1,6 +1,6 @@
 function [GS,x,y] = STREAMobj2mapstruct(S,varargin)
 
-%STREAMOBJ2MAPSTRUCT convert instance of STREAMobj to mapstruct
+%STREAMOBJ2MAPSTRUCT Convert instance of STREAMobj to mapstruct
 %
 % Syntax
 %
@@ -24,10 +24,11 @@ function [GS,x,y] = STREAMobj2mapstruct(S,varargin)
 %     STREAMobj2geotable instead.
 %
 %     When called with following syntax
+%
 %     MS = STREAMobj2mapstruct(S)
-%     then
-%     MS contains individual line features for each river reach with unique
-%     streamorder and contains following fields:
+%
+%     then MS contains individual line features for each river reach with
+%     unique streamorder and contains following fields:
 %
 %        Geometry: 'Line'
 %               X: vector with vertices of x-coordinates
@@ -37,6 +38,7 @@ function [GS,x,y] = STREAMobj2mapstruct(S,varargin)
 %        tribtoIX: tributary to stream with id IX
 %
 %     When called with following syntax
+%
 %     MS = STREAMobj2mapstruct(S,'seglength',length,...
 %                        'attributes',{'fieldname1' var1 aggfunction1 ...
 %                                      'fieldname2' var2 aggfunction2})
@@ -64,7 +66,7 @@ function [GS,x,y] = STREAMobj2mapstruct(S,varargin)
 %     S       STREAMobj
 %     type    {'strahler'} or 'shreve'
 %
-% Parameter name/value pairs
+%     Parameter name/value pairs
 %
 %     'seglength'   approximate segment length (scalar, map units)
 %     'attributes'  1 x n*3 cell array where n is the number of attributes,
@@ -114,9 +116,6 @@ function [GS,x,y] = STREAMobj2mapstruct(S,varargin)
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 6. November, 2024
-
-
-
 
 if nargin == 1
     type = 'strahler';

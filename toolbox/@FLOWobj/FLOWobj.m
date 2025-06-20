@@ -35,7 +35,7 @@ classdef FLOWobj
 %     DEM    digital elevation model (class: GRIDobj)
 %     type   {'single'}, 'multi' or 'dinf'
 %     
-% Parameter name/value pairs   {default}
+%     Parameter name/value pairs   {default}
 %
 %     'preprocess' --  {'carve'}, 'fill', 'none'
 %            set DEM preprocessing that determines flow behavior in

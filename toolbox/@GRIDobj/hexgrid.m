@@ -1,4 +1,4 @@
-function [X,Y,VGrid] = hexgrid(DEM,d)
+function [X,Y,HG] = hexgrid(DEM,d)
 
 %HEXGRID creates an array of haxagonal points
 %
@@ -6,6 +6,7 @@ function [X,Y,VGrid] = hexgrid(DEM,d)
 %
 %     [X,Y] = hexgrid(DEM)
 %     [X,Y] = hexgrid(DEM,d)
+%     [X,Y,HG] = ...
 %
 % Description
 %
@@ -22,6 +23,9 @@ function [X,Y,VGrid] = hexgrid(DEM,d)
 % Output arguments
 %
 %     X,Y   x,y coordinate arrays
+%     HG    geotable with hexagonal mappolyshapes with their centers at X
+%           and Y (Note that a small value of d will slow down the function
+%           substantially).
 %
 % Example
 %
@@ -38,14 +42,16 @@ function [X,Y,VGrid] = hexgrid(DEM,d)
 % See also: meshgrid
 %
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
-% Date: 18. August 2023
+% Date: 19. June 2025
+
+arguments
+    DEM  GRIDobj
+    d {mustBePositive} = 10
+end
+
 
 [x,y] = getcoordinates(DEM);
 cs = DEM.cellsize;
-
-if nargin == 1
-    d = 10;
-end
 
 dx = cs*d;
 dy = dx*sqrt(3)/2;
@@ -66,9 +72,40 @@ sx(1:2:end) = sx(1:2:end)+1;
 dX = repmat(sx.*dx/2,[1,nc]);
 X = X + dX;
 
+%% Create hexgrid of map- or geopolyshapes
 if nargout == 3
-    DT = delaunayTriangulation(X(:),Y(:));
-    [V,r] = voronoiDiagram(DT);
+    % Voronoi
+    % --- Input: Nx2 array of center points ---
+    centers = [X(:) Y(:)];  % Replace with your actual center coordinates
 
+    % --- Hexagon parameters ---
+    r = d*cs / sqrt(3);  % Radius of hexagon (distance from center to any vertex)
 
+    % Define hexagon shape around origin
+    theta = (0:6) * pi/3 + pi/6;  % 6 vertices of regular hexagon
+    x_hex = r * cos(theta);
+    y_hex = r * sin(theta);
+
+    % --- Create array of mappolyshape objects ---
+    %numPoints = size(centers, 1);
+    %polys(numPoints, 1) = mappolyshape();  % Preallocate
+
+    x_shifted = x_hex + centers(:,1);
+    y_shifted = y_hex + centers(:,2);
+
+    x_shifted = num2cell(x_shifted,2);
+    y_shifted = num2cell(y_shifted,2);
+
+    if isGeographic(DEM)
+        polys = cellfun(@(x,y)geopolyshape(x,y),y_shifted,x_shifted);
+    else
+        polys = cellfun(@(x,y)mappolyshape(x,y),x_shifted,y_shifted);
+    end
+
+    HG = table(polys,(1:numel(polys))',VariableNames= {'Shape','ID'});
+    if isGeographic(DEM)
+        HG.Shape.GeographicCRS = parseCRS(DEM);
+    elseif isProjected(DEM)
+        HG.Shape.ProjectedCRS = parseCRS(DEM);
+    end
 end

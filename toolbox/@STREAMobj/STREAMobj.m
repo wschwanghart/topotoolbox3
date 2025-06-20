@@ -21,7 +21,7 @@ classdef STREAMobj
 %     W      logical grid (GRIDobj) that indicates stream locations (e.g.
 %            obtained from thresholding the flow accumulation raster)
 %
-% Parameter name/value pairs
+%     Parameter name/value pairs
 %
 %     minarea      upslope area threshold for channel initiation (default =
 %                  1000)

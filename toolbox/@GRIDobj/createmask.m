@@ -19,7 +19,8 @@ function [MASK,pos] = createmask(DEM,options)
 %     Parameter name/value pairs
 %
 %     'hillshade'  use hillshade as background image ({false} or true)
-%     'rect'       mask is an axis-aligned rectangle
+%     'rect'       if true, mask is an axis-aligned rectangle ({false} or 
+%                  true)
 %
 % Output arguments
 %

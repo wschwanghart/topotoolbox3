@@ -30,7 +30,7 @@ function OUT = aspect(DEM,classify)
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     ASP = aspect(DEM);
-%     imageschs(DEM,ASP)
+%     imageschs(DEM,ASP,'colormap','romaO')
 %
 % References
 %

@@ -21,8 +21,7 @@ function [Sout,nalix] = modify(S,varargin)
 %
 %     S     instance of stream object
 %
-%     Parameter name/value pairs (one pn/pv pair is required to run the
-%     function)
+%     Parameter name/value pairs (one pn/pv pair is needed)
 %
 %     'streamorder'   scalar or string
 %     scalar: if you supply a scalar integer x as parameter value, S2
@@ -137,6 +136,7 @@ function [Sout,nalix] = modify(S,varargin)
 %     C.Z = bwmorph(C.Z,'diag');
 %     Su  = modify(S,'upstreamto',C);
 %     Sl  = modify(S,'downstreamto',C);
+%     figure
 %     plot(Su)
 %     hold on
 %     plot(Sl,'r')
@@ -486,35 +486,28 @@ elseif ~isempty(p.Results.interactive)
             switch meth
                 case 'polyselect'
                     title('create a polygon and double-click to finalize')
-                    try
+                    
                     hp = drawpolygon;
+                    wait(hp)
                     pos = hp.Position;
-                    catch
-                    hp = impoly;
-                    pos = wait(hp);
-                    end
+                    
                     pos(end+1,:) = pos(1,:);
                 case 'ellipseselect'
                     title('create a ellipse and double-click to finalize')
-                    try
+                    
                     hp = drawellipse;
+                    wait(hp)
                     pos = hp.Vertices;
-                    catch
-                    hp = imellipse;
-                    pos = wait(hp);
-                    pos = getVertices(hp);
-                    end
                     
                     pos(end+1,:) = pos(1,:);
                 case 'rectselect'
                     title('create a rectangle and double-click to finalize')
-                    hp = imrect;
-                    pos = wait(hp);
-                    pos = [pos(1)         pos(2); ...
-                           pos(1)+pos(3)  pos(2); ...
-                           pos(1)+pos(3)  pos(2)+pos(4);...
-                           pos(1)         pos(2)+pos(4);...
-                           pos(1)         pos(2)];
+
+                    hp = drawrectangle;
+                    wait(hp)
+                    pos = hp.Vertices;
+                    pos(end+1,:) = pos(1,:);
+
             end
 
             I = inpolygon(S.x,S.y,pos(:,1),pos(:,2));

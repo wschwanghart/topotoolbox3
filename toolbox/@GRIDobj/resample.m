@@ -31,8 +31,11 @@ function DEMr = resample(DEM,target,method,options)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     DEMr = resample(DEM,100);
-%     imagesc(DEMr)
+%     DEMr = resample(DEM,1000);
+%     subplot(1,2,1)
+%     imageschs(DEM,'colorbar',false)
+%     subplot(1,2,2)
+%     imageschs(DEMr,'colorbar',false)
 %
 % See also: griddedInterpolant, imtransform
 %        
@@ -45,7 +48,7 @@ arguments
     DEM   GRIDobj
     target  {mustBeGRIDobjOrPositiveScalar}
     method = "bilinear"
-    options.crop     = true
+    options.crop     = false
 end
 
 method = validatestring(method,{'cubic', 'bilinear', 'nearest' },...

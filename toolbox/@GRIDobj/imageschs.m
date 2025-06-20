@@ -34,7 +34,7 @@ function rgb = imageschs(DEM,A,options)
 %     DEM         digital elevation model (GRIDobj)
 %     A           coloring matrix or GRIDobj
 %
-% Parameter name/value pairs
+%     Parameter name/value pairs
 %
 %     caxis or clim    two element vector defining the value range. Default 
 %                      is [min(A) max(A)]. clim has precedence over caxis.  
