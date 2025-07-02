@@ -188,7 +188,7 @@ if isempty(p.Results.knickpoints)
     kp.IXgrid  = [];
     kp.order = [];
     kp.dz = [];
-    kp.nal = [];
+    kp.nal = false(size(z));
 else
     kp    = p.Results.knickpoints;
 end
