@@ -1,4 +1,4 @@
-function z = lowerenv(S,z,ix)
+function z = lowerenv(S,z,ix,options)
 
 %LOWERENV Lower envelope of a channel length profile
 %
@@ -57,6 +57,7 @@ arguments
     S STREAMobj
     z {mustBeGRIDobjOrNal(z,S)}
     ix = []
+    options.uselibtt (1,1) = false
 end
 
 z = ezgetnal(S,z);
@@ -74,6 +75,14 @@ end
 
 % nals
 d = distance(S);
+
+if options.uselibtt && haslibtopotoolbox
+    z = single(z);
+    z = tt_lowerenv(z, uint8(kn), single(d), ...
+        int64(S.ix - 1), int64(S.ixc - 1));
+    return;
+end
+
 trib = streampoi(S,'confl','logical');
 
 nrc = numel(S.x);
