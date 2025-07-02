@@ -188,7 +188,7 @@ if isempty(p.Results.knickpoints)
     kp.IXgrid  = [];
     kp.order = [];
     kp.dz = [];
-    kp.nal = [];
+    kp.nal = false(size(z));
 else
     kp    = p.Results.knickpoints;
 end
@@ -307,99 +307,4 @@ if plt
     hold off
 end
 
-end  
-
-%% Subfunctions    
-    
-function z = lowerenv(S,z,ix)
-
-% lower envelope of a channel length profile
-%
-% Syntax
-%
-%     zl = lowerenv(S,z)
-%     zl = lowerenv(S,z,kn)
-%
-% Description
-%
-%     lowerenv returns the lower envelope, i.e. the lower convex hull of a
-%     length profile given by the stream network S and elevation z.
-%
-% Input arguments
-%
-%     S      STREAMobj
-%     z      elevation (node attribute list)
-%     kn     logical vector (node attribute list) with knickpoints
-%
-% 
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 10. March, 2017
-
-
-
-kn = false(size(S.x));
-if nargin == 3
-    if isempty(ix)
-    elseif islogical(ix)
-        kn = ix;
-    else
-        kn(ix) = true;
-    end
 end
-
-% nals
-d = distance(S);
-trib = streampoi(S,'confl','logical');
-
-nrc = numel(S.x);
-ix  = S.ix;
-ixc = S.ixc;
-
-ixcix  = zeros(nrc,1);
-ixcix(ix) = 1:numel(ix);
-
-onenvelope = true(nrc,1);
-
-for r = numel(S.ixc):-1:1
-    s  = ix(r);
-    ss = ixc(r);
-    
-    if onenvelope(s) || trib(ss)
-    IX = allpred(ix,ixc,s,nrc,kn,r);
-    s  = ss;
-    if isempty(IX)
-        continue
-    end
-    gg = z(IX)-z(s);
-    dd = d(IX)-d(s);
-    gg = gg./dd;
-    [~,ii] = sortrows([gg dd],[1 -2]); 
-    IX = IX(ii(1));
-    g  = gg(ii(1));
-    
-    t = IX;
-    ixcix(ss) = 0;
-    while ixcix(t) ~= 0
-        t2 = ixc(ixcix(t));
-        z(t2) = z(t)-g.*(d(t)-d(t2));
-        onenvelope(t2) = false;
-        ixcix(t) = 0;
-        t  = t2;
-        
-    end
-    end
-    
-end
-
-end
-
-
-    function IX = allpred(ix,ixc,s,nr,kn,startix) 
-        I = false(nr,1);
-        I(s) = true;
-        for r = startix:-1:1
-            I(ix(r)) = (I(ix(r)) | I(ixc(r))) & ~kn(ixc(r)) ;
-        end
-        IX = find(I);
-    end
-
