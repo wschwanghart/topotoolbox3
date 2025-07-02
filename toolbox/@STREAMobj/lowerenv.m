@@ -123,7 +123,7 @@ function IX = allpred(ix,ixc,s,nr,kn,startix)
 I = false(nr,1);
 I(s) = true;
 for r = startix:-1:1
-    I(ix(r)) = (I(ix(r)) | I(ixc(r))) & ~kn(ixc(r)) ;
+    I(ix(r)) = I(ix(r)) | (I(ixc(r)) & ~kn(ixc(r))) ;
 end
 IX = find(I);
 end
