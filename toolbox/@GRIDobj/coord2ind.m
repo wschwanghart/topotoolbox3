@@ -28,7 +28,7 @@ function [IX,res,valid] = coord2ind(DEM,x,y)
 %
 % See also: GRIDobj/ind2coord, GRIDobj/getcoordinates
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 20. February, 2020
 
 
@@ -59,7 +59,7 @@ IX2 = (y-Y(1))./dy + 1;
 IX1 = round(IX1);
 IX2 = round(IX2);
 
-I = IX1>DEM.size(2) | IX1<1 | IX2>DEM.size(1) | IX2<1;
+I = IX1>DEM.size(2) | IX1<1 | IX2>DEM.size(1) | IX2<1 | isnan(IX1) | isnan(IX2);
 
 if any(I(:))
     warning('TopoToolbox:outsidegrid',...
