@@ -60,7 +60,9 @@ Results = rmfield(Results,{'plot' 'usepoints'});
 if ~usepoints
     P = generatepoints(P,'type',{'outlet','channelhead'});
 end
-d  = pointdistances(P,Results);
+
+Results = namedargs2cell(Results);
+d  = pointdistances(P,Results{:});
 d(isinf(d)) = -inf;
 [dmax,ix] = max(d(:));
 [r,c]  = ind2sub(size(d),ix);
