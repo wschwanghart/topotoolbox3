@@ -303,7 +303,7 @@ methods
 
             FD.ix = ix;
             FD.ixc = ixc;
-            FD.fraction = double((DEM.Z(ix)-DEM.Z(ix))./ ...
+            FD.fraction = double((DEM.Z(ix)-DEM.Z(ixc))./ ...
                 getdistance(ix,ixc,DEM.size,DEM.cellsize,'single'));
             FD.fraction(FD.fraction == 0) = 1;
             FD = updatetoposort(FD);

@@ -1,11 +1,13 @@
-function [MS,varargout] = asymmetry(FD,S,D,GRID,options)
+function [MS,varargout] = asymmetry(D,GRID,FD,S,options)
 % ASYMMETRY   directional asymmetry of divide segments
 %
 % Syntax
-%     [MS]   = asymmetry(FD,S,D,GRID)
-%     [MS,DS]= asymmetry(FD,S,D,GRID,'method','basin',       ...)
-%     [MS]   = asymmetry(FD,S,D,GRID,'method','pixel_pairs', ...)
-%     [MS]   = asymmetry(FD,S,D,GRID,'aggfun',@function,    ...)
+%  
+%     MS      = asymmetry(D,GRID)
+%     MS      = asymmetry(D,GRID,FD,S)
+%     [MS,DS] = asymmetry(D,GRID,FD,S,'method','basin',       ...)
+%     MS      = asymmetry(D,GRID,FD,S,'method','pixel_pairs', ...)
+%     MS      = asymmetry(D,GRID,FD,S,'aggfun',@function,    ...)
 %
 % Description
 %
@@ -19,11 +21,11 @@ function [MS,varargout] = asymmetry(FD,S,D,GRID,options)
 %     'plotc'.
 %
 % Input
-%       
-%     FD        instance of class FLOWobj
-%     S         instance of class STREAMobj
+%    
 %     D         instance of class DIVIDEobj
 %     GRID      instance of class GRIDobj
+%     FD        instance of class FLOWobj
+%     S         instance of class STREAMobj
 %
 % Parameter name/value pairs
 %
@@ -52,12 +54,10 @@ function [MS,varargout] = asymmetry(FD,S,D,GRID,options)
 %      .theta     - angle from north of asymmetry direction (for 'basin'
 %                   method points to side of lower GRID values)
 %      .rho       - magnitude of asymmetry
-%      .DAI       - divide asymmetry index (only for 'basin' method)
-%
-% Optional output     
+%      .DAI       - divide asymmetry index (only for 'basin' method)    
 %     
-%     S         data structure with LINE entries representing divide
-%               segments
+%     DS         data structure with LINE entries representing divide
+%                segments
 %      .IX        - linear indices of divide segment nodes
 %      .x         - x coordinate of divide nodes
 %      .y         - y coordinate of divide nodes
@@ -71,47 +71,50 @@ function [MS,varargout] = asymmetry(FD,S,D,GRID,options)
 %
 % Example
 %     
-% DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-% FD  = FLOWobj(DEM,'preprocess','carve');
-% S = STREAMobj(FD,flowacc(FD)>1000);
-% slope = gradient8(DEM);
-% upslope = upslopestats(FD,slope);
-% stream_slope = upslope.Z(S.IXgrid);
-% upslope_hillslope = mapfromnal(FD,S,stream_slope);
-% D = DIVIDEobj(FD,S);
-% D = divorder(D,'topo');
-% [MS,DS] = asymmetry2(FD,S,D,upslope_hillslope,method = "basin",aggfun = @median);
-% 
-% tiledlayout(1,2)
-% set(gcf,'Units','normalized','OuterPosition',[0 0 1 1])
-% nexttile
-% imageschs(DEM,upslope_hillslope,'colorbar',false);   % plot average upstream hillslope gradient of stream pixels
-% hold on
-% plotc(D,vertcat(DS.DAI),'caxis', [0,0.3], 'limit',[1000 inf])  % plot DAI
-% colormap(gca,flipud(pink))
-% axis image
-% hc = colorbar;
-% hc.Label.String = 'Divide asymmetry index';
-% hold on
-% ix = [MS.dist]>1000; 
-% u = [MS(ix).DAI] .* sind([MS(ix).theta]);   % east-component (x-axis)
-% v = [MS(ix).DAI] .* cosd([MS(ix).theta]);   % north-component (y-axis)
-% quiver([MS(ix).X],[MS(ix).Y],u, v,2,'color','r','linewidth',1)
-% title('Drainage divide asymmetry and direction of lower hillslope gradient (basin method)')
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD  = FLOWobj(DEM,'preprocess','carve');
+%     S = STREAMobj(FD,flowacc(FD)>1000);
+%     slope = gradient8(DEM);
+%     upslope = upslopestats(FD,slope);
+%     stream_slope = upslope.Z(S.IXgrid);
+%     upslope_hillslope = mapfromnal(FD,S,stream_slope);
+%     D = DIVIDEobj(FD,S);
+%     D = divorder(D,'topo');
+%     [MS,DS] = asymmetry(D,upslope_hillslope,FD,S,method = "basin",...
+%                           aggfun = @median);
+%     
+%     figure
+%     set(gcf,'Units','normalized','OuterPosition',[0 0 1 1])
+%     % plot average upstream hillslope gradient of stream pixels
+%     imageschs(DEM,upslope_hillslope,'colorbar',false);   
+%     hold on
+%     % plot DAI
+%     plotc(D,vertcat(DS.DAI),'caxis', [0,0.3], 'limit',[1000 inf])  
+%     colormap(gca,flipud(pink))
+%     axis image
+%     hc = colorbar;
+%     hc.Label.String = 'Divide asymmetry index';
+%     hold on
+%     ix = [MS.dist]>1000; 
+%     u = [MS(ix).DAI] .* sind([MS(ix).theta]);   % east-component (x-axis)
+%     v = [MS(ix).DAI] .* cosd([MS(ix).theta]);   % north-component (y-axis)
+%     quiver([MS(ix).X],[MS(ix).Y],u, v,2,'color','r','linewidth',1)
+%     title('Drainage divide asymmetry and direction of lower hillslope gradient (basin method)')
 %
 % See also: DIVIDEobj, DIVIDEobj/sort
 %
-% Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
-% Date: Nov 2018
-% modified by R.F. Ott, 2025
+% Author: Dirk Scherler (scherler[at]gfz-potsdam.de), Richard F. Ott
+% Date: September 2025
 
 arguments
-    FD  FLOWobj
-    S   STREAMobj
     D   DIVIDEobj
     GRID     GRIDobj
-    options.method (1,1) string {mustBeMember(options.method,["basin","pixel_pairs"])} = "basin"
-    options.aggfun (1,1) function_handle                                = @mean
+    FD  = []
+    S   = []
+    options.method (1,1) string {mustBeMember(options.method,...
+                                ["basin","pixel_pairs"])} = "pixel_pairs"
+    options.aggfun (1,1) function_handle  = @mean
+    options.warning (1,1) = false
 end
 
 % Preprocess DZ grid
@@ -187,7 +190,7 @@ end
 
 n = numel(DS);
 
-MS = struct('Geometry','point',...
+MS = struct('Geometry','Point',...
     'X',cell(n,1),...
     'Y',cell(n,1));
 
@@ -215,10 +218,14 @@ for i = 1 : length(MS)
             rho = nan;
             DAI = nan;
             if length(basin_inds)>2
+                if options.warning
                 warning('A divide segment had more than two bordering basins and will be skipped. No reason to worry.')
+                end
                 theta = nan;
             elseif length(basin_inds) <2
+                if options.warning
                 warning('A divide segment has less than 2 two bordering basins. No worries, this happens with small divides or the ones at the DEM border.')
+                end
                 theta = nan;
             else
                 coords       = [Labels(i).pix, Labels(i).qix];
