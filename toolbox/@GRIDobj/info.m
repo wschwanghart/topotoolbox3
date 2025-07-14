@@ -15,6 +15,15 @@ function info(DEM)
 %
 %     DEM    instance of GRIDobj
 %
+% Output arguments
+%
+%     -
+%
+% Example
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     info(DEM)
+%
 % See also: DISP
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)

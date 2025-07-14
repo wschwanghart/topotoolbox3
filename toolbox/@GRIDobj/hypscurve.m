@@ -1,4 +1,4 @@
-function varargout = hypscurve(DEM,bins)
+function varargout = hypscurve(DEM,bins,options)
 
 %HYPSCURVE plot hypsometric curve of a digital elevation model
 %
@@ -21,6 +21,11 @@ function varargout = hypscurve(DEM,bins)
 %     DEM       digital elevation model (GRIDobj)
 %     nrbins    number of bins
 %
+%     Parameter name/value pairs
+%
+%     'clip'    STREAMobj to return only the hypsometrical curve of the
+%               stream network
+%
 % Output
 %
 %     ax        axis handle
@@ -32,29 +37,40 @@ function varargout = hypscurve(DEM,bins)
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     hypscurve(DEM,50)
 %
-% See also: hist, histogram
+% See also: histogram
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 8. January, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. July, 2025
 
+arguments
+    DEM    GRIDobj
+    bins = []
+    options.clip = []
+end
 
-dem = DEM.Z;
+if isempty(options.clip)
+    z = DEM.Z;
+    z = z(~isnan(z));
+    z = z(:);
+else
+    if isa(options.clip,'STREAMobj')
+        z = getnal(options.clip,DEM);
+        z = z(~isnan(z));
+    end
+end
 
-dem = dem(~isnan(dem));
-dem = dem(:);
-
-if nargin == 2
-    [n,elev] = hist(dem,bins); 
+if ~isempty(bins)
+    [n,edges] = histcounts(z,bins);
+    elev = edges(1:end-1) + diff(edges)/2;
     n = flipud(n(:));
     elev = flipud(elev(:));
     n = cumsum(n);
-    linestyle = 'o-';
+    linestyle = '-';
 else
-    elev = sort(dem);
-    elev = flipud(elev(:));
+    elev = sort(z,'descend');
     
     % return unique entries only
-    I = [true;diff(elev)~=0];
+    I = [true;diff(elev)~=0] | [flipud(diff(flipud(elev))~=0); true];
     elev = elev(I);
     n    = find(I);
     linestyle = '-';
@@ -68,8 +84,8 @@ n = n./n(end) * 100;
 if nargout ~= 2
     axis_handle = plot(n,elev,linestyle);
     axis xy
-    xlabel('frequency [%]')
-    ylabel('elevation [m]')
+    xlabel('Compl. cum. frequency [%]')
+    ylabel('Elevation [m]')
 end
 
 % prepare output

@@ -49,7 +49,6 @@ end
 I       = ~isnan(DEM.Z);
 nvalid  = nnz(I);
 
-
 ix    = rand(n,1)*(nvalid-1) + 1;
 
 IX    = (uint32(1):uint32(prod(DEM.size)))';

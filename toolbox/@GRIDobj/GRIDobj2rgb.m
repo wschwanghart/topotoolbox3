@@ -45,14 +45,16 @@ function [RGB,x,y] = GRIDobj2rgb(DEM,options)
 %
 %     RGB2 = imageschs(DEM,[],'colormap',[1 1 1]);
 %     RGB3 = uint8(single(RGB) .* single(RGB2)/255);
-%     image(x,y,RGB3)
+%     image(x,y,RGB3) 
+%     axis xy
 %
 % Example 3: Add cast shadows
 %
 %     C = castshadow(DEM,135,15);
 %     RGB4 = GRIDobj2rgb(C,'colormap',ttscm("grayC",255,[0 70]));
 %     RGB5 = uint8(single(RGB3) .* (single(RGB4)/255));
-%     image(x,y,RGB5)
+%     image(x,y,RGB5) 
+%     axis xy
 %
 % See also: GRIDobj/imageschs, GRIDobj/GRIDobj2im
 %

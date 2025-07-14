@@ -40,6 +40,11 @@ function Z = rand(DEM,dist,params)
 %
 %      Z           GRIDobj
 %
+% Example
+%
+%      DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%      R = rand(DEM,'normal');
+%      imageschs(DEM,R,'percentclip',2)
 %
 % See also: GRIDobj
 % 

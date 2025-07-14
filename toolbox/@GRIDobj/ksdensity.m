@@ -20,12 +20,13 @@ function [DEM,bw] = ksdensity(DEM,x,y,varargin)
 %
 %     DEM     GRIDobj
 %     x,y     coordinates
-%     pn,pv   Parameter name, value pairs (see overloaded ksdensity function)
-%             In addition, following values can be set
-%             'useparallel'  {true} or false. If true, ksdensity will be
-%                            run in parallel (requires Parallel Computing
-%                            Toolbox)
 %
+%     Parameter name, value pairs (see overloaded ksdensity function)
+%     In addition, following values can be set
+%             
+%     'useparallel'  {true} or false. If true, ksdensity will be run in 
+%                    parallel (requires Parallel Computing Toolbox)
+%                            
 % Output arguments
 %
 %     F       GRIDobj with probability estimates
@@ -36,7 +37,7 @@ function [DEM,bw] = ksdensity(DEM,x,y,varargin)
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     ix = randperm(prod(DEM.size),500);
 %     [x,y] = ind2coord(DEM,ix);
-%     [F,bw] = ksdensity(DEM,x,y,'bandwidth',1000);
+%     [F,bw] = ksdensity(DEM,x,y,'bandwidth',1000,'useparallel',false);
 %     imageschs(DEM,F)
 %
 % See also: GRIDobj, ksdensity

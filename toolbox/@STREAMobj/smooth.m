@@ -1,6 +1,6 @@
 function zs = smooth(S,DEM,options)
 
-%SMOOTH smoothing of node-attribute lists
+%SMOOTH Smoothing of node-attribute lists
 %
 % Syntax
 %
@@ -118,7 +118,7 @@ function zs = smooth(S,DEM,options)
 % See also: STREAMobj/crs, STREAMobj/crsapp, STREAMobj/inpaintnans,
 %           STREAMobj/quantcarve, STREAMobj/crslin
 % 
-% Author: Wolfgang Schwanghartmaxcur (schwangh[at]uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 26. September, 2024
 
 arguments

@@ -26,8 +26,15 @@ function h = imagesc(DEM,varargin)
 %
 %     h       handle to image object
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 18. February, 2022
+% Example
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     imagesc(DEM)
+%
+% See also: GRIDobj/imageschs
+%
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. July, 2025
 
 %% Update on 18. Feb 2022
 % nans in the data are set to transparent

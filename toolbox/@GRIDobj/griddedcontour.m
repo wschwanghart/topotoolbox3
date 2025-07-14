@@ -28,6 +28,7 @@ function C = griddedcontour(DEM,level,fourconn)
 %
 % Example
 %
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     C = griddedcontour(DEM,[100:100:2000]);
 %     imageschs(DEM,dilate(C,ones(3)));
 %

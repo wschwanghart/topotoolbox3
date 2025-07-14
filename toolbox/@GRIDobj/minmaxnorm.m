@@ -23,6 +23,12 @@ function A = minmaxnorm(A,prcclip)
 %
 %     B     GRIDobj with values that range between 0 and 1.
 %
+% Example
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     B   = minmaxnorm(DEM);
+%     imagesc(B); colorbar
+%
 % See also: normalize, GRIDobj/zscore
 % 
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
