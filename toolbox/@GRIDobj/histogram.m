@@ -13,6 +13,15 @@ function h = histogram(varargin)
 %     HISTOGRAM overloads MATLAB's histogram function for GRIDobjs. Please
 %     read the help for this function for details.
 %
+% Input arguments
+%
+%     DEM     GRIDobj
+%     ...     Arguments used by the function histogram
+%
+% Output arguments
+%
+%     h       histogram handle
+%
 % Examples
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
@@ -21,8 +30,8 @@ function h = histogram(varargin)
 %  
 % See also: GRIDobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 1. December, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. July, 2025
 
 ixarg = cellfun(@(x) isa(x,'GRIDobj'),varargin,'UniformOutput',true);
 DEM = varargin{ixarg};

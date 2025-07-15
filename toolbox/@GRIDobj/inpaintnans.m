@@ -77,7 +77,7 @@ function DEM = inpaintnans(DEM,varargin)
 %     method    interpolation method if second input argument is a GRIDobj.
 %               {'linear'},'nearest','spline','pchip', 'cubic', or 'tt'.
 %   
-%     if method is 'tt' then several parameters can be applied
+%     if method is 'tt' then additional parameters apply
 %
 %     'eps'     parameter of the gaussian radial basis function (pixels). 
 %               Larger values will give higher weight to the Laplacian
@@ -95,7 +95,7 @@ function DEM = inpaintnans(DEM,varargin)
 %
 % Output
 %
-%     DEM      processed digital elevation model (GRIDobj)
+%     DEMf     processed digital elevation model (GRIDobj)
 %
 % Example 1
 %     
@@ -114,7 +114,7 @@ function DEM = inpaintnans(DEM,varargin)
 %             SRTM voids: The delta surface fill method." Photogrammetric 
 %             Engineering and Remote Sensing 72.3 (2006): 213-216.
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 27. January, 2023
 
 if nargin == 1

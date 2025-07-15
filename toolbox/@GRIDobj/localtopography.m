@@ -22,12 +22,11 @@ function OUT = localtopography(DEM,varargin)
 %     'max', 'min' and 'range', localtopography adopts the padding behavior
 %     of the function imdilate and imerode.
 %
-%
 % Input arguments
 %
-%     DEM    digital elevation model (GRIDobj)
-%     radius radius of the moving window filter in map units. The default
-%            value is 5000 (m).
+%     DEM     Digital elevation model (GRIDobj)
+%     radius  radius of the moving window filter in map units. The default
+%             value is 5000 (m).
 %
 % Parameter Name/Value (pn,pv) pairs
 %

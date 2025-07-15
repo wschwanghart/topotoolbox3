@@ -22,6 +22,10 @@ function GRIDobj2ascii(DEM,filename,type)
 %     filename   filename including extension (*.txt or *.asc)
 %     ext        extension if not used in filename ('.txt' or '.asc')
 %
+% Output arguments
+%
+%     -
+%
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');

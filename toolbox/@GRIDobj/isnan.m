@@ -24,6 +24,10 @@ function I = isnan(DEM)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 18. October, 2024
 
+arguments
+    DEM  GRIDobj
+end
+
 I = DEM;
 I.Z = isnan(DEM.Z);
 I.name = [DEM.name ' (isnan)'];
