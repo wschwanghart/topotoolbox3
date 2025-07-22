@@ -4,7 +4,7 @@ function [Z,R,wf] = createRasterFromFile(filename,options)
 %
 % Syntax
 %
-%     [Z,R,wf,GeoKeyDirTag] = createRasterFromFile(filename,options)
+%     [Z,R,wf] = createRasterFromFile(filename,options)
 %
 % Description
 %
@@ -23,6 +23,14 @@ if license('test','MAP_Toolbox')
         'OutputType',options.OutputType,...
         'Bands',options.Bands,...
         'CoordinateSystemType',options.CoordinateSystemType);
+    
+    if isempty(R)
+        error("TopoToolbox:createRasterFromFile", ...
+            "The returned referencing matrix is empty. This is likely due \n" + ...
+            "to an invalid geometry of the raster, e.g. extents beyond \n" + ...
+            "the valid data range of latitudes and longitudes.")
+    end
+
     wf = worldFileMatrix(R);
 
     % handle nans
@@ -91,7 +99,6 @@ else
             end
             
     end
-    GeoKeyDirTag = [];
 
 end
 
