@@ -12,7 +12,7 @@ include(FetchContent)
 FetchContent_Declare(
   topotoolbox
   GIT_REPOSITORY https://github.com/TopoToolbox/libtopotoolbox.git
-  GIT_TAG 69b4cee41208feb843333c732fd055ee5937cae9
+  GIT_TAG 1084fc42c4e8428829d56e5f3d3c18cea3d6a906
 )
 FetchContent_MakeAvailable(topotoolbox)
 
@@ -48,8 +48,17 @@ matlab_add_mex(
   LINK_TO topotoolbox
 )
 
+matlab_add_mex(
+  NAME tt_lowerenv
+  MODULE
+  SRC tt_lowerenv.c
+  R2018a
+  LINK_TO topotoolbox
+)
+
 install(
   TARGETS tt_has_topotoolbox tt_fillsinks tt_identifyflats tt_gwdt_computecosts
+          tt_lowerenv
   DESTINATION "."
   COMPONENT Runtime
 )
