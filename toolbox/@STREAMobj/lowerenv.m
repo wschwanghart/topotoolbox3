@@ -6,6 +6,7 @@ function z = lowerenv(S,z,ix,options)
 %
 %     zl = lowerenv(S,z)
 %     zl = lowerenv(S,z,kn)
+%     zl = lowerenv(___, uselibtt = false)
 %
 % Description
 %
@@ -21,6 +22,11 @@ function z = lowerenv(S,z,ix,options)
 %            downward decreasing.
 %     kn     logical vector (node attribute list) with knickpoints. Default
 %            is [].
+%
+%     Parameter name/value pairs
+%
+%     uselibtt    true or {false}. If true, the function will use
+%                 libtopotoolbox (if available).     
 %
 % Output arguments
 %
@@ -51,7 +57,7 @@ function z = lowerenv(S,z,ix,options)
 %           STREAMobj/quantcarve, STREAMobj/crs    
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 10. December, 2024
+% Date: 23. July, 2025
 
 arguments
     S STREAMobj
