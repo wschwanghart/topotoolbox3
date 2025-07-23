@@ -44,6 +44,13 @@ function [zs,kp] = knickpointfinder(S,DEM,varargin)
 %                     window
 %     'plot'          {false} or true. Plots the process. Only possible if
 %                     'split' is set to false.
+%     'uselibtt'      true or {false}. If true, the function will use
+%                     libtopotoolbox (if available). Note that results may
+%                     differ depending on whether using libtopotoolbox or
+%                     not as the C-implementation is numerically slightly 
+%                     different from MATLAB's lowerenv. This will cause 
+%                     slight discrepancies in the identified knickpoints, 
+%                     particularly at low tolerances.
 %
 % Output parameters
 %
@@ -67,7 +74,7 @@ function [zs,kp] = knickpointfinder(S,DEM,varargin)
 % See also: STREAMobj/quantcarve, STREAMobj/crs
 % 
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 25. February, 2018
+% Date: 23. July, 2025
 
 % check and parse inputs
 narginchk(2,inf)

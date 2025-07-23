@@ -1,4 +1,4 @@
-function [D,L] = distance(DEM,varargin)
+function [D,L] = distance(DEM,x,y)
 
 %DISTANCE distance transform
 %
@@ -51,20 +51,26 @@ function [D,L] = distance(DEM,varargin)
 %
 % See also: FLOWobj/flowdistance, bwdist
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 6. November, 2015
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. July, 2025
 
-narginchk(2,3);
+arguments
+    DEM GRIDobj
+    x = []
+    y = []
+end
 
-if nargin == 2
-    if isnumeric(varargin{1})
-        ix = varargin{1};
-    elseif isa(varargin{1},'GRIDobj')
-        ix = varargin{1}.Z~=0;
-    elseif isa(varargin{1},'STREAMobj')
-        ix = varargin{1}.IXgrid;
-    elseif isstruct(varargin{1})
-        MS = varargin{1};
+if nargin == 1
+    ix = find(DEM);
+elseif nargin == 2
+    if isnumeric(x)
+        ix = x;
+    elseif isa(x,'GRIDobj')
+        ix = x.Z~=0;
+    elseif isa(x,'STREAMobj')
+        ix = x.IXgrid;
+    elseif isstruct(x)
+        MS = x;
         
         switch lower(MS(1).Geometry)
             case 'point'
@@ -86,7 +92,7 @@ if nargin == 2
                 end
                 ix = coord2ind(DEM,x,y);
             case {'line' 'polyline'}
-                ix  = line2GRIDobj(DEM,varargin{1});
+                ix  = line2GRIDobj(DEM,x);
                 ix  = ix.Z;
             otherwise 
                 error('unsupported format of the structure array')
@@ -97,8 +103,10 @@ if nargin == 2
     
                 
 else
-    
-    ix = coord2ind(DEM,varargin{1},varargin{2});
+    if ~isequal(size(x),size(y))
+        error('The second and third input must have the same size.')
+    end
+    ix = coord2ind(DEM,x,y);
 end
 
 MASK = false(DEM.size);
