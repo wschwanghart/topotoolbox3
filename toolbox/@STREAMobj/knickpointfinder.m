@@ -80,6 +80,7 @@ addParameter(p,'plot',true);
 addParameter(p,'tol',100);
 addParameter(p,'verbose',true);
 addParameter(p,'toltype','range');
+addParameter(p,'uselibtt',false);
 parse(p,varargin{:});
 
 if p.Results.split 
@@ -222,7 +223,7 @@ while keepgoing
     
     counter = counter+1;
     
-    zs = lowerenv(S,z,kp.nal);
+    zs = lowerenv(S,z,kp.nal, uselibtt=p.Results.uselibtt);
 
     if ~isscalar(p.Results.tol) && strcmp(toltype,'lowerbound')
         II = zs < p.Results.tol(:,1);
