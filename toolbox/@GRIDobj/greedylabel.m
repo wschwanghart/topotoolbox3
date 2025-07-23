@@ -86,11 +86,8 @@ function colors = greedyColoring(A)
     % Assign colors to each node
     for u = 1:n
         % Find colors of adjacent nodes
-        ix = find(A(u,:));
-        ix2 = find(A(:,u));
-        ix = [ix(:);ix2(:)];
-        neighborColors = colors(ix);
-
+        neighborColors = colors(A(u,:)>0);
+        
         % Get the smallest available color not used by neighbors
         c = 1;
         while ismember(c, neighborColors)
