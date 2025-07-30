@@ -64,9 +64,17 @@ matlab_add_mex(
   LINK_TO topotoolbox
 )
 
+matlab_add_mex(
+  NAME tt_graphflood
+  MODULE
+  SRC tt_graphflood.c
+  R2018a
+  LINK_TO topotoolbox
+)
+
 install(
   TARGETS tt_has_topotoolbox tt_fillsinks tt_identifyflats tt_gwdt_computecosts
-          tt_lowerenv tt_hillshade
+          tt_lowerenv tt_hillshade tt_graphflood
   DESTINATION "."
   COMPONENT Runtime
 )
