@@ -196,7 +196,7 @@ classdef testSnapshot < matlab.perftest.TestCase
 
         function hillshade(testCase, dataset, uselibtt)
             testCase.startMeasuring();
-            H = hillshade(testCase.dem);
+            H = hillshade(testCase.dem,"uselibtt",uselibtt);
             testCase.stopMeasuring();
 
             result_file = fullfile("snapshots/data/", dataset, "hillshade.tif");
@@ -205,7 +205,7 @@ classdef testSnapshot < matlab.perftest.TestCase
                 H.GRIDobj2geotiff(result_file)
             else
                 H_result = GRIDobj(result_file);
-                testCase.verifyEqual(H_result.Z, H.Z);
+                testCase.verifyEqual(H_result.Z, H.Z,'AbsTol',single(1e-4));
             end
         end
     end
