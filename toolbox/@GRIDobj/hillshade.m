@@ -64,30 +64,54 @@ arguments
     options.blocksize  (1,1) {mustBeNumeric,mustBePositive} = 2000
     options.useblockproc (1,1) = true
     options.method = 'default'
+    options.uselibtt = true
 end
 
+% Preallocate output
 OUT     = DEM;
-
+% Cellsize
 cs      = DEM.cellsize;
+% Azimuth in degrees
 azimuth = options.azimuth;
+% Altitude in degrees
 altitude = options.altitude;
+% Exaggerate
 exaggerate = options.exaggerate;
-method   = validatestring(options.method,{'default','surfnorm','mdow'});
 
-% Large matrix support. Break calculations in chunks using blockproc
-if numel(DEM.Z)>(10001*10001) && options.useblockproc
-    blksiz = bestblk(size(DEM.Z),options.blocksize);    
-    padval = 'symmetric';
-    Z      = DEM.Z;
-    % The anonymous function must be defined as a variable: see bug 1157095
-    fun   = @(x) hsfun(x,cs,azimuth,altitude,exaggerate,method);
-    HS = blockproc(Z,blksiz,fun,...
-                'BorderSize',[1 1],...
-                'padmethod',padval,...
-                'UseParallel',options.useparallel);
-    OUT.Z = HS;
+if options.uselibtt && haslibtopotoolbox && ...
+        ismember(options.method,{'default','surfnorm'})
+    % Use libtt
+    if options.exaggerate ~= 1
+        DEM.Z = DEM.Z*options.exaggerate;
+    end
+    % libtt requires radians 
+    altitude = deg2rad(altitude);
+    % azimuth is measured anticlockwise
+    azimuth  = -90+azimuth;
+    azimuth  = deg2rad(azimuth);
+    % run mex function
+    [OUT.Z, ~,~] = tt_hillshade(single(DEM.Z),azimuth,altitude,cs);
+
 else
-    OUT.Z = hsfun(DEM.Z,cs,azimuth,altitude,exaggerate,method);
+
+    method   = validatestring(options.method,{'default','surfnorm','mdow'});
+
+    % Large matrix support. Break calculations in chunks using blockproc
+    if numel(DEM.Z)>(10001*10001) && options.useblockproc
+        blksiz = bestblk(size(DEM.Z),options.blocksize);
+        padval = 'symmetric';
+        Z      = DEM.Z;
+        % The anonymous function must be defined as a variable: see bug 1157095
+        fun   = @(x) hsfun(x,cs,azimuth,altitude,exaggerate,method);
+        HS = blockproc(Z,blksiz,fun,...
+            'BorderSize',[1 1],...
+            'padmethod',padval,...
+            'UseParallel',options.useparallel);
+        OUT.Z = HS;
+    else
+        OUT.Z = hsfun(DEM.Z,cs,azimuth,altitude,exaggerate,method);
+    end
+
 end
 
 OUT.name = 'hillshade';
