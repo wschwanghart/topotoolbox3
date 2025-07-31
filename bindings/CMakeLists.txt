@@ -65,6 +65,14 @@ matlab_add_mex(
 )
 
 matlab_add_mex(
+  NAME tt_hillshade_fused
+  MODULE
+  SRC tt_hillshade_fused.c
+  R2018a
+  LINK_TO topotoolbox
+)
+
+matlab_add_mex(
   NAME tt_graphflood
   MODULE
   SRC tt_graphflood.c
@@ -74,7 +82,7 @@ matlab_add_mex(
 
 install(
   TARGETS tt_has_topotoolbox tt_fillsinks tt_identifyflats tt_gwdt_computecosts
-          tt_lowerenv tt_hillshade tt_graphflood
+          tt_lowerenv tt_hillshade tt_hillshade_fused tt_graphflood
   DESTINATION "."
   COMPONENT Runtime
 )

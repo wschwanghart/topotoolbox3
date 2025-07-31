@@ -156,7 +156,7 @@ function rgb = imageschs(DEM,A,options)
 %     GRIDobj/prcclip, adjustgeoaspectratio 
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 3. March, 2025
+% Date: 31. July, 2025
 
 
 % Change log
@@ -173,6 +173,7 @@ function rgb = imageschs(DEM,A,options)
 % 04.6.2024: changed to be fit for TopoToolbox 3
 % 30.8.2024: arguments block
 % 10.12.2024: better handling of colors
+% 31.7.2024: added bindings to libtopotoolbox
 
 
 %% Input argument parsing
@@ -202,6 +203,7 @@ arguments
     options.method = 'surfnorm'
     options.brighten {mustBeInRange(options.brighten,-1,1)} = 0
     options.gcsadjust = true
+    options.uselibtt = true
 
 end
 
@@ -285,7 +287,8 @@ if usepermanent && isequal(size(H),DEM.size)
 
 else
     H = hillshade(DEM,'exaggerate',exag,'azimuth',azi,'altitude',alti,...
-        'useparallel',options.useparallel,'method',meth);
+        'useparallel',options.useparallel,'method',meth,'usefused',true,...
+        'uselibtt',options.uselibtt);
 
     H = H.Z;
     Inan = isnan(H);
