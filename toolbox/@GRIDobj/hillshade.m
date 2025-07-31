@@ -32,12 +32,14 @@ function OUT2 = hillshade(DEM,options)
 %     'useparallel'     true or {false}: use parallel computing toolbox
 %     'blocksize'       blocksize for blockproc (default: 5000)
 %     'method'          'surfnorm' (default) or 'mdow'
-%
+%     'uselibtt'        {true} or false: use libtopotoolbox. Using
+%                       libtopotoolbox leads to a significant speed gain.
+%     'usefused'        {true} or false: use libtopotoolbox fused
+%                       algorithm. 
 %
 % Output
 %
 %     H         shaded relief (ranges between 0 and 1)
-%
 %
 % Example
 %
@@ -53,7 +55,7 @@ function OUT2 = hillshade(DEM,options)
 % See also: SURFNORM, IMAGESCHS
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 31. August, 2024
+% Date: 31. July, 2025
 
 arguments
     DEM  GRIDobj
@@ -63,8 +65,9 @@ arguments
     options.useparallel (1,1) = true
     options.blocksize  (1,1) {mustBeNumeric,mustBePositive} = 2000
     options.useblockproc (1,1) = true
-    options.method = 'default'
-    options.uselibtt = true
+    options.method {mustBeMember(options.method,{'default','surfnorm','mdow'})} = 'default'
+    options.uselibtt (1,1) = true
+    options.usefused (1,1) = true
 end
 
 % Preallocate output
@@ -79,7 +82,7 @@ altitude = options.altitude;
 exaggerate = options.exaggerate;
 
 if options.uselibtt && haslibtopotoolbox && ...
-        ismember(options.method,{'default','surfnorm'})
+        ismember(lower(options.method),{'default','surfnorm'})
     % Use libtt
     if options.exaggerate ~= 1
         DEM.Z = DEM.Z*options.exaggerate;
@@ -90,7 +93,11 @@ if options.uselibtt && haslibtopotoolbox && ...
     azimuth  = -90+azimuth;
     azimuth  = deg2rad(azimuth);
     % run mex function
-    [OUT.Z, ~,~] = tt_hillshade(single(DEM.Z),azimuth,altitude,cs);
+    if ~options.usefused
+        [OUT.Z, ~,~] = tt_hillshade(single(DEM.Z),azimuth,altitude,cs);
+    else 
+        OUT.Z = tt_hillshade_fused(single(DEM.Z),azimuth,altitude,cs);
+    end
 
 else
 
