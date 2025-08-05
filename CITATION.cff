@@ -1,0 +1,24 @@
+title: 'TopoToolbox/topotoolbox3: latest'
+type: software
+version: latest
+authors:
+- affiliation: University of Potsdam
+  given-names: William
+  family-names: Kearney
+- affiliation: University of Potsdam
+  given-names: Wolfgang
+  family-names: Schwanghart
+- family-names: Scherler
+  given-names: Dirk
+- family-names: Arnau
+  given-names: Gina
+- family-names: Ott
+  given-names: Richard
+cff-version: 1.2.0
+date-released: '2025-08-05'
+doi: 10.5281/zenodo.16743005
+license:
+- GPL-3.0-only
+message: If you use this software, please cite it using the metadata from this file.
+repository-code: https://github.com/TopoToolbox/topotoolbox3/tree/latest
+
