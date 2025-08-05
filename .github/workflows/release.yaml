@@ -112,6 +112,7 @@ jobs:
           name: toolbox-${{ matrix.os }}-${{ matrix.release }}
           path: release/TopoToolbox_*.mltbx
       - name: Upload toolbox assets
+        shell: bash
         run: gh release upload --repo $GITHUB_REPOSITORY $TAG release/*
         env:
           TAG: ${{needs.release.outputs.new-tag}}
