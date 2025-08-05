@@ -32,6 +32,7 @@ jobs:
           NEXT=$((${MAX:-0} + 1))
           NEW_TAG="${PREFIX}${NEXT}"
           echo "TAG=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "TAG=$NEW_TAG" >> $GITHUB_ENV
           echo "This release will be tagged: $NEW_TAG"
       - name: Create release
         run: |
