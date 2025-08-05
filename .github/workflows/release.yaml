@@ -71,7 +71,7 @@ jobs:
   package:
     if: github.repository == 'TopoToolbox/topotoolbox3'
     name: Package toolbox
-    needs: docs release
+    needs: [docs, release]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
