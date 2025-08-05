@@ -90,10 +90,17 @@ jobs:
           path: release
           pattern: "toolbox-*-*"
           merge-multiple: true
-      - name: Delete latest release if it already exists
-        run: gh release delete latest --yes --cleanup-tag
+      - name: Generate tag
+        id: tag
+        run: |
+          PREFIX="release-$(date +'%Y%m%d')-"
+          MAX=$(git tag -l "${PREFIX}*" | sed -E "s/^${PREFIX}([0-9]+)/\1/" | sort -n | tail -n1)
+          NEXT=$((${MAX:-0} + 1))
+          NEW_TAG="${PREFIX}${NEXT}"
+          echo "TAG=$NEW_TAG" >> $GITHUB_ENV
+          echo "This release will be tagged: $NEW_TAG"
       - name: Create release
         run: |
-          gh release create latest --target main --generate-notes --latest -F .github/latest_release.md
+          gh release create $TAG --target main --generate-notes --latest -F .github/latest_release.md
       - name: Upload toolbox assets        
-        run: gh release upload --repo $GITHUB_REPOSITORY latest release/*
+        run: gh release upload --repo $GITHUB_REPOSITORY $TAG release/*
