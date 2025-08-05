@@ -16,7 +16,8 @@ jobs:
       new-tag: ${{ steps.tag.outputs.TAG }}
     steps:
       - uses: actions/checkout@v4
-        fetch-tags: true # Fetch all the tags so that we compute release number correctly
+        with:
+          fetch-tags: true # Fetch all the tags so that we compute release number correctly
       - name: Download compiled toolboxes
         uses: actions/download-artifact@v4
         with:
