@@ -3,7 +3,8 @@
 <img src="images/topotoolbox3.png" align="center">
 
 [![View TopoToolbox on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://de.mathworks.com/matlabcentral/fileexchange/50124-topotoolbox)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16743006.svg)](https://doi.org/10.5281/zenodo.16743006)
+[![DOI](https://zenodo.org/badge/851663486.svg)](https://doi.org/10.5281/zenodo.16743005)
+
 
 
 [TopoToolbox](http://topotoolbox.wordpress.com) is a MATLAB-based software designed for the analysis and visualization of topographic data. It provides a comprehensive set of tools for processing Digital Elevation Models (DEMs), extracting drainage networks, analyzing river profiles, and performing geomorphometric calculations. In addition, TopoToolbox facilitates hydrological modeling and landscape evolution studies. Its efficient algorithms and interactive visualization capabilities allow for detailed analysis of terrain features, helping to understand landscape processes and topographic changes over time.
