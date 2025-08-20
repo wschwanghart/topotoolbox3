@@ -75,7 +75,9 @@ function DEM = readopentopo(options)
 %                      also create a text file in the folder IOtools named
 %                      opentopography.apikey which must contain the API
 %                      Key. If there is a file that contains the key, there 
-%                      is no need to provide it here.
+%                      is no need to provide it here. If an empty string is
+%                      supplied, a dialog box will open and let you enter
+%                      (and save) the api key.
 %     'verbose'        {true} or false. If true, then some information on
 %                      the process is shown in the command window.
 %     'checkrequestlimit' {true} or false. Opentopography implements
@@ -158,18 +160,21 @@ url = 'https://portal.opentopography.org/API/globaldem?';
 f = fullfile(options.filename);
 
 % check api
+options.apikey = strip(options.apikey);
 
-if isempty(options.apikey)
+if strlength(options.apikey) == 0
     % check whether file opentopography.apikey is available
     if exist('opentopography.apikey','file')
         fid = fopen('opentopography.apikey');
         apikey = textscan(fid,'%c');
         apikey = apikey{1}';
-        % Remove trailing blanks, if there are any
-        apikey = deblank(apikey);
+        % Remove leading and trailing blanks, if there are any
+        apikey = strip(apikey);
     else
-        error('Readopentopo requires an API Key. Please read the help.')
+        apikey = strip(getApiKeyDialog());
+        % error('Readopentopo requires an API Key. Please read the help.')
     end
+
 else
     apikey = options.apikey;
 end
@@ -307,3 +312,72 @@ if options.verbose
     disp('-------------------------------------')
 end
 end
+
+
+
+function apiKey = getApiKeyDialog()
+    % getApiKeyDialog opens a dialog for user to enter an API key.
+    % Returns the API key string or empty if cancelled.
+    %
+    % If the user presses "Submit and Save", the key will also be written
+    % to a text file "api_key.txt" in the current folder.
+    
+    apiKey = '';
+
+    % Create dialog
+    d = dialog('Position',[300 300 400 150], ...
+               'Name','Enter API Key', ...
+               'WindowStyle','modal');
+    
+    % Instruction text
+    uicontrol('Parent',d,...
+              'Style','text',...
+              'Position',[20 100 360 30],...
+              'String','Please enter your API key:',...
+              'HorizontalAlignment','left');
+    
+    % Edit field
+    editBox = uicontrol('Parent',d,...
+                        'Style','edit',...
+                        'Position',[20 70 360 25],...
+                        'HorizontalAlignment','left');
+    
+    % Buttons
+    uicontrol('Parent',d,...
+              'Position',[20 20 100 30],...
+              'String','Cancel',...
+              'Callback',@(src,evt) delete(d));
+    
+    uicontrol('Parent',d,...
+              'Position',[140 20 100 30],...
+              'String','Submit',...
+              'Callback',@(src,evt) submitCallback(false));
+    
+    uicontrol('Parent',d,...
+              'Position',[260 20 120 30],...
+              'String','Submit and Save',...
+              'Callback',@(src,evt) submitCallback(true));
+
+    % Wait for user
+    uiwait(d);
+    
+    % Nested callback
+    function submitCallback(saveToFile)
+        apiKey = get(editBox,'String');
+        if saveToFile && ~isempty(apiKey)
+            % create path to apikey-file
+            p   = which("readopentopo");
+            f   = fileparts(p);
+            f   = [f filesep 'opentopography.apikey'];
+            fid = fopen(f,'w');
+            if fid ~= -1
+                fprintf(fid,'%s',strip(apiKey));
+                fclose(fid);
+            else
+                warning('Could not save API key to file.');
+            end
+        end
+        delete(d);
+    end
+end
+
