@@ -11,6 +11,7 @@ function DEM = readexample(example,options)
 %     readexample reads DEMs from the TopoToolbox DEM repository.
 %     Currently available examples are
 %
+%     'greenriver'
 %     'kedarnath'
 %     'kunashiri'
 %     'perfectworld'
@@ -32,10 +33,10 @@ function DEM = readexample(example,options)
 % See also: GRIDobj, websave, readopentopo
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 27. January, 2023
+% Date: 1. August, 2025
 
 arguments
-    example
+    example 
     options.filename = [tempname '.tif']
     options.deletefile (1,1) = true
     options.verbose (1,1) = true
@@ -48,22 +49,28 @@ f = fullfile(options.filename);
 
 switch example
     case 'taiwan'
-        url = 'https://github.com/wschwanghart/DEMs/raw/master/taiwan.tif';
+        url = 'https://github.com/TopoToolbox/DEMs/raw/master/taiwan.tif';
         istif = true;
     case 'tibet'
-        url = 'https://github.com/wschwanghart/DEMs/raw/master/tibet.tif';
+        url = 'https://github.com/TopoToolbox/DEMs/raw/master/tibet.tif';
         istif = true;
     case 'taalvolcano'
-        url = 'https://github.com/wschwanghart/DEMs/raw/master/taalvolcano.tif';
+        url = 'https://github.com/TopoToolbox/DEMs/raw/master/taalvolcano.tif';
         istif = true;
     case 'kunashiri'
-        url = 'https://github.com/wschwanghart/DEMs/raw/master/kunashiri.tif';
+        url = 'https://github.com/TopoToolbox/DEMs/raw/master/kunashiri.tif';
         istif = true;
     case 'perfectworld'
-        url = 'https://github.com/wschwanghart/DEMs/raw/master/perfectworld.tif';
+        url = 'https://github.com/TopoToolbox/DEMs/raw/master/perfectworld.tif';
         istif = true;
     case 'kedarnath'
-        url = 'https://github.com/wschwanghart/DEMs/raw/master/kedarnath.tif';
+        url = 'https://github.com/TopoToolbox/DEMs/raw/master/kedarnath.tif';
+        istif = true;
+    case 'bigtujunga'
+        url = 'https://github.com/TopoToolbox/DEMs/raw/master/bigtujunga.tif';
+        istif = true;
+    case 'greenriver'
+        url = 'https://github.com/TopoToolbox/DEMs/raw/master/greenriver.tif';
         istif = true;
     otherwise 
         error('There is no such example file.')
@@ -74,11 +81,11 @@ webopts = weboptions('Timeout',100000);
 
 % Download with websave
 if options.verbose
-    disp([datestr(now) ' -- Downloading...'])
+    disp([char(datetime("now")) ' -- Downloading...'])
 end
 outfile = websave(f,url,webopts);
 if options.verbose
-    disp([datestr(now) ' -- Download finished...'])
+    disp([char(datetime("now")) ' -- Download finished...'])
 end
 
 % Read grid or mat file
@@ -92,6 +99,6 @@ end
 if options.deletefile
     delete(f);
     if options.verbose
-        disp([datestr(now) ' -- Temporary file deleted'])
+        disp([char(datetime("now")) ' -- Temporary file deleted'])
     end
 end
