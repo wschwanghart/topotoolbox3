@@ -41,9 +41,9 @@ function ext = roipicker(options)
 %
 % See also: readopentopo, readopenalti
 %
-% Authors:  Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Authors:  Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 %
-% Date: 28. September, 2022
+% Date: 20. August, 2025
 
 arguments
     options.basemap = 'topographic'

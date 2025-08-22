@@ -87,7 +87,7 @@ if ~(exist(['flowacc_mex.' mexext],'file') == 3 && nargin<3 && strcmp(FD.type,'s
     ix = FD.ix;
     ixc = FD.ixc;
     
-    switch FD.type
+    switch lower(FD.type)
         case 'single'
             if nargin < 3
                 
@@ -98,15 +98,9 @@ if ~(exist(['flowacc_mex.' mexext],'file') == 3 && nargin<3 && strcmp(FD.type,'s
                 if isscalar(RR)
                     % if RR is a scalar, RR is assumed to be the
                     % coefficient of a homogenous differential equation
-                    % dA/dx = RR*A
-                    %
-                    % A1/A2 = A0exp(RR*x1)/A0exp(RR*x2)
-                    %       = exp(RR*x1)/exp(RR*x2)
-                    %       = exp(RR*(x1-x2))
-                    %       = exp(RR*dx)
                     
                     dx = getdistance(ix,ixc,FD.size,FD.cellsize);
-                    RR = exp(RR*dx);
+                    RR = RR.^dx;
                     clear dx
                     
                     for r = 1:numel(ix)
@@ -121,7 +115,7 @@ if ~(exist(['flowacc_mex.' mexext],'file') == 3 && nargin<3 && strcmp(FD.type,'s
                 
             end
             
-        case {'multi','Dinf'}
+        case {'multi','dinf'}
             fraction = FD.fraction;
             if nargin < 3
                 for r = 1:numel(ix)
