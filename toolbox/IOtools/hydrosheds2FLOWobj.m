@@ -24,8 +24,8 @@ function FD = hydrosheds2FLOWobj(file)
 %
 % See also: FLOWobj, GRIDobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 26. April, 2018
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 1. August, 2025
 
 if isa(file,'GRIDobj')
     FDIR = file;
