@@ -14,15 +14,26 @@ function DEM = readopentopo(options)
 %     projected to a projected coordinate system (use reproject2utm or 
 %     project) before further analysis in TopoToolbox.     
 %
-%     NOTE: Starting on January 1st, 2022, an API authorization key will be 
-%     required for this API. Users can request an API key via myOpenTopo in 
-%     the OpenTopography portal (https://opentopography.org/).
-%     See also the description below to learn how to make your API key
-%     permanently available to readopentopo.
+%     Note that an API authorization key will be required for this API.
+%     Users can request an API key via myOpenTopo in the OpenTopography
+%     portal (https://opentopography.org/).
+%     
+%     To use this key in MATLAB, you can create a text file named
+%     opentopography.apikey in MATLAB's preference folder (prefdir)
+%     containing the API key. If this file exists, you do not need to
+%     provide the key explicitly when calling this function.
+%     
+%     If you supply an empty string as the API key and no API key-file
+%     exists, a dialog box will appear allowing you to enter and
+%     permanently save the key directly to the preference folder.
+%     
+%     To delete a saved API key, navigate to the folder returned by the
+%     prefdir command and manually remove the opentopography.apikey file.
 %
 % Input arguments
 %
 %     Parameter name values
+%
 %     'interactive'    {true} or false. If true, readopentopo will open a
 %                      GUI that enables interactive selection. If true,
 %                      then any given extent options will be ignored.
@@ -46,7 +57,7 @@ function DEM = readopentopo(options)
 %     'south'          southern boundary
 %     'west'           western boundary
 %     'east'           eastern boundary
-%     'demtype'        The global raster dataset *
+%     'demtype'        The global raster dataset 
 %                      {'SRTMGL3'}:       SRTM GL3 (90m) (default)
 %                      'SRTMGL1':         SRTM GL1 (30m)  
 %                      'SRTMGL1_E':       SRTM GL1 (Ellipsoidal)  
@@ -67,17 +78,9 @@ function DEM = readopentopo(options)
 %                                         Surface Model (MRDEM) of Canada
 %                      'CA_MRDEM_DTM':    Medium Resolution (30 m) Digital 
 %                                         Terrain Model (MRDEM) of Canada
-%                        
-%                      * requires API Key (see option 'apikey').
 %
-%     'apikey'         char or string. Users can request an API key via 
-%                      myOpenTopo in the OpenTopography portal. You can
-%                      also create a text file in the folder IOtools named
-%                      opentopography.apikey which must contain the API
-%                      Key. If there is a file that contains the key, there 
-%                      is no need to provide it here. If an empty string is
-%                      supplied, a dialog box will open and let you enter
-%                      (and save) the api key.
+%     'apikey'         char or string. See above on how to get and apply
+%                      the api key.
 %     'verbose'        {true} or false. If true, then some information on
 %                      the process is shown in the command window.
 %     'checkrequestlimit' {true} or false. Opentopography implements
@@ -108,7 +111,7 @@ function DEM = readopentopo(options)
 % Reference: http://www.opentopography.org/developers
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 6. June, 2024
+% Date: 22. August, 2025
 
 arguments
     options.demtype {mustBeTextScalar,mustBeMember(options.demtype,...
@@ -164,14 +167,15 @@ options.apikey = strip(options.apikey);
 
 if strlength(options.apikey) == 0
     % check whether file opentopography.apikey is available
-    if exist('opentopography.apikey','file')
-        fid = fopen('opentopography.apikey');
+    apikeyfile = fullfile(prefdir,'opentopography.apikey');
+    if exist(apikeyfile,'file')
+        fid = fopen(apikeyfile);
         apikey = textscan(fid,'%c');
         apikey = apikey{1}';
         % Remove leading and trailing blanks, if there are any
         apikey = strip(apikey);
     else
-        apikey = strip(getApiKeyDialog());
+        apikey = strip(getApiKeyDialog(apikeyfile));
         % error('Readopentopo requires an API Key. Please read the help.')
     end
 
@@ -315,7 +319,7 @@ end
 
 
 
-function apiKey = getApiKeyDialog()
+function apiKey = getApiKeyDialog(apikeyfile)
     % getApiKeyDialog opens a dialog for user to enter an API key.
     % Returns the API key string or empty if cancelled.
     %
@@ -365,11 +369,8 @@ function apiKey = getApiKeyDialog()
     function submitCallback(saveToFile)
         apiKey = get(editBox,'String');
         if saveToFile && ~isempty(apiKey)
-            % create path to apikey-file
-            p   = which("readopentopo");
-            f   = fileparts(p);
-            f   = [f filesep 'opentopography.apikey'];
-            fid = fopen(f,'w');
+            
+            fid = fopen(apikeyfile,'w');
             if fid ~= -1
                 fprintf(fid,'%s',strip(apiKey));
                 fclose(fid);
