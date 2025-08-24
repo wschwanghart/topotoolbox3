@@ -177,6 +177,7 @@ zx   = ezgetnal(S,DEM,'double');
 zb   = zx(outlet);
 
 a = ezgetnal(S,A)*(A.cellsize.^2); 
+a = a0./a;
 
 % x is the cumulative horizontal distance in upstream direction
 x    = S.distance;
