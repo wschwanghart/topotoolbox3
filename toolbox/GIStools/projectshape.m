@@ -32,7 +32,7 @@ function GT = projectshape(GT,TARGET,projsource)
 %     
 % Output arguments
 %
-%     MS2     geographic data structure or geotable
+%     GT2     geotable
 %
 % See also: parseCRS, geotable2mapstruct, mapstruct2geotable
 %
