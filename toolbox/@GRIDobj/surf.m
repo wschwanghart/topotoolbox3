@@ -57,6 +57,7 @@ function ht = surf(DEM,varargin)
 %     surf((DEM-800)*2,'block',true,'baselevel',-900*2,...
 %                      'sea',true,'exaggerate',1); 
 %     camlight; 
+%     material dull
 %     colormap(ttcmap((DEM-800)*2,'cmap','france'))
 %     ax = gca;
 %     ax.Clipping = 'off';

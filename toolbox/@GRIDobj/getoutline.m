@@ -105,6 +105,7 @@ else
 end
 
 if nargout == 1
+    GT.ID = (1:size(GT,1))';
     varargout{1} = GT;
 
 elseif nargout == 2
