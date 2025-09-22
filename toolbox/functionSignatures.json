@@ -4,7 +4,7 @@
   {
      "inputs":
      [
-        {"name":"filename", "kind":"required", "type":[["file=*.tif,*.tiff,*.asc,*.txt"],["char"]]}
+        {"name":"filename", "kind":"required", "type":[["file=*.tif,*.tiff,*.asc,*.txt"],["char"],["string"]]}
      ]
   },
   "GRIDobj":
@@ -12,7 +12,24 @@
      "inputs":
      [
         {"name":"Z", "kind":"required", "type":["numeric"]},
-        {"name":"cs", "kind":"ordered", "type":["numeric","scalar",">0"]}
+		{"name":"cs", "kind":"ordered", "type":["numeric"]}
+     ]
+  },
+  "GRIDobj":
+  {
+     "inputs":
+     [
+        {"name":"X", "kind":"required", "type":["numeric"]},
+		{"name":"Y", "kind":"required", "type":["numeric"]},
+		{"name":"Z", "kind":"required", "type":["numeric"]}
+     ]
+  },
+  "GRIDobj":
+  {
+     "inputs":
+     [
+        {"name":"ttobject", "kind":"required", "type":[["GRIDobj"],["FLOWobj"],["STREAMobj"],["PPS"]]},
+		{"name":"class/values", "kind":"ordered", "type":[["numeric"],["string"],["char"]]}
      ]
   }
 }

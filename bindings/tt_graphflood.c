@@ -19,20 +19,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   }
 
   // DEM array
-  float *dem = mxGetSingles(prhs[0]);
+  double *dem = mxGetDoubles(prhs[0]);
 
   // Duplicate water height array so that it serves as output
   plhs[0] = mxDuplicateArray(prhs[1]);
-  float *hwout = mxGetSingles(plhs[0]);
+  double *hwout = mxGetDoubles(plhs[0]);
 
   // Boundary conditions
   uint8_t *BCs = mxGetUint8s(prhs[2]);
   
   // Precip
-  float *Precipitations = mxGetSingles(prhs[3]);
+  double *Precipitations = mxGetDoubles(prhs[3]);
 
   // Manning
-  float *manning = mxGetSingles(prhs[4]);
+  double *manning = mxGetDoubles(prhs[4]);
 
   // Dims
   size_t dims[2];
@@ -40,10 +40,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   dims[1] = mxGetM(prhs[0]);
 
   // Time step length  
-  float dt = (float) mxGetScalar(prhs[5]);
+  double dt = (double) mxGetScalar(prhs[5]);
   
   // Spatial resolution
-  float dx = (float) mxGetScalar(prhs[6]);
+  double dx = (double) mxGetScalar(prhs[6]);
 
   // SFD
   bool SFD = (bool) mxGetScalar(prhs[7]);
@@ -55,7 +55,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   size_t N_iterations = (size_t) mxGetScalar(prhs[9]);
   
   // step
-  float step = (float) mxGetScalar(prhs[10]);
+  double step = (double) mxGetScalar(prhs[10]);
 
   // Run graphflood
   graphflood_full(dem,  hwout, BCs, Precipitations, manning, dims, 
