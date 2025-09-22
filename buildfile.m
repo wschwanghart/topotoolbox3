@@ -2,12 +2,18 @@ function plan = buildfile
     plan = buildplan(localfunctions);
     
     plan("package") = matlab.buildtool.Task( ...
+        Dependencies = "mexDirectory", ...
         Description = "Package toolbox", ...
         Actions = @packageToolbox);
 
     plan("benchmark").Dependencies = "compile";
 
     plan.DefaultTasks = ["check" "test" "package"];
+end
+
+function mexDirectoryTask(~)
+    [status, msg, msgid] = mkdir("toolbox/internal/mex");
+    assert(status == 1);
 end
 
 function checkTask(~)
