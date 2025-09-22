@@ -77,27 +77,27 @@ arguments
 end
 
 % Elevation
-DEM.Z = single(DEM.Z);
+DEM.Z = double(DEM.Z);
 
 % Precipitation
 if isnumeric(P) && isscalar(P)
-    P = GRIDobj(DEM,'single') + single(P);
+    P = GRIDobj(DEM,'double') + double(P);
 else
     validatealignment(DEM,P)
-    P.Z = single(P.Z);
+    P.Z = double(P.Z);
 end 
 
 % Water depth
 if isnumeric(HW) && isscalar(HW)
-    HW = GRIDobj(DEM,'single') + single(HW);
+    HW = GRIDobj(DEM,'double') + double(HW);
 else
     validatealignment(DEM,HW)
-    HW.Z = single(HW.Z);
+    HW.Z = double(HW.Z);
 end 
 
 % Manning
 if isnumeric(options.manning) && isscalar(options.manning)
-    manning = GRIDobj(DEM,'single') + options.manning;
+    manning = GRIDobj(DEM,'double') + double(options.manning);
 else
     validatealignment(DEM,options.manning)
     manning = options.manning;
@@ -110,8 +110,8 @@ BCs = options.BCs;
 
 HWout = GRIDobj(DEM,'single');
 HWout.Z = tt_graphflood(DEM.Z,HW.Z,BCs.Z,P.Z,...
-    manning.Z,single(options.dt),single(DEM.cellsize),options.SFD,options.D8,...
-    options.N_iterations, single(options.step));
+    manning.Z,double(options.dt),double(DEM.cellsize),options.SFD,options.D8,...
+    options.N_iterations, double(options.step));
 
 end
 
