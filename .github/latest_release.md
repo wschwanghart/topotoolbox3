@@ -9,5 +9,6 @@ operating system:
 - TopoToolbox_glnxa64.mltbx - 64-bit Linux platform
 - TopoToolbox_maci64.mltbx - 64-bit macOS platform
 - TopoToolbox_maca64.mltbx - 64-bit macOS platform, Apple silicon
+- TopoToolbox_nolibtt.mltbx - Platform-agnostic without libtopotoolbox
 
 and open it in MATLAB.
