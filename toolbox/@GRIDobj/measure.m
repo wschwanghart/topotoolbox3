@@ -1,4 +1,4 @@
-function measure(DEM,varargin)
+function measure(DEM,options)
 
 %MEASURE Take interactive measurements along a polyline
 %
@@ -9,8 +9,8 @@ function measure(DEM,varargin)
 %
 % Description
 %
-%     This simple gui lets you measure distances and slopes along a
-%     polyline. 
+%     This simple GUI lets you measure distances and slopes along a
+%     polyline. You can also create and safe topographic profiles. 
 %
 % Input arguments
 %
@@ -32,7 +32,7 @@ function measure(DEM,varargin)
 % See also: IMDISTLINE, IMROI, IMPOLY, GRIDobj/DEMPROFILE
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 18. October, 2024
+% Date: 24. September, 2025
 
 % 24. November, 2014: added structure field nodes if profile is saved to
 % workspace. This allows to continue working with the measure tool with an
@@ -42,45 +42,37 @@ function measure(DEM,varargin)
 % 12. February, 2022: add water option to display water surfaces in
 % profiles. Increased resolution of profiles
 
+% 24. September, 2025: added arguments block and replaced impoly with
+% drawpolyline
 
-% get DEM coordinates
+arguments
+    DEM   GRIDobj
+    options.xyprecision {mustBeTextScalar} = '%6.0f'
+    options.slopeunit {mustBeTextScalar,...
+        mustBeMember(options.slopeunit,{'tan','degree','percent'})} = 'degree'
+    options.reset (1,1) = false
+    options.colormap = landcolor(255)
+    options.colormapwater = flowcolor(255)
+    options.showhelp (1,1) = true
+    options.position = getDefaultPosition(DEM)
+    options.water = []
+end
+
 [X,Y] = getcoordinates(DEM);
 X   = X(:);
 Y   = Y(:);
 dx  = X(2)-X(1);
 dy  = Y(2)-Y(1);
+xmax = max(X);
+xmin = min(X);
+ymax = max(Y);
+ymin = min(Y);
 
-xmax  = max(X);
-ymax  = max(Y);
-xmin  = min(X);
-ymin  = min(Y);
-
-% default position
-defpos = [xmin + (xmax-xmin)*[1/3; 2/3] ymin + (ymax-ymin)*[2/3; 1/3]];
-
-% choose colormap
-cmap = landcolor(255);
-
-p = inputParser;
-
-p.FunctionName = 'measure';
-addParameter(p,'xyprecision','%6.0f',@(x) ischar(x));
-addParameter(p,'slopeunit','degree',@(x) ischar(validatestring(x,{'tan','degree','percent'})));
-addParameter(p,'reset',false);
-addParameter(p,'colormap',cmap);
-addParameter(p,'showhelp',true,@(x) isscalar(x));
-addParameter(p,'position',defpos,@(x) numel(x) >= 4 && size(x,2) == 2 && ...
-    (max(x(:,1)) <= xmax && min(x(:,1)) >= xmin && ...
-     max(x(:,2)) <= ymax && min(x(:,2)) >= ymin));
-addParameter(p,'water',[]);
-
-parse(p,varargin{:});
-
-if ~p.Results.reset
-    if isempty(p.Results.water)
-        imageschs(DEM,DEM,'colormap',p.Results.colormap)
+if ~options.reset
+    if isempty(options.water)
+        imageschs(DEM,DEM,'colormap',options.colormap)
     else
-        imageschs(DEM,p.Results.water,'colormap',flowcolor)
+        imageschs(DEM,options.water,'colormap',options.colormapwater)
     end
     zoom reset
 end
@@ -89,14 +81,15 @@ hax = gca;
 hf  = gcf;
 
 title('')
-fcn = makeConstrainToRectFcn('impoly',get(gca,'XLim'),get(gca,'YLim'));
-h = impoly(hax,p.Results.position,'closed',false,'PositionConstraintFcn',fcn);
+h = drawpolyline("Parent",hax,"Position",options.position,...
+    "DrawingArea",[min(X) min(Y) max(X)-min(X) max(Y)-min(Y)]);
+
 htext = [];
 htextedge = [];
 totdist = [];
 elev = [];
 segdist = [];
-switch p.Results.slopeunit
+switch options.slopeunit
     case 'tan'
         slopefun = @(x) x;
         slopesign = '';
@@ -123,26 +116,26 @@ textformatedge = {'HorizontalAlignment','center',...
           
 % nr of nodes
 showpointtext = false;
-nrnodes       = size(getPosition(h),1);          
+nrnodes       = size(h.Position,1);
+% nrnodes       = size(getPosition(h),1);          
 showedgetext  = nrnodes < 5;
 
-id = addNewPositionCallback(h,@getinfo);
-iptcallback = get(hf,'WindowKeyPressFcn');
-set(hf,'WindowKeyPressFcn', @toggleview)
-% iptcallbackr = get(hf,'WindowKeyReleaseFcn');
-% set(hf,'WindowKeyReleaseFcn', @releasefun);
 
-pos = getPosition(h);
-getinfo(pos);
+addlistener(h,'MovingROI',@(src,evt) getinfo(src,evt));
+hf.WindowKeyPressFcn = @toggleview;
 
-if p.Results.showhelp
+getinfo(h);
+
+if options.showhelp
     showhelp;
 end
 
+% -----
+% subfunctions
 
-    function pos = getinfo(pos)
+    function pos = getinfo(h,~)
         % GETINFO callback when polyline is modified
-        
+        pos = h.Position;
         nrpos   = size(pos,1);
         
         if nrpos == 1
@@ -175,8 +168,8 @@ end
             
             for r = 1:size(pos,1)
                 
-                textstr = ['x: ' num2str(pos(r,1),p.Results.xyprecision) ...
-                    '\newline' 'y: ' num2str(pos(r,2),p.Results.xyprecision) ...
+                textstr = ['x: ' num2str(pos(r,1),options.xyprecision) ...
+                    '\newline' 'y: ' num2str(pos(r,2),options.xyprecision) ...
                     '\newline' 'z: ' num2str(elev(r))];
                 try
                     set(htext(r),'Position',textpos(r,:),'String',textstr);
@@ -198,7 +191,7 @@ end
             
             for r = 1:size(pos,1)-1
                 
-                textstredge = ['d: ' num2str(segdist(r),p.Results.xyprecision) ...
+                textstredge = ['d: ' num2str(segdist(r),options.xyprecision) ...
                     '\newline' 'slope: ' num2str(slop(r)) slopesign];
                 textposedge = (pos(r,:)+pos(r+1,:))/2;
                 try
@@ -235,31 +228,32 @@ end
         ix  = sub2ind(DEM.size,IX2,IX1);
     end
 
-    function toggleview(varargin)
+    function toggleview(src,event)
         % TOGGLEVIEW callback for key press
-        iptcallback(varargin{:});
-        switch varargin{2}.Key
+        % iptcallback(varargin{:});
+        switch event.Character
             case 't'
                 showpointtext = ~showpointtext;
-                getinfo(getPosition(h));
+                getinfo(h);
             case 'd'
                 showedgetext = ~showedgetext;
-                getinfo(getPosition(h));
+                getinfo(h);
             case 'i'
                 zoom(1.5);
             case 'o'
                 zoom(2/3);
             case 'r'
-                setPosition(h,p.Results.position);
+                h.Position = options.position;
+                % setPosition(h,options.position);
             case 'l'
                 zoomtoroi  
                 
             case 'p'
                 n = ceil((totdist/DEM.cellsize)*5);
-                posn = getPosition(h);
+                posn = h.Position;
                 [dn,z] = demprofile(DEM,n,posn(:,1),posn(:,2));
-                if ~isempty(p.Results.water)
-                    [~,zw] = demprofile(p.Results.water,n,posn(:,1),posn(:,2));
+                if ~isempty(options.water)
+                    [~,zw] = demprofile(options.water,n,posn(:,1),posn(:,2));
                 end
                 posfig = get(hf,'OuterPosition');
                 
@@ -267,7 +261,7 @@ end
                 ax = gca;
                 plot(ax,dn,z,'k');
                 hold on
-                if ~isempty(p.Results.water)
+                if ~isempty(options.water)
                     plot(ax,dn,z+zw,'b');
                 end
                 plot(ax,cumsum([0;segdist(:)]),elev,'sr');
@@ -278,15 +272,13 @@ end
             case 's'
                 % save profile structure array to workspace
                 n = ceil((totdist/DEM.cellsize)*5);
-                posn = getPosition(h);
+                posn = h.Position;
                 [S.distance,S.z,S.x,S.y] = demprofile(DEM,n,posn(:,1),posn(:,2));
-                if ~isempty(p.Results.water)
-                    [~,S.zw] = demprofile(DEM+p.Results.water,n,posn(:,1),posn(:,2));
+                if ~isempty(options.water)
+                    [~,S.zw] = demprofile(DEM+options.water,n,posn(:,1),posn(:,2));
                 end
                 S.nodes = posn;
                 
-                
-
                 answer = inputdlg('Enter variable name:', 'Export profile to workspace', 1, {'profile_struct'});
                 try
                 if isvarname(answer{1})
@@ -294,9 +286,7 @@ end
                 
                 end
                 catch
-                end
-
-                
+                end        
                 
             case 'h'
                 showhelp
@@ -304,19 +294,9 @@ end
         end
     end
 
-%     function releasefun(varargin)
-        % TOGGLEVIEW callback for key press
-%         iptcallbackr(varargin{:});
-%         switch varargin{2}.Key
-%             case 'p'
-%                 pan off
-                
-%         end
-%     end
-
+  
     function showhelp
         str = ['Access tools with these keys \n' ...
-               'a: add new vertex (move cursor over edge) \n' ...
                't: toggle location information \n' ...
                'd: toggle distance information \n' ...
                'o: zoom out \n' ...
@@ -331,7 +311,7 @@ end
            
     function zoomtoroi
         % zoom to polyline
-        posn  = getPosition(h);
+        posn  = h.Position;
         axlim = axis(hax);
         % get x/y axis ratio
         ratio  = (axlim(2)-axlim(1))/(axlim(4)-axlim(3));
@@ -376,4 +356,20 @@ end
         axis(hax,newaxlim)
 
     end
+end
+
+function defpos = getDefaultPosition(DEM)
+% get DEM coordinates
+[X,Y] = getcoordinates(DEM);
+X   = X(:);
+Y   = Y(:);
+
+xmax  = max(X);
+ymax  = max(Y);
+xmin  = min(X);
+ymin  = min(Y);
+
+% default position
+defpos = [xmin + (xmax-xmin)*[1/3; 2/3] ymin + (ymax-ymin)*[2/3; 1/3]];
+
 end
