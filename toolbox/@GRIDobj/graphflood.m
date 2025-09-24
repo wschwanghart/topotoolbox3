@@ -31,7 +31,13 @@ function HWout = graphflood(DEM,P,HW,options)
 %             boundary pixels (incl. pixels adjacent to nan pixels) are
 %             outflow pixels.
 %     'dt'    time step = 1e-3 [s]. This is not simulated time as we make 
-%             the steady low assumption.
+%             the steady flow assumption. Still, dt can be critical for the
+%             convergence of graphflood. As a rule of thumb, following
+%             recommendations apply:             
+%             dx < 2m : 1e-5 for large discharge to 1e-2 for hillslope 
+%                     (usually 2e-3 is OK for LiDAR data)
+%             dx < 10m : 1e-1 for hillslopes, 1e-2 for rivers
+%             dx = 30-90m : dt from 1e-1 to 1
 %     'manning'  GRIDobj or numeric scalar of friction coefficient. 
 %             Default is 0.033. 
 %     'SFD'   True to compute single flow directions, False to compute 
@@ -61,7 +67,7 @@ function HWout = graphflood(DEM,P,HW,options)
 % See also: GRIDobj/fillsinks
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 30. July, 2025
+% Date: 22. September, 2025
 
 arguments
     DEM  GRIDobj
@@ -108,7 +114,7 @@ validatealignment(DEM,options.BCs)
 BCs = options.BCs;
 
 
-HWout = GRIDobj(DEM,'single');
+HWout = GRIDobj(DEM,'double');
 HWout.Z = tt_graphflood(DEM.Z,HW.Z,BCs.Z,P.Z,...
     manning.Z,double(options.dt),double(DEM.cellsize),options.SFD,options.D8,...
     options.N_iterations, double(options.step));
