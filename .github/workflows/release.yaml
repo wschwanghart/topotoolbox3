@@ -79,6 +79,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        mex: [ true ]
+        include:
+          - os: windows-latest
+            mex: false
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     permissions:
@@ -102,10 +106,19 @@ jobs:
         with:
           name: toolbox-docs
           path: toolbox/docs/html/
+      - name: Build MEX files
+        if: ${{ matrix.mex }}
+        uses: matlab-actions/run-build@v2
+        with:
+          tasks: compile
       - name: Build package
         uses: matlab-actions/run-build@v2
         with:
-          tasks: compile package
+          tasks: package
+      - name: Move un-compiled package to one with a generic name
+        if: ${{ ! matrix.mex }}
+        shell: bash
+        run: mv release/TopoToolbox_win64.mltbx release/TopoToolbox_nolibtt.mltbx
       - name: Upload toolbox as artifact
         uses: actions/upload-artifact@v4
         with:
