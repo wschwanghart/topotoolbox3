@@ -122,7 +122,7 @@ jobs:
       - name: Upload toolbox as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: toolbox-${{ matrix.os }}-${{ matrix.release }}
+          name: toolbox-${{ matrix.os }}-${{ matrix.mex }}
           path: release/TopoToolbox_*.mltbx
       - name: Upload toolbox assets
         shell: bash
