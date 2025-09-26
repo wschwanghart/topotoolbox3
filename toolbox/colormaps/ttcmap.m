@@ -1,6 +1,6 @@
 function [cmap,zlimits] = ttcmap(zlimits,varargin)
 
-%TTCMAP create elevation color map optimized for elevation range
+%TTCMAP Create elevation color map optimized for elevation range
 %
 % Syntax
 %     

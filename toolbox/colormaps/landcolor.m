@@ -1,5 +1,5 @@
 function y = landcolor(n)
-% colormap for the display of DEMs
+%LANDCOLOR Colormap for the display of DEMs
 %
 % Syntax
 %
@@ -13,9 +13,8 @@ function y = landcolor(n)
 %
 % Example
 %
-%     load exampledem
-%     imageschs(X,Y,dem,dem)
-%     colormap(landcolor)
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     imageschs(DEM,'colormap',landcolor)
 %
 % Author: Francois Beauducel <beauducel@ipgp.fr>
 % Date: 2012/05/17

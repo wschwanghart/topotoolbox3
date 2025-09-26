@@ -18,6 +18,13 @@ function y = flowcolor(n)
 %
 %     y   n-by-3 matrix with rgb-values
 %
+% Example
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD  = FLOWobj(DEM,'multi');
+%     A   = flowacc(FD);
+%     imageschs(DEM,log(A),'colormap',flowcolor)
+%
 % Author: Francois Beauducel <beauducel@ipgp.fr>
 % Date: 2012/05/17
 
