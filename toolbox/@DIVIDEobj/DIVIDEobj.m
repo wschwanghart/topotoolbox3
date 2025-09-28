@@ -36,6 +36,7 @@ classdef DIVIDEobj
 %                  divides
 %     verbose      toggle for displaying function execution progress in the
 %                  command window
+%     useparallel  use parallel toolbox (default = false)
 %
 % Output arguments
 %
@@ -44,7 +45,7 @@ classdef DIVIDEobj
 % Examples
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     ST = STREAMobj(FD,flowacc(FD)>1000);
 %     D = DIVIDEobj(FD,ST);
 %     plot(D)
@@ -52,7 +53,7 @@ classdef DIVIDEobj
 % See also: getdivide, FLOWobj/drainagebasins, FLOWobj/streamorder
 %
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
-% Date: August 2020
+% Date: September 2025
 
     
     properties 
@@ -76,26 +77,31 @@ classdef DIVIDEobj
     
     methods 
         
-        function [D,varargout] = DIVIDEobj(FD,ST,varargin) 
+        function [D,varargout] = DIVIDEobj(FD,ST,options) 
             %DIVIDEobj Construct an instance of DIVIDEobj
+            arguments
+                FD  FLOWobj
+                ST  
+                options.type {mustBeMember(options.type,...
+                    {'strahler','shreve','topo'})} = 'topo'
+                options.outlet (1,1) = true
+                options.network (1,1) = true
+                options.verbose (1,1) = false
+                options.useparallel (1,1) = false
+            end
             
-            % Parse inputs
-            ordschemes = {'strahler','shreve','topo'};
-            p = inputParser;
-            p.FunctionName = 'divides';
-            p.KeepUnmatched = true;
-            addRequired(p,'FD',@(x) isa(x,'FLOWobj'));
-            addRequired(p,'ST',@(x) isa(x,'GRIDobj')|isa(x,'STREAMobj'));
-            addParamValue(p,'type','topo',@(x) ismember(lower(x),ordschemes))
-            addParamValue(p,'outlets',true,@(x) islogical(x))
-            addParamValue(p,'network',true,@(x) islogical(x))
-            addParamValue(p,'verbose',false,@(x) islogical(x))
-            parse(p,FD,ST,varargin{1:end});
-            
-            type    = p.Results.type;
-            outlets = p.Results.outlets;
-            verbose = p.Results.verbose;
-            
+            % get options
+            sotype  = options.type;
+            outlet  = options.outlet;
+            verbose = options.verbose;
+            useparallel = options.useparallel;
+
+            % To maintain backward compatibility, also allow for stream
+            % grids
+            if isa(ST,'GRIDobj')
+                ST = STREAMobj(FD,ST);
+            end
+  
             % Prepare
             % the divide grid is shifted by half a cell size in x & y
             hcs = FD.cellsize/2;
@@ -103,50 +109,69 @@ classdef DIVIDEobj
             D.size = FD.size+[1 1];
             D.wf = FD.wf+[0 0;0 0;-hcs,hcs]';
             
-            % Create streamorder grid
-            if isa(ST,'STREAMobj')
-                STG = STREAMobj2GRIDobj(ST);
-            elseif isa(ST,'GRIDobj')
-                STG = ST;
-            else
-                error('TT2: See function help for instructions.')
-            end
-            sotype = lower(type);
+            % If topo is chosen, sotype is 'shreve'
             if strcmp(sotype,'topo')
                 sotype = 'shreve';
             end
-            S = streamorder(FD,STG,sotype);
-            sz = S.Z(S.Z>0);
-            sox = unique(sz);
-            n = length(sox);
+            
+            % Calculate streamorder
+            so = streamorder(ST,sotype);
+            
+            % Find stream nodes below which stream order changes
+            I  = so(ST.ixc) ~= so(ST.ix);
+            ixbc = ST.IXgrid(ST.ix(I));
+
+            % Add outlets, if required
+            if outlet
+                ixout = streampoi(ST,'out','ix');
+                ixbc  = [ixbc;  ixout];
+            end
+            
+            % This function returns a cell array that contains the indices
+            % of stream pixels that have spatially disjunct drainage
+            % basins. This reduces the number of scans required later.
+            C   = disjunctdbs(ST,ixbc);
+            n   = length(C);
             
             % Divide identification loop
-            G = cell(n+double(outlets),1); % divides
-            O = cell(n+double(outlets),1); % outlets
+            G = cell(n,1); % divides
+            O = cell(n,1); % outlets
             if verbose
                 fprintf(1,'Divide identification:\n');
             end
-            for k = 1 : n
-                if verbose
-                    fprintf(1,'%d / %d  \n',k,n);
+
+            if useparallel && license('test', 'Distrib_Computing_Toolbox')
+                parfor k = 1 : n
+                    if verbose
+                        fprintf(1,'%d / %d  \n',k,n);
+                    end
+                    ixbcsel = C{k};
+                    [DB,IX] = drainagebasins(FD,ixbcsel);
+                    % Record divide coordinates
+                    if sum(IX)>0
+                        % Get basin outlines
+                        MS = GRIDobj2polygon(DB,"waitbar",false);
+                        MS = getdivide(MS,IX,FD);
+                        G{k} = MS;
+                        O{k} = double(IX);
+                    end
                 end
-                [DB,IX] = drainagebasins(FD,S,sox(k));
-                % Record divide coordinates
-                if sum(IX)>0
-                    % Get basin outlines
-                    MS = GRIDobj2polygon(DB);
-                    MS = getdivide(MS,IX,FD);
-                    G{k} = MS;
-                    O{k} = double(IX);
+            else
+                for k = 1 : n
+                    if verbose
+                        fprintf(1,'%d / %d  \n',k,n);
+                    end
+                    ixbcsel = C{k};
+                    [DB,IX] = drainagebasins(FD,ixbcsel);
+                    % Record divide coordinates
+                    if sum(IX)>0
+                        % Get basin outlines
+                        MS = GRIDobj2polygon(DB,"waitbar",false);
+                        MS = getdivide(MS,IX,FD);
+                        G{k} = MS;
+                        O{k} = double(IX);
+                    end
                 end
-            end
-            if (outlets) % Include outlets
-                IX = streampoi(ST,'outlets','ix');
-                DB = drainagebasins(FD,IX);
-                [MS,~,~] = GRIDobj2polygon(DB);
-                MS = getdivide(MS,IX,FD);
-                G{k+1} = MS;
-                O{k+1} = IX;
             end
             
             
@@ -201,7 +226,7 @@ classdef DIVIDEobj
             D.issorted = false;
             
             % Get junctions and endpoints
-            if p.Results.network
+            if options.network
                 D = divnet(D,FD);
                 D = sort(D);
                 D = divdist(D);
@@ -435,4 +460,44 @@ classdef DIVIDEobj
         
     end
 end
+
+function C = disjunctdbs(S,ixgrid)
+
+arguments
+    S   STREAMobj
+    ixgrid % must be unique
+end
+
+IX = zeros(size(S.x));
+[~,b] = ismember(ixgrid,S.IXgrid);
+n  = numel(ixgrid);
+IX(b) = 1:n;
+for r = numel(S.ix):-1:1
+    if IX(S.ixc(r)) ~= 0 && IX(S.ix(r)) == 0
+        IX(S.ix(r)) = IX(S.ixc(r));
+    end
+end
+
+% Get a reduced stream network
+I = (IX(S.ix) ~= IX(S.ixc)) & ...
+    (IX(S.ixc) ~= 0);
+
+% Transclosure (maybe use digraph/transclosure) 
+A = sparse(IX(S.ix(I)),IX(S.ixc(I)),true,n,n);
+A  = (speye(n)-A)\speye(n);
+
+C  = cell(0);
+ct = 0;
+while nnz(A)>0
+    I = sum(A,1) == 1;
+    if any(I)
+        ct = ct+1;
+        C{ct} = ixgrid(I);
+        A(I,:) = 0;
+    end
+end
+end
+
+
+    
 
