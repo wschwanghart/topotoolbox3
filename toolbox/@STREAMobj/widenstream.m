@@ -8,6 +8,7 @@ function [DEM,MASK] = widenstream(S,DEM,inp,method)
 %     DEMw = widenstream(S,DEM,widthnal)
 %     DEMw = widenstream(S,DEM,xyw,method)
 %     DEMw = widenstream(S,DEM,'4conn')
+%     DEMw = widenstream(S,DEM,'4conn',method)
 %     [DEMw,MASK] = ...
 %
 % Description
@@ -30,6 +31,13 @@ function [DEM,MASK] = widenstream(S,DEM,inp,method)
 %     algorithm chooses and lowers the cardinal neighbor with the lower 
 %     elevation while the other remains unchanged.
 %
+%     widenstream(S,DEM,'4conn',method) will adjust the elevation of
+%     cardinal neighbors connecting diagonal neighbors using different
+%     methods. 'linear' will take the average of the upstream and
+%     downstream neighbors. 'previous' will adjust the elevation to that of
+%     the upstream neighbor. 'next' will adjust the elevation to that of
+%     the downstream neighbor. Default is 'linear'.
+%
 %     widenstream(S,DEM,xyw,method) levels elevations in DEM by the width
 %     in mapunits measured at the locations xy. The locations and width are
 %     must be provided as the nx3 matrix xyw where the first two columns
@@ -51,7 +59,8 @@ function [DEM,MASK] = widenstream(S,DEM,inp,method)
 %              network node
 %     xyw      n-by-3 matrix with x and y coordinates and river width.
 %     method   interpolation method ('linear','spline',...). See interp1 
-%              for further options.
+%              for further options. In case if option '4conn' is chosen,
+%              method can be 'linear', 'previous', or 'next'.
 %
 % Output arguments
 %
@@ -89,7 +98,18 @@ end
 % If users choose '4conn'
 if (ischar(inp) || isstring(inp)) 
     if ~strcmpi(inp,"4conn")
-        error('Unknown method')
+        error('Unknown method for widening stream.')
+    end
+
+    switch method
+        case 'linear'
+            m = 1;
+        case 'previous'
+            m = 2;
+        case 'next'
+            m = 3;
+        otherwise
+            error('Method does not apply for 4conn.')
     end
 
     [row,col] = ind2sub(S.size,S.IXgrid);
@@ -116,12 +136,27 @@ if (ischar(inp) || isstring(inp))
         subs1   = [rix cixc];
         subs2   = [rixc cix];
         
-        % Linear index of diagonal candidates
+        % Linear index of cardinal candidates
         ixd     = sub2ind(S.size,[subs1(1);subs2(1)],[subs1(2);subs2(2)]);
 
         % Which of the two has a lower elevation?
         [~,ixlowest] = min(DEM.Z(ixd));
-        DEM.Z(ixd(ixlowest)) = DEM.Z(S.IXgrid(S.ix(r)));
+
+        % What value should we assign to the pixel to be lowered
+        % 1. Elevation of upstream pixel
+        if m == 2
+            DEM.Z(ixd(ixlowest)) = DEM.Z(S.IXgrid(S.ix(r)));
+        
+        % 2. Elevation of downstream pixel
+        elseif m == 3
+            DEM.Z(ixd(ixlowest)) = DEM.Z(S.IXgrid(S.ixc(r)));
+        % 3. Average of upstream and downstream pixel
+        else
+        DEM.Z(ixd(ixlowest)) = (DEM.Z(S.IXgrid(S.ix(r))) + ...
+                                 DEM.Z(S.IXgrid(S.ixc(r))))/2;
+        end
+        
+        % Add pixel to the stream mask
         SG.Z(ixd(ixlowest)) = true;
     end
 
