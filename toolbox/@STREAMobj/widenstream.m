@@ -1,4 +1,4 @@
-function [DEM,MASK] = widenstream(S,DEM,varargin)
+function [DEM,MASK] = widenstream(S,DEM,inp,method)
 
 %WIDENSTREAM level elevations adjacent to the stream network
 %
@@ -7,6 +7,7 @@ function [DEM,MASK] = widenstream(S,DEM,varargin)
 %     DEMw = widenstream(S,DEM,nrpx)
 %     DEMw = widenstream(S,DEM,widthnal)
 %     DEMw = widenstream(S,DEM,xyw,method)
+%     DEMw = widenstream(S,DEM,'4conn')
 %     [DEMw,MASK] = ...
 %
 % Description
@@ -20,6 +21,14 @@ function [DEM,MASK] = widenstream(S,DEM,varargin)
 %
 %     widenstream(S,DEM,nrpx) levels elevations in DEM within a distance of 
 %     nrpx pixels around the stream network S (STREAMobj).
+%
+%     widenstream(S,DEM,'4conn') ensures a downward descending flowpath
+%     along cardinal stream pixels. This will ensure that flood models that
+%     route along cardinal (and not diagonal) neighbors only will not
+%     impound where the stream network S connects diagonal neighbors.
+%     Diagonal neighbors can be connected by two cardinal neighbors. The
+%     algorithm chooses and lowers the cardinal neighbor with the lower 
+%     elevation while the other remains unchanged.
 %
 %     widenstream(S,DEM,xyw,method) levels elevations in DEM by the width
 %     in mapunits measured at the locations xy. The locations and width are
@@ -67,21 +76,72 @@ function [DEM,MASK] = widenstream(S,DEM,varargin)
 %
 % See also: interp1, STREAMobj/imposemin 
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 2. June, 2015
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 2. October, 2025
 
+arguments
+    S  STREAMobj
+    DEM GRIDobj
+    inp 
+    method {mustBeMember(method,{'linear','nearest','next','previous','spline','pchip','cubic'})} = 'linear'
+end
 
-narginchk(3,4)
+% If users choose '4conn'
+if (ischar(inp) || isstring(inp)) 
+    if ~strcmpi(inp,"4conn")
+        error('Unknown method')
+    end
 
+    [row,col] = ind2sub(S.size,S.IXgrid);
+    % Identify downstream cardinal neighbors
+    I = isapprox(hypot(S.x(S.ix)-S.x(S.ixc),S.y(S.ix)-S.y(S.ixc)),...
+                       S.cellsize);
+
+    SG = STREAMobj2GRIDobj(S);
+
+    for r = 1:numel(S.ix)
+        
+        if I(r)
+            % Downstream neighbor is cardinal, proceed.
+            continue
+        end
+    
+        % Downstream neighbor is diagonal. There are two pixels that are
+        % candidates to be lowered. 
+        rix = row(S.ix(r));
+        cix = col(S.ix(r));
+        rixc = row(S.ixc(r));
+        cixc = col(S.ixc(r));
+
+        subs1   = [rix cixc];
+        subs2   = [rixc cix];
+        
+        % Linear index of diagonal candidates
+        ixd     = sub2ind(S.size,[subs1(1);subs2(1)],[subs1(2);subs2(2)]);
+
+        % Which of the two has a lower elevation?
+        [~,ixlowest] = min(DEM.Z(ixd));
+        DEM.Z(ixd(ixlowest)) = DEM.Z(S.IXgrid(S.ix(r)));
+        SG.Z(ixd(ixlowest)) = true;
+    end
+
+    if nargout == 2
+        MASK = SG;
+    end
+    
+    return
+end
+
+% if users choose the other options, we continue here
 I = false(DEM.size);
 I(S.IXgrid) = true;
 
 [D,L] = bwdist(I,'e');
 
-if numel(varargin) == 1 && isscalar(varargin{1})
-    I = D<=varargin{1};
-elseif numel(varargin) == 1 && isnal(S,varargin{1})
-    distnal = varargin{1}/DEM.cellsize;
+if isscalar(inp)
+    I = D<=inp;
+elseif isnal(S,inp)
+    distnal = inp/DEM.cellsize;
     HG = zeros(DEM.size);
     HG(S.IXgrid) = distnal;
     I = HG(L) >= D;
@@ -91,16 +151,8 @@ else
             ['widenstream works only with a river reach, i.e., there\n'...
              'must not be more than one channel head.'])
     end
-    
-    if numel(varargin) == 2
-        method = validatestring(varargin{2},...
-            {'linear','nearest','next','previous','spline','pchip','cubic'},...
-            'widenstream','method',4);
-    else
-        method = 'linear';
-    end
-    
-    xyw = varargin{1};
+
+    xyw = inp;
     xyw(:,3) = xyw(:,3)/DEM.cellsize/2;
     
     [~,~,IX] = snap2stream(S,xyw(:,1),xyw(:,2));
