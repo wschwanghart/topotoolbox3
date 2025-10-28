@@ -92,7 +92,7 @@ if not(all(isdo)) % outlets without downstream neighbors
     G.Z = nan(G.size,'single');
     %P = polygon2GRIDobj(G,MS); % Fails sometimes due to a bug
     % This is just a work-around to avoid a bug in polygon2GRIDobj
-    P = pad(polygon2GRIDobj(pad(G,1),MS),-1);
+    P = pad(polygon2GRIDobj(pad(G,1),MS,"waitbar",false),-1);
     G.Z(P.Z) = 1;
     G = pad(G,1,nan);
     
