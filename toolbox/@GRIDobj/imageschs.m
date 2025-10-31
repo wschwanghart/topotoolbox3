@@ -429,7 +429,7 @@ if nargout == 0
     
     % plot grid
     if ~isempty(gridmarkers)
-        if numel(gridmarkers) == 1
+        if isscalar(gridmarkers)
             gridmarkers = [gridmarkers gridmarkers];
         end
           

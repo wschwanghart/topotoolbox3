@@ -1,7 +1,7 @@
 
 # User Guide to TopoToolbox \- multiple flow directions
 
-![image_0.png](./usersguide_3_mfd_media/image_0.png)
+![image_0.png](usersguide_3_mfd_media/image_0.png)
 
 # Background
 
@@ -23,7 +23,7 @@ imageschs(DEM,sqrt(A),'colorbarylabel','sqrt(# upstream cells)', ...
 title('Single')
 ```
 
-![figure_0.png](./usersguide_3_mfd_media/figure_0.png)
+![figure_0.png](usersguide_3_mfd_media/figure_0.png)
 
 The advantage of the single flow direction is that it is computationally much more simple, requires less memory and is thus calculated quite quickly even for large DEMs. Moreover, TopoToolbox's implementation of the SFD algorithm requires no preprocessing of the DEM. Instead, FLOWobj handles sinks and flat areas in the DEM automatically. The drawback is that it may create some spurious, parallel flow patterns on hillslopes or in flat areas. 
 
@@ -34,7 +34,7 @@ setextent({[392624 400000] [3792674 3796916]},gca)
 title('Single')
 ```
 
-![figure_1.png](./usersguide_3_mfd_media/figure_1.png)
+![figure_1.png](usersguide_3_mfd_media/figure_1.png)
 
 Now let's compare these flow patterns to those obtained from multiple flow directions. 
 
@@ -47,7 +47,7 @@ setextent({[392624 400000] [3792674 3796916]},gca)
 title('Multi')
 ```
 
-![figure_2.png](./usersguide_3_mfd_media/figure_2.png)
+![figure_2.png](usersguide_3_mfd_media/figure_2.png)
 
 Clearly, flow patterns on hillslopes appear smoother and may reflect better the true moisture pattern, though not necessarily runoff patterns. Zooming out, however, shows that runoff patterns on fans and low parts of the landscape appear much more realistic. 
 
@@ -57,7 +57,7 @@ imageschs(DEM,log(A),'colorbarylabel','log(# upstream cells)', ...
 title('Multi')
 ```
 
-![figure_3.png](./usersguide_3_mfd_media/figure_3.png)
+![figure_3.png](usersguide_3_mfd_media/figure_3.png)
 
 Finally, we compare the single and multi algorithms with Dinf.
 
@@ -70,7 +70,7 @@ setextent({[392624 400000] [3792674 3796916]},gca)
 title('Dinf')
 ```
 
-![figure_4.png](./usersguide_3_mfd_media/figure_4.png)
+![figure_4.png](usersguide_3_mfd_media/figure_4.png)
 
 Flow patterns look less dispersive compared to the multi algorithm.
 
@@ -80,7 +80,7 @@ imageschs(DEM,log(A),'colorbarylabel','log(# upstream cells)', ...
 title('Dinf')
 ```
 
-![figure_5.png](./usersguide_3_mfd_media/figure_5.png)
+![figure_5.png](usersguide_3_mfd_media/figure_5.png)
 
 The advantage of the Dinf algorithm is that it probably reflects best the true flow patterns but this may depend on application, DEM resolution, and other factors. From a computational point of view, Dinf requires less memory because each cell drains to a maximum of two neighbors.
 

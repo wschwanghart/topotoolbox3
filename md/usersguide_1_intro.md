@@ -1,7 +1,7 @@
 
 # User Guide to TopoToolbox \- Introduction
 
-![image_0.png](./usersguide_1_intro_media/image_0.png)
+![image_0.png](usersguide_1_intro_media/image_0.png)
 
 
 TopoToolbox provides a set of Matlab functions that support the analysis of relief and flow pathways in digital elevation models. The major aim of TopoToolbox is to offer helpful analytical GIS utilities in a non\-GIS environment in order to support the simultaneous application of GIS\-specific and other quantitative methods. 
@@ -72,7 +72,7 @@ methods GRIDobj
 ```matlabTextOutput
 Methods for class GRIDobj:
 
-GRIDobj                  GRIDobj2ascii            GRIDobj2geotable         GRIDobj2geotiff          GRIDobj2im               GRIDobj2mat              GRIDobj2pm               GRIDobj2polygon          GRIDobj2rgb              acv                      aggregate                all                      and                      any                      arcslope                 aspect                   castshadow               cellarea                 clip                     contour                  coord2ind                coord2sub                createmask               crop                     curvature                demarea                  demprofile               diffusion                dilate                   dist2curve               dist2line                distance                 elevateminima            eq                       erode                    evansslope               excesstopography         fillsinks                filter                   find                     findcoord                ge                       getcoordinates           getextent                getoutline               gradient8                griddedcontour           gt                       hexgrid                  hillshade                histogram                hydrogram                hypscurve                identifyflats            imagesc                  imageschs                ind2coord                info                     inpaintnans              interp                   interp2GRIDobj           interpwithbarriers       isUnderlyingInteger      isUnderlyingNumeric      isUnderlyingType         isnan                    ksdensity                largestinscribedgrid     ldivide                  le                       line2GRIDobj             localtopography          log                      log10                    log2                     lt                       max                      measure                  min                      minmaxnorm               minus                    mosaic                   mpower                   mrdivide                 mtimes                   mustBeUnderlyingInteger  mustBeUnderlyingNumeric  mustBeUnderlyingType     ncols                    ne                       not                      nrows                    or                       pad                      plus                     polygon2GRIDobj          postprocflats            power                    prcclip                  project                  prominence               rand                     randomsample             rdivide                  reclabel                 reclassify               reproject2utm            resample                 roughness                shufflelabel             snap2stream              sqrt                     sub2coord                surf                     tanakacontour            times                    toposhielding            uminus                   underlyingType           uplus                    validatealignment        xor                      zscore                   
+GRIDobj                  GRIDobj2ascii            GRIDobj2geotable         GRIDobj2geotiff          GRIDobj2im               GRIDobj2mat              GRIDobj2pm               GRIDobj2polygon          GRIDobj2rgb              acv                      aggregate                all                      and                      any                      arcslope                 aspect                   castshadow               cellarea                 clip                     contour                  coord2ind                coord2sub                createmask               crop                     curvature                demarea                  demprofile               diffusion                dilate                   dist2curve               dist2line                distance                 elevateminima            eq                       erode                    evansslope               excesstopography         fillsinks                filter                   find                     findcoord                ge                       getcoordinates           getextent                getoutline               gradient8                graphflood               greedylabel              griddedcontour           gt                       hexgrid                  hillshade                histogram                hydrogram                hypscurve                identifyflats            imagesc                  imageschs                ind2coord                info                     inpaintnans              interp                   interp2GRIDobj           interpwithbarriers       isUnderlyingInteger      isUnderlyingNumeric      isUnderlyingType         isnan                    ksdensity                largestinscribedgrid     ldivide                  le                       line2GRIDobj             localtopography          log                      log10                    log2                     lt                       max                      measure                  min                      minmaxnorm               minus                    mosaic                   mpower                   mrdivide                 mtimes                   mustBeUnderlyingInteger  mustBeUnderlyingNumeric  mustBeUnderlyingType     ncols                    ne                       not                      nrows                    or                       pad                      plus                     polygon2GRIDobj          postprocflats            power                    prcclip                  project                  prominence               rand                     randomsample             rdivide                  reclabel                 reclassify               reproject2utm            resample                 roughness                shufflelabel             snap2stream              sqrt                     sub2coord                surf                     tanakacontour            times                    toposhielding            uminus                   underlyingType           uplus                    validatealignment        xor                      zscore                   
 ```
 
 # View the DEM
@@ -83,7 +83,7 @@ Matlab provides numerous ways to display gridded data (images). Among these are 
 imagesc(DEM)
 ```
 
-![figure_0.png](./usersguide_1_intro_media/figure_0.png)
+![figure_0.png](usersguide_1_intro_media/figure_0.png)
 
 Note that the axes contain the x and y coordinates and that the axes are scaled equally.
 
@@ -92,10 +92,12 @@ Another useful function is imageschs which displays an instance of `GRIDobj` and
 
 ```matlab
 G = gradient8(DEM);
-imageschs(DEM,G,'ticklabel','nice','colorbarylabel','Slope [-]','caxis',[0 1])
+imageschs(DEM,G,'ticklabel','nice',...
+    'colorbarylabel','Slope [-]',...
+    'clim',[0 1])
 ```
 
-![figure_1.png](./usersguide_1_intro_media/figure_1.png)
+![figure_1.png](usersguide_1_intro_media/figure_1.png)
 
 If none of the available visualization functions are what you are looking for, you can simply convert your DEM to the standard representation using GRIDobj2mat. The function returns two coordinate vectors and a matrix with values. Here we crop our DEM to a smaller extent before plotting.
 
@@ -105,7 +107,7 @@ DEMc = crop(DEM,sub2ind(DEM.size,[1 50],[1 50]));
 surf(x,y,double(Z))
 ```
 
-![figure_2.png](./usersguide_1_intro_media/figure_2.png)
+![figure_2.png](usersguide_1_intro_media/figure_2.png)
 
 Note: See the help of the function `crop` on other ways to clip your data to a desired extent.
 
@@ -143,7 +145,7 @@ DEMf = fillsinks(DEM);
 TopoToolbox 3 uses a novel technique to store flow direction that allows for easy coding and fast performance. Flow direction is stored as a new object, `FLOWobj`, an instance of which is derived from an existing DEM (instance of `GRIDobj`).
 
 
-Here is a fast way to calculate flow accumulation based on the previously sink filled DEM. The flow accumulation grid is dilated a little bit, so that flow paths are more easily appreciated in the figure.
+Here is a fast way to calculate flow accumulation based on the unprocessed DEM. Morphological dilation of the flow accumulation grid acts as a maximum filter that enhances the visual appearance of the flow paths in the figure.
 
 ```matlab
 FD = FLOWobj(DEM);
@@ -153,7 +155,7 @@ imageschs(DEM,dilate(sqrt(A),ones(5)),'colormap',flowcolor,...
     'ticklabel','nice');
 ```
 
-![figure_3.png](./usersguide_1_intro_media/figure_3.png)
+![figure_3.png](usersguide_1_intro_media/figure_3.png)
 
 When creating an instance of `FLOWobj`, you can set numerous options that are summarized in the help of `FLOWobj`. 
 
@@ -168,7 +170,7 @@ methods FLOWobj
 ```matlabTextOutput
 Methods for class FLOWobj:
 
-FLOWobj                  FLOWobj2GRIDobj          FLOWobj2M                FLOWobj2cell             clip                     coord2ind                crop                     dbasymmetry              dbentropy                dependencemap            drainagebasins           drainagebasinstats       find                     flipdir                  flowacc                  flowconvergence          flowdistance             flowdivergence           flowpathextract          flowtime                 flowvec                  gradient                 imposemin                ind2coord                influencemap             ismulti                  mapfromnal               meltonruggedness         multi2single             multi_normalize          plotdbfringe             propagatevaluesupstream  quantcarve               randomize                removesmallfractions     saveobj                  slopeareatool            streamorder              tfactor                  updatetoposort           upslopestats             validatealignment        vertdistance2stream      
+FLOWobj                  FLOWobj2GRIDobj          FLOWobj2M                FLOWobj2cell             clip                     coord2ind                crop                     dbasymmetry              dbentropy                dependencemap            drainagebasins           drainagebasinstats       find                     flipdir                  flowacc                  flowconvergence          flowdistance             flowdivergence           flowpathextract          flowtime                 flowvec                  getoutlets               gradient                 imposemin                ind2coord                influencemap             ismulti                  mapfromnal               meltonruggedness         multi2single             multi_normalize          plotdbfringe             propagatevaluesupstream  quantcarve               randomize                removesmallfractions     saveobj                  slopeareatool            streamorder              tfactor                  updatetoposort           upslopestats             validatealignment        vertdistance2stream      
 ```
 
 
@@ -202,7 +204,7 @@ end
 hold off
 ```
 
-![figure_4.png](./usersguide_1_intro_media/figure_4.png)
+![figure_4.png](usersguide_1_intro_media/figure_4.png)
 
 
 
@@ -214,7 +216,7 @@ D = D/1000;
 imageschs(DEM,D,'ticklabel','nice','colorbarylabel','Flow distance [km]')
 ```
 
-![figure_5.png](./usersguide_1_intro_media/figure_5.png)
+![figure_5.png](usersguide_1_intro_media/figure_5.png)
 
 You can use the output of flowdistance to calculate the area function which is the frequency distribution of flow distances to the outlet of a specific basin. Let's take the largest basin in our study site.
 
@@ -225,7 +227,7 @@ xlabel('Distance to outlet [lm]');
 ylabel('# cells');
 ```
 
-![figure_6.png](./usersguide_1_intro_media/figure_6.png)
+![figure_6.png](usersguide_1_intro_media/figure_6.png)
 # STREAMobj \- a class for stream networks
 
 While FLOWobj stores the information on the entire flow network on hillslopes and in channels, STREAMobj is a class that is used to analyze the channelized part of the flow network only. The storage strategy is very similar to the one of the class FLOWobj.
@@ -249,7 +251,7 @@ plot(S);
 axis image
 ```
 
-![figure_7.png](./usersguide_1_intro_media/figure_7.png)
+![figure_7.png](usersguide_1_intro_media/figure_7.png)
 
 STREAMobj stores various properties some of which you might use to directly access if you want to customize your code or build your own functions. Please check the help of STREAMobj.
 
@@ -263,7 +265,7 @@ methods STREAMobj
 ```matlabTextOutput
 Methods for class STREAMobj:
 
-STREAMobj            STREAMobj2GRIDobj    STREAMobj2SWATHobj   STREAMobj2XY         STREAMobj2cell       STREAMobj2geotable   STREAMobj2kml        STREAMobj2latlon     STREAMobj2mapstruct  aggregate            bifurcationratio     binarize             chiplot              chitransform         clean                conncomps            crs                  crslin               cummaxupstream       cumsum               cumtrapz             curvature            densify              diff                 distance             drainagedensity      extend2divide        extractconncomps     ezgetnal             fastscape            getlocation          getnal               getvalue             gradient             hillslopearea        identifyflats        imposemin            info                 inpaintnans          interp               intersect            intersectlocs        isempty              isequal              isnal                issubgraph           istrunk              klargestconncomps    knickpointfinder     ksn                  labelreach           loessksn             lowerenv             maplateral           mchi                 meanupstream         mincosthydrocon      mnoptim              mnoptimvar           modify               nal2nal              netdist              networksegment       orientation          plot                 plot3                plot3d               plotc                plotcategorical      plotdz               plotdzshaded         plotsegmentgeometry  plotstreamorder      quantcarve           randlocs             removeedgeeffects    removeshortstreams   rmedge               rmnode               sharedstreampower    sidebranching        sinuosity            slopearea            smooth               snap2stream          split                splitbyattribute     stackedplotdz        streamorder          streampoi            streamproj           subgraph             transformcoords      tribdir              truncate             trunk                union                validatealignment    widenstream          wmplot               zerobaselevel        
+STREAMobj            STREAMobj2GRIDobj    STREAMobj2SWATHobj   STREAMobj2XY         STREAMobj2cell       STREAMobj2geotable   STREAMobj2kml        STREAMobj2latlon     STREAMobj2mapstruct  aggregate            bifurcationratio     binarize             buffer               chiplot              chitransform         clean                conncomps            crs                  crslin               cummaxupstream       cumsum               cumtrapz             curvature            densify              diff                 distance             drainagedensity      extend2divide        extractconncomps     ezgetnal             fastscape            getlocation          getnal               getvalue             gradient             hillslopearea        identifyflats        imposemin            info                 inpaintnans          interp               intersect            intersectlocs        isempty              isequal              isnal                issubgraph           istrunk              klargestconncomps    knickpointfinder     ksn                  labelreach           loessksn             lowerenv             maplateral           mchi                 meanupstream         mincosthydrocon      mnoptim              mnoptimvar           modify               nal2nal              netdist              networksegment       orientation          plot                 plot3                plot3d               plotc                plotcategorical      plotdz               plotdzshaded         plotsegmentgeometry  plotstreamorder      quantcarve           randlocs             removeedgeeffects    removeshortstreams   rmedge               rmnode               sharedstreampower    sidebranching        sinuosity            slopearea            smooth               snap2stream          split                splitbyattribute     stackedplotdz        streamorder          streampoi            streamproj           subgraph             transformcoords      tribdir              truncate             trunk                union                validatealignment    widenstream          wmplot               zerobaselevel        
 ```
 
 
@@ -274,7 +276,7 @@ S = klargestconncomps(S,1);
 plot(S); axis image
 ```
 
-![figure_8.png](./usersguide_1_intro_media/figure_8.png)
+![figure_8.png](usersguide_1_intro_media/figure_8.png)
 
 and plot flow distance along the stream network versus elevation.
 
@@ -282,12 +284,12 @@ and plot flow distance along the stream network versus elevation.
 plotdz(S,DEM)
 ```
 
-![figure_9.png](./usersguide_1_intro_media/figure_9.png)
+![figure_9.png](usersguide_1_intro_media/figure_9.png)
 
-If you have a license of MATLAB's Mapping Toolbox you can export the stream network to a shapefile to be read by other GIS software. First, you need to create a mapstruct, a structure array used by the mapping toolbox to store vector data. Then use shapewrite to write the mapstruct to a shapefile.
+If you have a license of MATLAB's Mapping Toolbox you can export the stream network to a shapefile to be read by other GIS software. First, you need to create a geotable, a tabular data structure used by the Mapping Toolbox to store vector data. The function `shapewrite` to write the geotable to a shapefile.
 
 ```matlab
-MS = STREAMobj2mapstruct(S);
+MS = STREAMobj2geotable(S);
 ```
 
 `shapewrite(MS,'testshape.shp')`

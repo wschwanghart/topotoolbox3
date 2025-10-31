@@ -46,6 +46,10 @@ function [metric,label] = connectivity(P,options)
 %     plotc(P,label);
 %     title(['RCIP = ' num2str(RCIP)])
 %
+% Reference: Flecker, A. S. et al.: Reducing adverse impacts of
+%            Amazon hydropower expansion, Science, 375, 753–760,
+%            https://doi.org/10.1126/science.abj4017, 2022.
+%
 % See also: PPS
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)

@@ -11,9 +11,10 @@ classdef STREAMobj
 %
 %     An instance of stream object encapsulate the information on geometry
 %     and connectivity of a stream network based on the flow direction of a
-%     digital elevation model and a logical raster that indicates the
+%     digital elevation model and a logical raster W that stores the
 %     position of streams. STREAMobj provides access to various methods
-%     that investigate properties of a stream network and associated data.
+%     that enable assessing properties of a stream network and associated 
+%     data.
 %
 % Input arguments
 %
@@ -40,12 +41,24 @@ classdef STREAMobj
 %
 %     S      instance of STREAMobj
 %
-% Examples
+% Examples 1: Create a stream network with a minimum supporting area
+%             of 1000 pixels
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     S = STREAMobj(FD,flowacc(FD)>1000);
 %     plot(S)
+%
+% Example 2: Initiate a single stream in the center of the DEM
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD  = FLOWobj(DEM);
+%     ix  = ceil(prod(DEM.size)/2);
+%     S = STREAMobj(FD,channelheads = ix);
+%     imageschs(DEM)
+%     hold on
+%     plot(S,'w')
+%     hold off
 %
 % Note: You can use flowpathapp to manually map channelheads and export an
 %       instance of STREAMobj.
@@ -53,7 +66,7 @@ classdef STREAMobj
 % See also: STREAMobj/modify, FLOWobj, GRIDobj, flowpathapp
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 2. July, 2024
+% Date: 29. October, 2025
     
         
 properties
