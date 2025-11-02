@@ -72,8 +72,6 @@ end
 [~,isproj] = parseCRS(GT);
 
 if isempty(y)
-    
-    
 
     if isproj
         shapes = mapclip(GT.Shape,x);
