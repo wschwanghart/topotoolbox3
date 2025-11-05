@@ -1,7 +1,7 @@
 
 # User Guide to TopoToolbox \- Plotting ksn\-values
 
-![image_0.png](./usersguide_2_ksn_media/image_0.png)
+![image_0.png](usersguide_2_ksn_media/image_0.png)
 
 # Background
 
@@ -35,20 +35,20 @@ FD  = FLOWobj(DEM,'preprocess','carve');
 A   = flowacc(FD);
 ```
 
-The quality of the DEM is relatively bad, so we correct it by imposing a downward minimum gradient.
+Uncertainties of elevation values in the DEM cause that the river profile is not monotoneously decreasing in downstream direction. By imposing a downward minimum gradient, we ensure strictly positive along\-river gradients.
 
 ```matlab
 DEM = imposemin(FD,DEM,0.0001);
 ```
 
-Subsequently, we extract a stream network by thresholding flow accumulation. In this example, we simply assume that channels occupy cells that have a minimum upslope area of 1000 pixels. We will only consider the largest stream network here, and extract it using the function klargestconncomps.
+Subsequently, we extract a stream network by thresholding flow accumulation. In this example, we simply assume that channels occupy cells that have a minimum upslope area of 1000 pixels. We will only consider the largest stream network here, and extract it using the function `klargestconncomps`.
 
 ```matlab
 S  = STREAMobj(FD,'minarea',1000);
 S  = klargestconncomps(S,1);
 ```
 
-We modify the stream network somewhat so that we avoid to include the alluvial areas in the most downstream portion of the profile. 
+We modify the stream network somewhat so that we exclude the alluvial areas in the most downstream portion of the profile. 
 
 ```matlab
 S = modify(S,'distance',10000);
@@ -64,13 +64,15 @@ plot(S,'k')
 hold off
 ```
 
-![figure_0.png](./usersguide_2_ksn_media/figure_0.png)
+![figure_0.png](usersguide_2_ksn_media/figure_0.png)
+
+The river profile is now plotted using the function `plotdz`.
 
 ```matlab
 plotdz(S,DEM)
 ```
 
-![figure_1.png](./usersguide_2_ksn_media/figure_1.png)
+![figure_1.png](usersguide_2_ksn_media/figure_1.png)
 # Calculating the concavity index
 
 After extracting the channel network of interest, we calculate the concavity index $\theta$ using the slopearea function. **Note that** slopearea returns the concavity index $\theta$ including its negative sign!
@@ -79,7 +81,7 @@ After extracting the channel network of interest, we calculate the concavity ind
 STATS = slopearea(S,DEM,A)
 ```
 
-![figure_2.png](./usersguide_2_ksn_media/figure_2.png)
+![figure_2.png](usersguide_2_ksn_media/figure_2.png)
 
 ```matlabTextOutput
 STATS = struct with fields:
@@ -111,7 +113,7 @@ box on
 axis image
 ```
 
-![figure_3.png](./usersguide_2_ksn_media/figure_3.png)
+![figure_3.png](usersguide_2_ksn_media/figure_3.png)
 # Aggregate ksn values in stream segments
 
 Note that in the above figure each channel location in the grid is plotted. There are two problems arising from doing so. First, owing to the high point density in the xy plane some of the points and their color may not be visible due to overlapping. Second, owing to the poor quality of the DEM the ksn\-values are strongly variable at short distances. Note the large variability in the main river trunk! To avoid both problems, ksn values should be generalized along stream segments. This is achieved with the function STREAMobj/aggregate. Here we use a stream segment length of 1 km (1000 m).
@@ -127,7 +129,7 @@ box on
 axis image
 ```
 
-![figure_4.png](./usersguide_2_ksn_media/figure_4.png)
+![figure_4.png](usersguide_2_ksn_media/figure_4.png)
 # Smoothing ksn values
 
 Instead of aggregation, ksn\-values can also be smoothed using the function STREAMobj/smooth. This might allow to locate zones of high steepness more precisely.
@@ -143,13 +145,13 @@ box on
 axis image
 ```
 
-![figure_5.png](./usersguide_2_ksn_media/figure_5.png)
+![figure_5.png](usersguide_2_ksn_media/figure_5.png)
 # Export as shapefile
 
-Alternativly, you may want to choose another software to visualize the stream network together with ksn values. In order to do so, you will need the function shapewrite available with the mapping toolbox (in case you don't have access to the toolbox, check the Mathworks fileexchange for functions with same functionality). 
+Alternatively, you may want to choose another software to visualize the stream network together with ksn values. In order to do so, you will need the function `shapewrite` available with the Mapping Toolbox (in case you don't have access to the toolbox, check the Mathworks fileexchange for functions with same functionality). 
 
 ```matlab
-MS = STREAMobj2mapstruct(S,'seglength',1000,'attributes',...
+MS = STREAMobj2geotable(S,'seglength',1000,'attributes',...
     {'ksn' ksn @mean ...
      'uparea' a @mean ...
      'gradient' g @mean});
@@ -166,5 +168,5 @@ Schwanghart, W., Kuhn, N.J. (2010): TopoToolbox: a set of Matlab functions for t
 
 # History
 
-This user guide was updated last: August 16, 2017.
+This user guide was updated last: June 10, 2025.
 

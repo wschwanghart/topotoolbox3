@@ -64,11 +64,12 @@ arguments
     options.blocksize (1,1) = 5000
     options.useparallel (1,1) = false
     options.uselibtt (1,1) = false
+    options.usemp (1,1) = true
 end
 
 if options.uselibtt && haslibtopotoolbox
     G = GRIDobj(DEM,tt_gradient8(...
-        single(DEM.Z),single(DEM.cellsize),true));
+        single(DEM.Z),single(DEM.cellsize),options.usemp > 0));
 else
 
     % create a copy of the DEM instance
