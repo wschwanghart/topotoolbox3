@@ -208,5 +208,67 @@ classdef testSnapshot < matlab.perftest.TestCase
                 testCase.verifyEqual(H_result.Z, H.Z,'AbsTol',single(1e-4));
             end
         end
+
+        function erode3x3(testCase, dataset)
+            testCase.startMeasuring();
+            E = erode(testCase.dem,ones(3));
+            testCase.stopMeasuring();
+
+            result_file = fullfile("snapshots/data/", dataset, "erode3x3.tif");
+
+            if ~isfile(result_file)
+                E.GRIDobj2geotiff(result_file);
+            else
+                E_result = GRIDobj(result_file);
+                testCase.verifyEqual(E_result.Z, E.Z)
+            end
+        end
+
+        function erode_diag(testCase, dataset)
+            SE = [1 0 1; 0 1 0; 1 0 1];
+            testCase.startMeasuring();
+            E = erode(testCase.dem, SE);
+            testCase.stopMeasuring();
+
+            result_file = fullfile("snapshots/data/", dataset, "erode_diag.tif");
+
+            if ~isfile(result_file)
+                E.GRIDobj2geotiff(result_file);
+            else
+                E_result = GRIDobj(result_file);
+                testCase.verifyEqual(E_result.Z, E.Z)
+            end
+        end
+
+        function dilate3x3(testCase, dataset)
+            testCase.startMeasuring();
+            D = dilate(testCase.dem,ones(3));
+            testCase.stopMeasuring();
+
+            result_file = fullfile("snapshots/data/", dataset, "dilate3x3.tif");
+
+            if ~isfile(result_file)
+                D.GRIDobj2geotiff(result_file);
+            else
+                D_result = GRIDobj(result_file);
+                testCase.verifyEqual(D_result.Z, D.Z)
+            end
+        end
+
+        function dilate_diag(testCase, dataset)
+            SE = [1 0 1; 0 1 0; 1 0 1];
+            testCase.startMeasuring();
+            D = dilate(testCase.dem, SE);
+            testCase.stopMeasuring();
+
+            result_file = fullfile("snapshots/data/", dataset, "dilate_diag.tif");
+
+            if ~isfile(result_file)
+                D.GRIDobj2geotiff(result_file);
+            else
+                D_result = GRIDobj(result_file);
+                testCase.verifyEqual(D_result.Z, D.Z)
+            end
+        end
     end
 end
