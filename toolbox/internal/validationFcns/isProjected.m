@@ -11,5 +11,9 @@ if isa(A,'PPS')
 end
 
 tf = isprop(A.georef,"ProjectedCRS");
+if isempty(tf)
+    tf = false;
+    return
+end
 tf = tf && ~isempty(A.georef.ProjectedCRS);
 end

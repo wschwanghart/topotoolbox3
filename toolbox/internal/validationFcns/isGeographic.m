@@ -6,5 +6,9 @@ function tf = isGeographic(A)
 %     tf = isgeographic(A)
 %
 tf = isprop(A.georef,"GeographicCRS");
+if isempty(tf)
+    tf = false;
+    return
+end
 tf = tf && ~isempty(A.georef.GeographicCRS);
 end

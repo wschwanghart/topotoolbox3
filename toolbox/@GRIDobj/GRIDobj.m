@@ -200,7 +200,7 @@ classdef GRIDobj
             
             % ............................................................
             % With input arguments, there are several options
-            if isnumeric(varargin{1})         
+            if isnumeric(varargin{1}) || islogical(varargin{1})       
 
                 % ........................................................
                 %% Case 1: GRIDobj is created from a numeric array
