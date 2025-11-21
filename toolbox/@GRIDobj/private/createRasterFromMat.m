@@ -66,7 +66,7 @@ if license('test','MAP_Toolbox')
         'ColumnsStartFrom','north','RowsStartFrom','west');
 
     % Finally check, whether
-    assert(R.CellExtentInWorldX == csx && R.CellExtentInWorldY == -csy, ...
+    assert(isapprox(R.CellExtentInWorldX,csx,"tight") && isapprox(R.CellExtentInWorldY,-csy,"tight"), ...
         'Something went wrong.')
     wf = worldFileMatrix(R);
 else

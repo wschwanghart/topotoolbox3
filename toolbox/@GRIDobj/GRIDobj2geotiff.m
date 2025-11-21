@@ -1,6 +1,6 @@
 function GRIDobj2geotiff(A,file)
 
-%GRIDobj2geotiff Exports an instance of GRIDobj to a geotiff file
+%GRIDobj2geotiff Export an instance of GRIDobj to a geotiff file
 %
 % Syntax
 %    
@@ -31,13 +31,16 @@ function GRIDobj2geotiff(A,file)
 %
 % See also: GRIDobj
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. August, 2017
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 14. November, 2025
 
-narginchk(1,2)
+arguments
+    A  GRIDobj
+    file = ''
+end
 
 % if only 1 argument, open file dialog box
-if nargin == 1
+if isempty(file)
     [FileName,PathName] = uiputfile({'*.tif'});
     if FileName == 0
         disp('     no output written to disk')
@@ -49,14 +52,24 @@ end
 % try to use geotiffwrite, which comes with the Mapping Toolbox
 try
     if isempty(A.georef)
-        geotiffwrite(file,A.Z,A.wf);
+        % There might be no georef entry. In this case, we will try to
+        % write a geographic grid as no information about the projection is
+        % available
+        R = georasterref(A.wf,A.size);
+        geotiffwrite(file,A.Z,R,"CoordRefSysCode","EPSG:4326");
     else
-        GeoKeyDirectoryTag = createGeoKeyDirectoryTag(A);
-        geotiffwrite(file,A.Z,A.georef,...
-            "GeoKeyDirectoryTag",GeoKeyDirectoryTag ...
-            );
-        %geotiffwrite(file,A.Z,A.georef.SpatialRef,...
-        %    'GeoKeyDirectoryTag',A.georef.GeoKeyDirectoryTag);
+        % A.georef is not empty. If a CRS is available, the following code
+        % will use geotiffwrite
+        if isProjected(A) || isGeographic(A)
+
+            GeoKeyDirectoryTag = createGeoKeyDirectoryTag(A);
+            geotiffwrite(file,A.Z,A.georef,...
+                "GeoKeyDirectoryTag",GeoKeyDirectoryTag ...
+                );
+        else
+            geotiffwrite(file,A.Z,A.georef,"CoordRefSysCode","EPSG:4326");
+        end
+
     end
 catch ME
     warning('TopoToolbox:GRIDobj',...
