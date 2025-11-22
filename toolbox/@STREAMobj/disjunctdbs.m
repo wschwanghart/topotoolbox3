@@ -1,6 +1,6 @@
 function C = disjunctdbs(S,ixgrid)
 
-%DISJUNCTDBS Identify mutually disjunct downstream basins in a stream network
+%DISJUNCTDBS Identify disjunct downstream basins in a stream network
 %
 % Syntax
 %
