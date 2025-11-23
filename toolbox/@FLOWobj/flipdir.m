@@ -38,12 +38,12 @@ function FD = flipdir(FD,options)
 %                A = flowacc(FD); w = A.Z(FD.ix).*FD.fraction
 %                If weights is a GRIDobj G, then weights are calculated by 
 %                w = G.Z(FD.ix).*FD.fraction
-%                If weights is 'rand', then they are computed with a
-%                uniformly distributed numbers
+%                If weights is 'rand', then weights are randomly drawn from
+%                a uniform distribution.
 %                If weights is 'rescale', then weights are computed from
 %                the normalization of the original, incoming proportions.
-%                Alternatively, weights can be a vector of nonnegative that
-%                has the same size as FD.ix.
+%                Alternatively, weights can be a vector of nonnegative 
+%                values that has the same size as FD.ix.
 %
 % Example
 %

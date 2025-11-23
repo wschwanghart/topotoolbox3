@@ -1,4 +1,4 @@
-function [zs,kp] = knickpointfinder(S,DEM,varargin)
+function [zs,kp] = knickpointfinder(S,DEM,options)
 
 %KNICKPOINTFINDER Find knickpoints in river profiles
 %
@@ -74,44 +74,34 @@ function [zs,kp] = knickpointfinder(S,DEM,varargin)
 % See also: STREAMobj/quantcarve, STREAMobj/crs
 % 
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 23. July, 2025
+% Date: 22. November, 2025
 
-% check and parse inputs
-narginchk(2,inf)
+arguments
+    S STREAMobj
+    DEM {mustBeGRIDobjOrNal(DEM,S)}
+    options.split (1,1) = 1
+    options.plot (1,1) = true
+    options.tol (1,1) {mustBePositive} = 100
+    options.verbose (1,1) = true
+    options.toltype  = 'range'
+    options.uselibtt (1,1) = true
+    options.knickpoints = []
+end
 
-p = inputParser;
-p.FunctionName = 'STREAMobj/knickpointfinder';
-addParameter(p,'split',1);
-addParameter(p,'knickpoints',[]);
-addParameter(p,'plot',true);
-addParameter(p,'tol',100);
-addParameter(p,'verbose',true);
-addParameter(p,'toltype','range');
-addParameter(p,'uselibtt',false);
-parse(p,varargin{:});
-
-if p.Results.split 
+if options.split 
     plt = false;
     verbose = false;
 else
-    plt = p.Results.plot;
-    verbose = p.Results.verbose;
+    plt = options.plot;
+    verbose = options.verbose;
 end
 
 % get node attribute list with elevation values
-if isa(DEM,'GRIDobj')
-    validatealignment(S,DEM);
-    z = getnal(S,DEM);
-elseif isnal(S,DEM)
-    z = DEM;
-else
-    error('Imcompatible format of second input argument')
-end
+z = ezgetnal(S,DEM,'double');
 
 if any(isnan(z))
     error('DEM or z may not contain any NaNs')
 end
-z = double(z);
 
 % ensure downstream decreasing profiles
 z = imposemin(S,z);
@@ -121,13 +111,12 @@ z = imposemin(S,z);
 %  The code can run in parallel by distributing individual catchments to
 %  workers. This involves some work.
 
-if p.Results.split
-    params = p.Results;
-    params.split = false;
-    params.plot  = false;
+if options.split
+    options.split = false;
+    options.plot  = false;
     [CS,locS] = STREAMobj2cell(S);
     
-    tol = params.tol;
+    tol = options.tol;
     TOL = cell(numel(CS),1);
     if ~isscalar(tol)        
         for r = 1:numel(CS)
@@ -136,7 +125,8 @@ if p.Results.split
     else
         [TOL{:}] = deal(tol);
     end
-    params = rmfield(params,'tol');
+    options = rmfield(options,'tol');
+    options = namedargs2cell(options);
     
     Cz  = cellfun(@(ix) z(ix),locS,'UniformOutput',false);
     Czs = cell(size(CS));
@@ -144,7 +134,7 @@ if p.Results.split
     n   = numel(CS);
 
     parfor r = 1:n
-        [Czs{r},Ckp{r}] = knickpointfinder(CS{r},Cz{r},'tol',TOL{r},params);
+        [Czs{r},Ckp{r}] = knickpointfinder(CS{r},Cz{r},'tol',TOL{r},options{:});
     end
     
     zs = nan(size(z));
@@ -187,7 +177,7 @@ d  = S.distance;
 nr  = numel(S.IXgrid);
 
 %% Structure array with output
-if isempty(p.Results.knickpoints)
+if isempty(options.knickpoints)
     kp.n   = 0;
     kp.x   = [];
     kp.y   = [];
@@ -198,7 +188,7 @@ if isempty(p.Results.knickpoints)
     kp.dz = [];
     kp.nal = false(size(z));
 else
-    kp    = p.Results.knickpoints;
+    kp    = options.knickpoints;
 end
 
 %% Find knickpoints
@@ -223,17 +213,17 @@ if verbose
     disp([datestr(now) ' -- Starting']);
 end
 
-toltype = validatestring(p.Results.toltype,{'range','lowerbound'});
+toltype = validatestring(options.toltype,{'range','lowerbound'});
 
 
 while keepgoing
     
     counter = counter+1;
     
-    zs = lowerenv(S,z,kp.nal, uselibtt=p.Results.uselibtt);
+    zs = lowerenv(S,z,kp.nal, uselibtt=options.uselibtt);
 
-    if ~isscalar(p.Results.tol) && strcmp(toltype,'lowerbound')
-        II = zs < p.Results.tol(:,1);
+    if ~isscalar(options.tol) && strcmp(toltype,'lowerbound')
+        II = zs < options.tol(:,1);
     else
         II = true(size(zs));
     end
@@ -241,10 +231,10 @@ while keepgoing
     if counter == 1
         
         [dz,ix] = max((z-zs).*II);
-        if ~isscalar(p.Results.tol)
+        if ~isscalar(options.tol)
             I = dz>0;
         else
-            I = dz >= p.Results.tol;
+            I = dz >= options.tol;
         end
         
     else
@@ -265,15 +255,15 @@ while keepgoing
             ixtemp(tt) = ixx(ixtt);
         end
         
-        switch p.Results.toltype
+        switch options.toltype
             case 'lowerbound'
                 I = dztemp > 0;
             otherwise 
-                if isscalar(p.Results.tol)
-                    I = dztemp >= p.Results.tol;
+                if isscalar(options.tol)
+                    I = dztemp >= options.tol;
 
                 else
-                    I = dztemp >= p.Results.tol(ixtemp);
+                    I = dztemp >= options.tol(ixtemp);
                 end
         end
         dz = dztemp(I);
