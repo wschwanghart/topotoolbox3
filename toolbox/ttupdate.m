@@ -1,6 +1,6 @@
 function out = ttupdate(options)
 
-%TTUPDATE Automatically update TopoToolbox addon
+%TTUPDATE Automatically update TopoToolbox add-on
 %
 % Syntax
 %
@@ -9,9 +9,10 @@ function out = ttupdate(options)
 % Description
 %
 %     This function attempts to automatically update TopoToolbox with the
-%     latest release available on github. If the function fails, use 
+%     latest release available on github. Make sure to run the command
 %     clear all
-%     before running this function. 
+%     before using this function because clear-all will flush function and
+%     MEX caches. This is required to uninstall the previous version. 
 %
 %     Note that the function will remove your current version. Any
 %     changes to toolbox files will be lost.
@@ -31,6 +32,7 @@ function out = ttupdate(options)
 arguments
     options.verbose (1,1) = true
     options.nolibtt (1,1) = false
+    options.keepkeys (1,1) = true
 end
 
 verbose = options.verbose;
@@ -68,8 +70,9 @@ else
 end
 
 if verbose
+    filesize = round(assets(I).size/1e6,1); % MB
     disp(string(datetime("now")) + ...
-        " - Download (" + string(round(assets(I).size/1e6,1)) + " MB).");
+        " - Download (" + string(filesize) + " MB).");
 end
 directory   = tempdir;
 toolboxfile = fullfile(directory,assets(I).name);
