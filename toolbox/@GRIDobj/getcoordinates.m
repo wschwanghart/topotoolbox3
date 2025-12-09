@@ -10,13 +10,14 @@ function [x,y] = getcoordinates(DEM,type)
 % Input arguments
 %
 %     DEM    grid (class: GRIDobj)
+%     type   'vector' (default). Alternatively, you can return coordinate
+%            matrices ('matrix') or GRIDobjs ('GRIDobj')
 %
 % Output arguments
 %
 %     x      coordinate vector in x direction (row vector)
 %     y      coordinate vector in y direction (column vector)
-%     type   'vector' (default). Alternatively, you can return coordinate
-%            matrices ('matrix') or GRIDobjs ('GRIDobj')
+%
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
@@ -28,8 +29,8 @@ function [x,y] = getcoordinates(DEM,type)
 %
 % See also: GRIDobj2mat
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 17. September, 2018
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 27. November, 2025
 
 [x,y] = wf2XY(DEM.wf,DEM.size);
 

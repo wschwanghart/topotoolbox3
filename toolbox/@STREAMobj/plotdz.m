@@ -1,23 +1,24 @@
-function h = plotdz(S,DEM,varargin)
+function h = plotdz(S,DEM,options)
 
-%PLOTDZ plot upstream distance version elevation of a stream network
+%PLOTDZ Plot river profile (upstream distance versus elevation)
 %
 % Syntax
 %
 %     plotdz(S,DEM)
 %     plotdz(S,DEM,pn,pv,...)
-%     plotdz(S,nal,pn,pv,...)
+%     plotdz(S,z,pn,pv,...)
 %     h = ...
 %
 % Description
 %
-%     Plot stream distance from the outlet versus elevation. 
+%     Plot stream distance from the outlet versus elevation (or any other
+%     variable).
 %
 % Input arguments
 %
 %     S      instance of STREAMobj
 %     DEM    digital elevation model (GRIDobj)
-%     nal    node attribute list (as returned by various STREAMobj
+%     z      node attribute list (as returned by various STREAMobj
 %            methods, e.g. STREAMobj/streamorder, STREAMobj/gradient)
 %
 %     Parameter name/value pairs {default}
@@ -55,13 +56,17 @@ function h = plotdz(S,DEM,varargin)
 %     if 'color' is a node attribute list, then following parameter
 %     name/values apply
 %
-%     'colormethod'    {'line'} or 'surface'
+%     'colormethod'    {'line'} or 'surface' or 'split'
 %     lines with variable colors can be obtained by different methods.
 %     Before introduction of the new graphics system in Matlab, using the
 %     edges of surfaces was the standard hack. Since 2014b and the new
 %     graphics system, lines have an undocumented edge property. Modifying
 %     this edge property results in much smoother and more beautiful lines,
-%     but may be bugged in newer versions.
+%     but may be bugged in newer versions. The option 'split' uses
+%     splitbyattribute to split the line into multiple lines which are
+%     then colored. In this case, the color is not related to the color
+%     limits of the axis. The color limits of the axis will be adjusted to
+%     the value range only if 'colorbar' is set to true.
 %
 %     'colormap'  {'parula'}
 %     string that identifies a known colormap (e.g. 'jet','landcolor')
@@ -73,7 +78,6 @@ function h = plotdz(S,DEM,varargin)
 %     'cbarlabel' {''}
 %     string to label colorbar
 %     
-%
 % Output arguments
 %
 %     h     handle to the line handle. h will be a surface handle if color 
@@ -96,51 +100,41 @@ function h = plotdz(S,DEM,varargin)
 % Example 3 (adjust distance to be \chi)
 %
 %     plotdz(S,DEM,'distance',c)
-%     xlabel('\chi [m]')
+%     xlabel('\chi [m]')  
 %
 % See also: STREAMobj, STREAMobj/plot, STREAMobj/smooth, PPS/plotdz
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 18. July, 2024
+% Date: 7. December, 2025
 
-nrnodes = numel(S.x);
-ax      = gca;
+arguments
+    S  STREAMobj
+    DEM {mustBeGRIDobjOrNal(DEM,S)}
+    options.parent = gca
+    options.annotation = []
+    options.color = getNextColor(gca)
+    options.annotationtext = []
+    options.distance  = S.distance
+    options.dunit {mustBeMember(options.dunit,{'km' 'm'})} = 'm'
+    options.doffset (1,1) = 0
+    options.colormap = 'parula'
+    options.linewidth (1,1) {mustBePositive} = 1
+    options.colormethod {mustBeMember(options.colormethod,...
+        {'line' 'surface' 'split'})} = 'line'
+    options.colorbar (1,1) = true
+    options.cbarlabel  = ''
+    options.type {mustBeMember(options.type,...
+        {'plot','area','stairs','stairsarea'})} = 'plot'
+    options.EdgeColor = [.3 .3 .3]
+    options.FaceColor = [.7 .7 .7]
+    options.FaceAlpha (1,1) = 1
+    options.EdgeAlpha (1,1) = 1
+    options.ncolors (1,1) {mustBePositive,mustBeInteger} = 20
+    options.BaseValue = []
+    
+end
 
-% For MATLAB versions with the new graphics engine
-colororderindex = mod(ax.ColorOrderIndex, size(ax.ColorOrder,1));
-if colororderindex==0; colororderindex=size(ax.ColorOrder,1); end
-clr = ax.ColorOrder(colororderindex,:);
-
-% check input
-p = inputParser;         
-p.FunctionName = 'plotdz';
-addRequired(p,'S',@(x) isa(x,'STREAMobj'));
-addRequired(p,'DEM', @(x) isa(x,'GRIDobj') || numel(x) == nrnodes);
-addParameter(p,'annotation',[])
-addParameter(p,'color',clr);
-addParameter(p,'annotationtext',{});
-addParameter(p,'distance',[],@(x) isempty(x) || isnal(S,x) || isa(x,'STREAMobj') || ischar(x));
-addParameter(p,'dunit','m',@(x) ischar(validatestring(x,{'m' 'km'})));
-addParameter(p,'doffset',0,@(x) isscalar(x));
-addParameter(p,'colormap','parula');
-addParameter(p,'linewidth',1);
-addParameter(p,'colormethod','line');
-addParameter(p,'colorbar',true);
-addParameter(p,'cbarlabel','');
-addParameter(p,'type','plot');
-
-% only relevant for 'type' = 'area' or 'stairsarea'
-addParameter(p,'EdgeColor',[.3 .3 .3]);
-addParameter(p,'FaceColor',[.7 .7 .7]);
-addParameter(p,'FaceAlpha',1);
-addParameter(p,'EdgeAlpha',1);
-addParameter(p,'BaseValue',[]);
-
-parse(p,S,DEM,varargin{:});
-
-S   = p.Results.S;
-DEM = p.Results.DEM;
-type = validatestring(p.Results.type,{'plot','area','stairs','stairsarea'});
+ax   = options.parent;
 
 % Get elevation nal
 zz = ezgetnal(S,DEM);
@@ -148,28 +142,28 @@ zz = ezgetnal(S,DEM);
 % get dynamic properties of S
 order    = S.orderednanlist;
 
-if isempty(p.Results.distance)
+% distance
+if isempty(options.distance)
     dist = S.distance;
 else
-    if isa(p.Results.distance,'STREAMobj')
-        dist = distance(S,p.Results.distance);
-    elseif ischar(p.Results.distance)
+    if isa(options.distance,'STREAMobj')
+        dist = distance(S,options.distance);
+    elseif ischar(options.distance)
         dist = S.distance;
         dist = dist./max(dist);
     else
-        dist = p.Results.distance;
+        dist = options.distance;
     end
 end
 
-
-switch lower(p.Results.dunit)
+% Convert horizontal distance to km?
+switch lower(options.dunit)
     case 'km'
         dist = dist/1000;
 end
         
-
 % apply distance offset
-dist = dist + p.Results.doffset;
+dist = dist + options.doffset;
 
 I     = ~isnan(order);
 d     = nan(size(order));
@@ -177,58 +171,58 @@ d(I)  = dist(order(I));
 z     = nan(size(order));
 z(I)  = zz(order(I));
 
-% plot
-if ~isnal(S,p.Results.color)
-    switch type
+% Plot with uniform color
+if ~isnal(S,options.color) && ~isa(options.color,'GRIDobj')
+    switch options.type
         case 'plot'
-            ht = plot(ax,d,z,'-','Color',p.Results.color,...
-                'LineWidth',p.Results.linewidth);
+            ht = plot(ax,d,z,'-','Color',options.color,...
+                'LineWidth',options.linewidth);
         case 'stairs'
-            ht = stairs(ax,d,z,'-','Color',p.Results.color,...
-                'LineWidth',p.Results.linewidth);
+            ht = stairs(ax,d,z,'-','Color',options.color,...
+                'LineWidth',options.linewidth);
         case 'area'
-            if isempty(p.Results.BaseValue)
+            if isempty(options.BaseValue)
                 basevalue = min(z);
             else
-                basevalue = p.Results.BaseValue;
+                basevalue = options.BaseValue;
             end
-            ht = area(ax,d,z,'EdgeColor',p.Results.EdgeColor,...
-                'FaceColor',p.Results.FaceColor,...
-                'FaceAlpha',p.Results.FaceAlpha,...
-                'EdgeAlpha',p.Results.EdgeAlpha,...
+            ht = area(ax,d,z,'EdgeColor',options.EdgeColor,...
+                'FaceColor',options.FaceColor,...
+                'FaceAlpha',options.FaceAlpha,...
+                'EdgeAlpha',options.EdgeAlpha,...
                 'BaseValue',basevalue);
         case 'stairsarea'
-            if isempty(p.Results.BaseValue)
+            if isempty(options.BaseValue)
                 basevalue = min(z);
             else
-                basevalue = p.Results.BaseValue;
+                basevalue = options.BaseValue;
             end
             [xb,yb] = stairs(ax,d,z);
-            ht = area(ax,flipud(xb),flipud(yb),'EdgeColor',p.Results.EdgeColor,...
-                'FaceColor',p.Results.FaceColor,...
-                'FaceAlpha',p.Results.FaceAlpha,...
-                'EdgeAlpha',p.Results.EdgeAlpha,...
+            ht = area(ax,flipud(xb),flipud(yb),'EdgeColor',options.EdgeColor,...
+                'FaceColor',options.FaceColor,...
+                'FaceAlpha',options.FaceAlpha,...
+                'EdgeAlpha',options.EdgeAlpha,...
                 'BaseValue',basevalue);
     end
     
 else
-    
-    meth = validatestring(p.Results.colormethod,{'line','surface'});
-    switch meth
+    % Make sure that the colors come as node-attribute list  
+    options.color = ezgetnal(S,options.color);
+    switch lower(options.colormethod)
         case 'line'
             %% Plotting colored lines using undocumented Edges property
             % see here:
             % http://undocumentedmatlab.com/blog/plot-line-transparency-and-color-gradient
             
-            ht = plot(ax,d,z,'-');
+            ht    = plot(ax,d,z,'-');
             c     = zeros(size(order,1),3);
-            minc  = min(+p.Results.color);
-            maxc  = max(+p.Results.color);
+            minc  = min(+options.color);
+            maxc  = max(+options.color);
             
-            cmap    = colormap(ax,p.Results.colormap)*255;
+            cmap    = colormap(ax,options.colormap)*255;
             cmapix  = linspace(minc,maxc,size(cmap,1));
             
-            col   = interp1(cmapix,cmap,+p.Results.color);
+            col   = interp1(cmapix,cmap,+options.color);
             c(I,:) = col(order(I),:);
             c     = c';
             c     = [c;zeros(1,size(c,2))+200];
@@ -236,47 +230,72 @@ else
             % nans must be removed
             c     = c(:,I);
             
-            ht.LineWidth = p.Results.linewidth;
+            ht.LineWidth = options.linewidth;
             % seems that the line must be first drawn ...
             drawnow
             % ... to be colored.
             set(ht.Edge, 'ColorBinding','interpolated', 'ColorData',c);
             
-            if p.Results.colorbar
+            if options.colorbar
                 cc = colorbar(ax);
                 clim([minc maxc]);
             end
             
             
-        otherwise
+        case 'surface'
             %% Plotting colored lines using surface
             
             dummy = z*0;
             c     = nan(size(order));
-            c(I)  = +p.Results.color(order(I));
-            colormap(ax,p.Results.colormap)
+            c(I)  = +options.color(order(I));
+            colormap(ax,options.colormap)
             ht = surface([d d],[z z],[dummy dummy],[c c],...
                 'facecolor','none',...
                 'edgecolor','flat',...
-                'linewidth',p.Results.linewidth,...
+                'linewidth',options.linewidth,...
                 'parent',ax);
-            if p.Results.colorbar
+            if options.colorbar
                 cc = colorbar(ax);
             end
-            
-            
+        otherwise
+            [CS,zagg] = splitbyattribute(S,options.color,options.ncolors);
+            [clr,lims] = num2rgb(zagg,options.colormap);
+            if ishold(ax)
+                keephold = true;
+            else
+                keephold = false;
+            end
+            hold(ax,'on');
+            ht = cellfun(@(Ssub,col) ...
+                plotdz(Ssub,DEM,'distance',nal2nal(Ssub,S,dist),...
+                'color',col,'parent',ax,...
+                'linewidth',options.linewidth),...
+                CS(:),num2cell(clr,2));
+            if options.colorbar
+                colormap(ax,options.colormap);          
+                hcb = colorbar(ax);
+                if ~isempty(options.cbarlabel)
+                    hcb.Label.String = options.cbarlabel;
+                end
+                clim(ax,lims)
+            end
+
+            if ~keephold
+                hold(ax,'off')
+            end
+     
     end
-    if p.Results.colorbar && ~isempty(p.Results.cbarlabel)
-        cc.Label.String = p.Results.cbarlabel;
+    if options.colorbar && ~isempty(options.cbarlabel)
+        cc.Label.String = options.cbarlabel;
     end
 end
 
-xlabel(['Distance upstream [' lower(p.Results.dunit) ']'])
+xlabel(['Distance upstream [' lower(options.dunit) ']'])
 ylabel('Elevation [m]')
 
 %% Annotation
-if ~isempty(p.Results.annotation)
-    ix = p.Results.annotation;
+if ~isempty(options.annotation)
+    ix = options.annotation;
     hold on
     [Lia,Locb] = ismember(ix,S.IXgrid);
 
@@ -294,8 +313,8 @@ if ~isempty(p.Results.annotation)
         annz = zz(Locb);
     end
     
-    if ~isempty(p.Results.annotationtext)
-        c = p.Results.annotationtext;
+    if ~isempty(options.annotationtext)
+        c = options.annotationtext;
         addtext = true;
     else
         addtext = false;
@@ -321,4 +340,10 @@ end
 if nargout == 1
     h = ht;
 end
+end
+
+
+function clr = getNextColor(ax)
+        currentIndex = mod(ax.ColorOrderIndex - 1, size(ax.ColorOrder,1)) + 1;
+        clr = ax.ColorOrder(currentIndex, :);
 end

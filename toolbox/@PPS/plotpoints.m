@@ -60,8 +60,8 @@ p = inputParser;
 p.KeepUnmatched = true;
 addParameter(p,'Marker','o');
 addParameter(p,'MarkerEdgeColor','k');
-addParameter(p,'MarkerEdgeAlpha',0.5);
 addParameter(p,'MarkerFaceAlpha',0.5);
+addParameter(p,'MarkerFaceColor','w');
 
 addParameter(p,'LineWidth',1)
 addParameter(p,'SizeData',20);

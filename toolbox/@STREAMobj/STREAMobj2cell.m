@@ -100,7 +100,7 @@ function [CS,locS,order] = STREAMobj2cell(S,ref,n)
 %
 % See also: FLOWobj2cell, STREAMobj/split, PPS
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 11. March, 2022
 
 
