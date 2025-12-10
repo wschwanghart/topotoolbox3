@@ -195,7 +195,7 @@ A = [sparse(n,n*2) (sparse(S.ix,S.ixc,d,n,n)-sparse(S.ix,S.ix,d,n,n))];
 
 if options.mingradient~=0
     b = zeros(n,1);
-    b(S.ix) = -p.Results.mingradient;
+    b(S.ix) = -options.mingradient;
 else
     b = sparse(n,1);
 end
