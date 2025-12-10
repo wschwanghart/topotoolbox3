@@ -75,7 +75,7 @@ F = scatteredInterpolant(allX(:),allY(:),allD(:),'linear','none');
 [X,Y] = getcoordinates(DEM,'matrix');
 qz = F(X(:),Y(:));
 
-
-OUT = GRIDobj(DEM,resize(qz,DEM.size));
+OUT = GRIDobj(DEM,'double');
+OUT.Z(:) = qz(:);
 OUT.Z(OUT.Z>maxdist | OUT.Z<mindist) = nan;
 
