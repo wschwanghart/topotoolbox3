@@ -54,11 +54,10 @@ end
 [tfy,csy] = isuniform(Y);
 
 cs = abs(csx);
-
 assert(tfx && tfy, 'Coordinate vectors/matrices must be uniformly spaced.')
-%assert(csx == -csy, 'The step size (cellsize) along x and y must be the same.')
 
-% Create the referencing matrix
+% Create the referencing matrix. When created from coordinate vectors or
+% matrices, the GRIDob will have a cell reference
 if license('test','MAP_Toolbox')
     % Now, build a mapcellref if mapping toolbox is available.
     R = maprefcells([min(X)-cs/2 max(X)+cs/2],...
@@ -66,14 +65,27 @@ if license('test','MAP_Toolbox')
         'ColumnsStartFrom','north','RowsStartFrom','west');
 
     % Finally check, whether
-    assert(isapprox(R.CellExtentInWorldX,csx,"tight") && isapprox(R.CellExtentInWorldY,-csy,"tight"), ...
-        'Something went wrong.')
+    if ~verLessThan('matlab','26')
+        assert(isapprox(R.CellExtentInWorldX,csx,"tight") && ...
+            isapprox(R.CellExtentInWorldY,-csy,"tight"), ...
+            'Something went wrong.')
+        assert(isapprox(abs(R.CellExtentInWorldX),...
+                        abs(R.CellExtentInWorldY),"tight"),...
+            "Cellsize in x and y direction must be the same.")
+    else
+        assert(isapprox_bef2024b(R.CellExtentInWorldX,csx) && ...
+            isapprox_bef2024b(R.CellExtentInWorldY,-csy), ...
+            'Something went wrong.')
+        assert(isapprox_bef2024b(abs(R.CellExtentInWorldX),...
+                        abs(R.CellExtentInWorldY)),...
+            "Cellsize in x and y direction must be the same.")
+    end
     wf = worldFileMatrix(R);
 else
+    % If mapping toolbox is not available, georef will be empty       
     R = [];
     wf = [csx    0    min(X);
-        0      csy  max(Y)];
-
+          0      csy  max(Y)];
 end
 
 
@@ -101,4 +113,28 @@ if exist('msg','var')
     error(eid,msg)
 end
 
+end
+
+
+function tf = isapprox_bef2024b(a, b, opts)
+%ISAPPROX   Determine approximate equality between numbers/arrays.
+%
+%   TF = ISAPPROX(A, B) uses default tolerances:
+%       RelTol = 1e-5
+%       AbsTol = 0
+%
+%   TF = ISAPPROX(A, B, opts) where opts is a struct with:
+%       opts.RelTol  - relative tolerance
+%       opts.AbsTol  - absolute tolerance
+
+    arguments
+        a
+        b
+        opts.RelTol (1,1) double {mustBeNonnegative} = 1e-5
+        opts.AbsTol (1,1) double {mustBeNonnegative} = 0
+    end
+
+    diffVal = abs(a - b);
+    tol = opts.AbsTol + opts.RelTol .* max(abs(a), abs(b));
+    tf = diffVal <= tol;
 end
