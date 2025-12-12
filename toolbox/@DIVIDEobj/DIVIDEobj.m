@@ -1,247 +1,326 @@
 classdef DIVIDEobj
-%DIVIDEobj Create divide object (DIVIDEobj)
-%
-% Syntax
-%
-%     D = DIVIDEobj(FD,ST) 
-%     D = DIVIDEobj(FD,ST,pn,pv)
-%
-% Description
-%
-%     An instance of divide object encapsulates information on the geometry
-%     and connectivity of a divide network, based on the flow direction of
-%     a digital elevation model and a STREAMobj or a logical raster that 
-%     indicates the position of streams. Divides are defined as the lines
-%     surrounding drainage basins and thus they are positioned in between
-%     pixels of the digital elevation model. The drainage basins used to
-%     define divide objects are based on tributrary junctions that are
-%     derived from changes in stream orders.
-%     DIVIDEobj provides access to various methods that investigate 
-%     properties of a divide network and associated data.
-%
-% Input arguments
-%
-%     FD     instance of flow direction object (FLOWobj)
-%     ST     instance of stream object (STREAMobj) or logical grid 
-%            (GRIDobj) that indicates stream locations (e.g. obtained from 
-%            thresholding the flow accumulation raster)
-%
-% Parameter name/value pairs
-%
-%     type         string that defines the stream ordering scheme 
-%                  ('strahler', 'shreve', or 'topo' {default}) used to
-%                  locate tributary junctions at breaks in stream orders
-%     outlets      toggle (default=true) to indicate whether outlets, i.e.,
-%                  the downstream ends of streams, shall be used to derive 
-%                  divides
-%     verbose      toggle for displaying function execution progress in the
-%                  command window
-%     useparallel  use parallel toolbox (default = false)
-%
-% Output arguments
-%
-%     D      instance of DIVIDEobj
-%
-% Examples
-%
-%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM);
-%     ST = STREAMobj(FD,flowacc(FD)>1000);
-%     D = DIVIDEobj(FD,ST);
-%     plot(D)
-%  
-% See also: getdivide, FLOWobj/drainagebasins, FLOWobj/streamorder
-%
-% Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
-% Date: September 2025
+    %DIVIDEobj Create divide object (DIVIDEobj)
+    %
+    % Syntax
+    %
+    %     D = DIVIDEobj(FD,ST)
+    %     D = DIVIDEobj(FD,IX)
+    %     D = DIVIDEobj(FD,ST,pn,pv)
+    %
+    % Description
+    %
+    %     An instance of divide object encapsulates information on the geometry
+    %     and connectivity of a divide network, based on the flow direction of
+    %     a digital elevation model and a STREAMobj or a logical raster that
+    %     indicates the position of streams. Divides are defined as the lines
+    %     surrounding drainage basins and thus they are positioned in between
+    %     pixels of the digital elevation model. The drainage basins used to
+    %     define divide objects are based on tributrary junctions that are
+    %     derived from changes in stream orders.
+    %     DIVIDEobj provides access to various methods that investigate
+    %     properties of a divide network and associated data.
+    %
+    % Input arguments
+    %
+    %     FD     instance of flow direction object (FLOWobj)
+    %     ST     instance of stream object (STREAMobj) or logical grid
+    %            (GRIDobj) that indicates stream locations (e.g. obtained from
+    %            thresholding the flow accumulation raster)
+    %
+    % Parameter name/value pairs
+    %
+    %     network      toggle (default=true) to indicate whether after the
+    %                  identification of the divides, they shall arranged
+    %                  into a divide network (divnet), sorted (sort), and
+    %                  assigned divide distances (divdist). Turn off to
+    %                  obtain only divide segments. Usually this is used
+    %                  only for code development.
+    %     verbose      toggle for displaying function execution progress in the
+    %                  command window
+    %
+    % Output arguments
+    %
+    %     D      instance of DIVIDEobj
+    %
+    % Examples
+    %
+    %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+    %     FD  = FLOWobj(DEM,'preprocess','c');
+    %     ST = STREAMobj(FD,flowacc(FD)>1000);
+    %     D = DIVIDEobj(FD,ST);
+    %     hillshade(DEM)
+    %     hold on
+    %     plot(D)
+    %
+    % See also: FLOWobj/drainagebasins, FLOWobj/streamorder
+    %
+    % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
+    % Date: August 2020
+    %       April 2025
 
-    
-    properties 
-        size      % size of hypothetical GRIDobj that would place the 
+
+    properties
+        size      % size of hypothetical GRIDobj that would place the
                   % divide nodes into cells
         cellsize  % cellsize
         wf        % 2-by-3 affine transformation matrix
-        IX        % nan-separated linear indices of divide nodes into 
+        IX        % nan-separated linear indices of divide nodes into
                   % instance of GRIDobj
-                  
         order     % divide order
-        distance  % maximum directed distance from divide endpoint        
-        ep        % linear indices of divide network endpoints 
+        distance  % maximum directed distance from divide endpoint
+        ep        % linear indices of divide network endpoints
         jct       % linear indices of divide network junctions
         jctedg    % number of edges per junction (divides)
         %endo      % linear indices of endorheic nodes
         issorted  % flag to indicate if divide network is sorted
         ordertype % name of ordering scheme
     end
-    
-    
-    methods 
-        
-        function [D,varargout] = DIVIDEobj(FD,ST,options) 
-            %DIVIDEobj Construct an instance of DIVIDEobj
+
+
+    methods
+
+        function [D,varargout] = DIVIDEobj(FD,ST,options)
+            %DIVIDEobj Construct an instance of this class
+
             arguments
-                FD  FLOWobj
-                ST  
-                options.type {mustBeMember(options.type,...
-                    {'strahler','shreve','topo'})} = 'topo'
-                options.outlet (1,1) = true
+                FD {mustBeA(FD,'FLOWobj')}
+                ST {mustBeA(ST,'STREAMobj')}
                 options.network (1,1) = true
                 options.verbose (1,1) = false
-                options.useparallel (1,1) = false
             end
             
-            % get options
-            sotype  = options.type;
-            outlet  = options.outlet;
-            verbose = options.verbose;
-            useparallel = options.useparallel;
+            % Prepare
+            % The divide object is shifted by half a cell size in x & y
+            hcs = FD.cellsize/2;
+            D.cellsize = FD.cellsize;
+            D.wf = FD.wf+[0,0,-hcs;0,0,hcs];
+            D.size = FD.size+[1 1];
 
             % To maintain backward compatibility, also allow for stream
             % grids
             if isa(ST,'GRIDobj')
                 ST = STREAMobj(FD,ST);
             end
-  
-            % Prepare
-            % the divide grid is shifted by half a cell size in x & y
-            hcs = FD.cellsize/2;
-            D.cellsize = FD.cellsize;
-            D.size = FD.size+[1 1];
-            D.wf = FD.wf+[0 0;0 0;-hcs,hcs]';
             
-            % If topo is chosen, sotype is 'shreve'
-            if strcmp(sotype,'topo')
-                sotype = 'shreve';
-            end
+            % Outlets / sinks
+            outlets = streampoi(ST,'outlets','ix');
             
-            % Calculate streamorder
-            so = streamorder(ST,sotype);
-            
-            % Find stream nodes below which stream order changes
-            I  = so(ST.ixc) ~= so(ST.ix);
-            ixbc = ST.IXgrid(ST.ix(I));
+            % Label stream segments (reaches) and get contributing areas
+            L = labelreach(ST);
+            STG = STREAMobj2GRIDobj(ST,L);
+            L = mapfromnal(FD,ST,L);
+            outlet_gridval = STG.Z(outlets);
 
-            % Add outlets, if required
-            if outlet
-                ixout = streampoi(ST,'out','ix');
-                ixbc  = [ixbc;  ixout];
+            % Note that GRIDobj2polygon has an issue with catchments that
+            % contain an embayment diagonally connected to another
+            % catchment along the edge. These are not recognized and
+            % filled. However, the counter part catchment, which has
+            % the one-pixel apendix is recognized well.
+            % GRIDobj2geotable also has issues in that either the hole or
+            % the apendix is not identified as part of the polygon, but as
+            % a hole or a multipart feature. 
+            MS = GRIDobj2polygon(L);
+            [MS.outlet_id] = deal(nan);
+            [MS.endo] = deal(false);
+            for i = 1 : numel(MS)
+                % append nan to coordinate vectors if needed
+                if not(isnan(MS(i).X(end)))
+                    MS(i).X = [MS(i).X;NaN];
+                    MS(i).Y = [MS(i).Y;NaN];
+                end
+                % identify outlets
+                outix = ismember(outlet_gridval,MS(i).gridval);
+                if sum(outix)>0
+                    MS(i).outlet_id = outlets(outix);
+                end
             end
             
-            % This function returns a cell array that contains the indices
-            % of stream pixels that have spatially disjunct drainage
-            % basins. This reduces the number of scans required later.
-            C   = disjunctdbs(ST,ixbc);
-            n   = length(C);
             
-            % Divide identification loop
-            G = cell(n,1); % divides
-            O = cell(n,1); % outlets
-            if verbose
-                fprintf(1,'Divide identification:\n');
+            % Coordinates of flow edges that change basin ID
+            st_giver = ST.IXgrid(ST.ix);
+            st_receiver = ST.IXgrid(ST.ixc);
+            [x1,y1] = ind2coord(FD,st_giver);
+            [x2,y2] = ind2coord(FD,st_receiver);
+            
+            % The following three lines can speed up the code but currently
+            % don't work because of the GRIDObj2polygon issue mentioned
+            % above: incorrect basin outlines preclude focusing on stream
+            % nodes that change basin ID.
+            %IX = abs(st_giver_label-st_receiver_label)>0;
+            %[x1,y1] = ind2coord(FD,st_giver(IX));
+            %[x2,y2] = ind2coord(FD,st_receiver(IX));
+            
+            % Flow edge midpoints
+            mx = (x1+x2)./2;
+            my = (y1+y2)./2;
+
+            % Loop over basin outlines to get divides
+            if (options.verbose)
+                f = waitbar(0,'Processing divides');
             end
 
-            if useparallel && license('test', 'Distrib_Computing_Toolbox')
-                parfor k = 1 : n
-                    if verbose
-                        fprintf(1,'%d / %d  \n',k,n);
+            for i = 1 : numel(MS)
+
+                if (options.verbose)
+                    waitbar(i/numel(MS),f,sprintf('Processing divides: %d / %d',i,numel(MS)))
+                end
+                
+                tx = MS(i).X;
+                ty = MS(i).Y;
+                
+                % split divide edges crossing rivers (insert nans)
+                tmx = (tx(1:end-1)+tx(2:end))./2;
+                tmy = (ty(1:end-1)+ty(2:end))./2;
+                ix = ismember([tmx,tmy],[mx,my],'rows');
+                iy = find(ix);
+                [~,isort] = sort([(1:numel(tx))';iy]);
+                tx = [tx;nan(numel(iy),1)];
+                ty = [ty;nan(numel(iy),1)];
+                tx = tx(isort);
+                ty = ty(isort);
+
+                % identify divide nodes on river edges
+                ix = ismember([tx,ty],[mx,my],'rows');
+                iy = find(ix);
+                % insert nans and duplicate point
+                [~,isort] = sort([(1:numel(tx))';repmat(iy,2,1)]);
+                tx = [tx;nan(numel(iy),1);tx(iy)];
+                ty = [ty;nan(numel(iy),1);ty(iy)];
+                tx = tx(isort);
+                ty = ty(isort);
+                
+                % Check for endorheic drainage
+                isendo = false;
+                if not(isnan(MS(i).outlet_id))
+                    
+                    % Check for internal drainage
+                    % (by comparing the corner coordinates of the outlet pixels with basin outlines)
+                    [outx,outy] = ind2coord(STG,MS(i).outlet_id);
+                    fx = [outx-hcs,outx-hcs,outx+hcs,outx+hcs];
+                    fy = [outy-hcs,outy+hcs,outy-hcs,outy+hcs];
+                    fi = nan(size(fx));
+                    fi(:) = coord2ind(D,fx,fy);
+                    tix = coord2ind(D,tx,ty);
+                    ix = ismember(fi,tix);
+                    % endorheic drainages have outlets that don't intersect the catchment outlines
+                    isendo = not(any(ix,2));
+
+                    if (isendo)
+                        warning('Warning: found endorheic drainage. Results may be erroneous.')
+                    else
+                        iy = ismember([tx,ty],[fx(ix)' fy(ix)'],'rows');
+                        tx(iy) = nan;
+                        ty(iy) = nan;
                     end
-                    ixbcsel = C{k};
-                    [DB,IX] = drainagebasins(FD,ixbcsel);
-                    % Record divide coordinates
-                    if sum(IX)>0
-                        % Get basin outlines
-                        MS = GRIDobj2polygon(DB,"waitbar",false);
-                        MS = getdivide(MS,IX,FD);
-                        G{k} = MS;
-                        O{k} = double(IX);
+
+                end
+
+                % remove redundant nan
+                IX = isnan(tx);
+                JX = [IX(2:end);true];
+                IJ = logical(min([IX JX],[],2));
+                tx = tx(not(IJ));
+                ty = ty(not(IJ));
+
+                % reorder
+                if not(isendo)
+                    ix = find(isnan(tx),1,'first');
+                    if not(isempty(ix))
+                        tx = [tx(ix+1:end);tx(1:ix)];
+                        ty = [ty(ix+1:end);ty(1:ix)];
                     end
                 end
-            else
-                for k = 1 : n
-                    if verbose
-                        fprintf(1,'%d / %d  \n',k,n);
-                    end
-                    ixbcsel = C{k};
-                    [DB,IX] = drainagebasins(FD,ixbcsel);
-                    % Record divide coordinates
-                    if sum(IX)>0
-                        % Get basin outlines
-                        MS = GRIDobj2polygon(DB,"waitbar",false);
-                        MS = getdivide(MS,IX,FD);
-                        G{k} = MS;
-                        O{k} = double(IX);
-                    end
-                end
+
+                dtx = tx(1:end-1)-tx(2:end);
+                dty = ty(1:end-1)-ty(2:end);
+                ix = not(dtx==0 & dty==0);
+                tx = [tx(ix);NaN];
+                ty = [ty(ix);NaN];
+
+                MS(i).X = tx;
+                MS(i).Y = ty;
+
+            end
+
+            if (options.verbose)
+                close(f)
             end
             
+            % Endorheic divide nodes
+            isendo = [MS.endo];
+            Ien = unique(coord2ind(D,vertcat(MS(isendo).X),vertcat(MS(isendo).Y)));
             
-            % Make structure (M) with all divides
-            M = struct;
-            ct = 0;
-            for k = 1 : length(G)
-                MS = G{k};
-                for j = 1 : length(MS)
-                    x = MS(j).X;
-                    y = MS(j).Y;
-                    if length(x)>2 % At least two nodes and one NaN
-                        ct = ct+1;
-                        M(ct).IX = coord2ind(D,x,y);
-                        M(ct).ep = M(ct).IX([1 end-1]);
-                        %M(ct).endo = MS(j).endo.*ones(size(M(ct).IX));
-                    end
-                end
-            end
-            I = vertcat(M.IX); % nodes
-            %D.ep = vertcat(M.ep); % all divide endpoints
-            
-            % remember endorheic nodes
-            %ex = logical(vertcat(M.endo));
-            %endo = unique(I(ex));
+            % All divide nodes
+            I = coord2ind(D,vertcat(MS.X),vertcat(MS.Y));
             
             % Remove redundant edges
             T = [I(1:end-1),I(2:end)]; % edges (connections between nodes)
             % Rows with one NaN in either column become NaN
             T(sum(isnan(T),2)==1,:) = NaN;
             % Set redundant edges to NaN
-            sT = sort(T,2); % lower index left
+            sT = sort(T,2); % lower index left (rows unchanged)
             [~,IX,~] = unique(sT,'rows','stable');
             T0 = nan(size(T));
             T0(IX,:) = T(IX,:);
+
+            % Remove self-connections
+            IX = (T0(:,1)-T0(:,2))==0;
+            T0(IX,:) = NaN;
+            
             % Remove redundant NaN between segments
             IX = isnan(T0(:,1));
             JX = [IX(2:end);true];
             IJ = logical(min([IX JX],[],2));
             T0 = [T0(not(IJ),:);NaN NaN];
-            
+
             % Assemble structure
             M = struct;
             ix = [0;find(isnan(T0(:,1)))];
-            for i = 1 : length(ix)-1 
-                M(i).IX = [T0(ix(i)+1,1);T0(ix(i)+1:ix(i+1),2)];
-                % % identify endorheic nodes
-                % M(i).isendo = ismember(M(i).IX,endo);
+            ct = 0;
+            for i = 1 : length(ix)-1
+                if (ix(i+1)-ix(i))>2 % avoid single nodes
+                    ct = ct+1;
+                    M(ct).IX = [T0(ix(i)+1,1);T0(ix(i)+1:ix(i+1),2)];
+                    M(ct).nix = numel(M(ct).IX);
+                    % identify endorheic nodes
+                    M(ct).isendo = ismember(M(ct).IX,Ien);
+                end
             end
+            
             D.IX = vertcat(M.IX);
-            %D.endo = endo;
+            %D.endo = vertcat(M.isendo);
+
             D.issorted = false;
             
             % Get junctions and endpoints
             if options.network
+                if (options.verbose)
+                    f = waitbar(0.25,'Sorting divide network');
+                end
                 D = divnet(D,FD);
+                if (options.verbose)
+                    waitbar(0.5,f,'Sorting divide network');
+                end
                 D = sort(D);
+                if (options.verbose)
+                    waitbar(0.75,f,'Sorting divide network');
+                end
                 D = divdist(D);
+                if (options.verbose)
+                    waitbar(1,f,'Sorting divide network');
+                end
             end
-            
+
             if nargout>1
-                varargout{1} = O;
+                varargout{1} = M;
             end
-            
+
         end
-        
-        
-        function DOUT = divnet(DIN,FD) 
-            %DIVNET   Compute divide network 
-            % 
+
+
+        function DOUT = divnet(DIN,FD)
+            %DIVNET   Compute divide network
+            %
             % Syntax
             %
             %     D2 = divnet(D,FD)
@@ -274,26 +353,27 @@ classdef DIVIDEobj
             %
             % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
             % Date: Nov 2018
-            
+            %       Apr 2018
+
             %  input properties: D.IX
             % output properties: D.ep, D.jct, D.jctedg
-            
+
             DOUT = DIN;
-            
-            % Grid with nodes indicating diagonal flow
+
+            % Divide grid with nodes indicating diagonal flow
             [x,y] = wf2XY(FD.wf,FD.size);
             cs = FD.cellsize;
             hcs = cs/2;
-            xn = [x'-hcs,x(end)+hcs];
+            xn = [x-hcs;x(end)+hcs];
             yn = [y+hcs;y(end)-hcs];
             A = zeros(FD.size+1);
             FX = GRIDobj(xn,yn,A);
-            NEDGE = FX;
-            NST = FX;
+            NEDGE = FX; % grid that counts the number of divide edges
+            NST = FX; % grid that counts the numnber of segment termini
             [x,y] = getcoordinates(FX);
             [XD,YD] = meshgrid(x,y);
             
-            % Indices of flow edge midpoints 
+            % Indices of flow edge midpoints
             [x1,y1] = ind2coord(FD,FD.ix);
             [x2,y2] = ind2coord(FD,FD.ixc);
             dx = x2-x1;
@@ -301,14 +381,16 @@ classdef DIVIDEobj
             mx = (x1+x2)./2;
             my = (y1+y2)./2;
             [mix,res] = coord2ind(DIN,mx,my);
+            % Identify diagonal connections
             FX.Z(mix(res<0.5*hcs & abs(dx+dy)<cs)) = 1; % NW-SE / SE-NW
             FX.Z(mix(res<0.5*hcs & abs(dx+dy)>cs)) = 2; % NE-SW / SW-NE
+            % Identify horizontal/vertical connections
             
-            % Unique nodes and number of edges
+            % Unique nodes (e) and number of edges (NEDGE)
             T0 = [DIN.IX(1:end-1),DIN.IX(2:end)];
-            T0(sum(isnan(T0),2)==1,:) = NaN;
+            T0(sum(isnan(T0),2)==1,:) = NaN; % rows with one NaN become NaN
             ix = not(isnan(T0(:,1)));
-            T1 = T0(ix,:);
+            T1 = T0(ix,:); % without NaNs
             [e,~,f] = unique([T0(ix,1);T0(ix,2)],'rows','stable');
             CTS = [e accumarray(f,1)];
             NEDGE.Z(CTS(:,1)) = CTS(:,2);
@@ -319,20 +401,17 @@ classdef DIVIDEobj
             [e,~,f] = unique(st(:),'stable');
             STIX = [e accumarray(f,1)];
             NST.Z(STIX(:,1)) = STIX(:,2);
-            
-            % Junctions
+
+            % Junctions (more than two divide edges and no crossing river)
             DOUT.jct = find(NEDGE.Z>2 & FX.Z==0);
             DOUT.jctedg = NEDGE.Z(DOUT.jct);
-            
-%             % Endpoints
-%             ixep = find((NEDGE.Z==1 | NEDGE.Z==3) & NST.Z==1);
-                
+
             % Dead segments
             ixdseg = find((NEDGE.Z==2 & NST.Z==2 & FX.Z==0) | ...
-                         (NEDGE.Z==4 & NST.Z==2 & FX.Z>0) | ...
-                         (NEDGE.Z==4 & NST.Z==4 & FX.Z>0) | ...
-                         (NEDGE.Z==3 & NST.Z==3 & FX.Z>0));
-                     
+                (NEDGE.Z==4 & NST.Z==2 & FX.Z>0) | ...
+                (NEDGE.Z==4 & NST.Z==4 & FX.Z>0) | ...
+                (NEDGE.Z==3 & NST.Z==3 & FX.Z>0));
+
             % Distinguish EP and DST at NST==2,NEDGE==2,ST>0
             ix = find(NEDGE.Z==2 & NST.Z==2 & FX.Z>0);
             L = ix;
@@ -349,8 +428,8 @@ classdef DIVIDEobj
             newix = not(logical(abs(L-FX.Z(ix))));
             %ixep = [ixep; ix(not(newix))];
             ixdseg = [ixdseg; ix(newix)];
-            
-            % Merge dead segment termini 
+
+            % Merge dead segment termini
             M = onl2struct(DIN.IX);
             for i = 1 : length(M)
                 ix = ismember(M(i).st,ixdseg);
@@ -361,13 +440,10 @@ classdef DIVIDEobj
             udst = unique(dst(:));
             [M.tag] = deal(true);
             nn = length(udst);
-            for i = 1:length(udst) 
+            for i = 1:length(udst)
                 this_dst = udst(i);
-%                 if verbose
-%                     fprintf(1,'%1.0d / %1.0d\n',i,nn)
-%                 end
                 [r,c] = find(allst==this_dst);
-                if length(r)==2 % 2 segment termini 
+                if length(r)==2 % 2 segment termini
                     ix1 = M(r(1)).IX(1:end-1);
                     ix2 = M(r(2)).IX(1:end-1);
                     if c(1) == 1
@@ -380,8 +456,8 @@ classdef DIVIDEobj
                     M(r(1)).IX = [ix1;ix2(2:end);NaN];
                     M(r(1)).st = M(r(1)).IX([1,end-1])';
                     M(r(2)).tag = false;
-                    
-                elseif length(r)>2 % 3 or 4 segment termini 
+
+                elseif length(r)>2 % 3 or 4 segment termini
                     k = FX.Z(this_dst);
                     % Get adjacent nodes
                     [tr,tc] = ind2sub(DIN.size,this_dst);
@@ -396,7 +472,7 @@ classdef DIVIDEobj
                     p{1} = sub2ind(DIN.size,p1(:,1),p1(:,2));
                     p{2} = sub2ind(DIN.size,p2(:,1),p2(:,2));
                     % Find and merge segments (once or twice)
-                    for g = 1 : 2 
+                    for g = 1 : 2
                         m = nan(1,2); ct = 0;
                         for j = 1 : length(r)
                             ax = ismember(p{g},M(r(j)).IX);
@@ -425,9 +501,9 @@ classdef DIVIDEobj
                             end
                         end
                     end
-                    
+
                 end
-                % Remove redundant segments 
+                % Remove redundant segments
                 tags = [M.tag];
                 M = M(tags);
                 allst = vertcat(M.st);
@@ -435,8 +511,8 @@ classdef DIVIDEobj
             M = onl2struct(vertcat(M.IX)); % Update structure
 
             % Insert breaks at junctions
-            for i = 1:length(M) 
-                ix = M(i).IX(1:end-1); 
+            for i = 1:length(M)
+                ix = M(i).IX(1:end-1);
                 tix = ix;
                 tix([1 end]) = NaN; % omit segment termini
                 iy = find(ismember(tix,DOUT.jct));
@@ -450,54 +526,14 @@ classdef DIVIDEobj
                 end
             end
             M = onl2struct(vertcat(M.IX)); % Update structure
-            
+
             DOUT.IX = vertcat(M.IX);
             st = [M.st];
             DOUT.ep = setdiff(st(:),DOUT.jct);
-            
+
         end
-        
-        
+
+
     end
 end
-
-function C = disjunctdbs(S,ixgrid)
-
-arguments
-    S   STREAMobj
-    ixgrid % must be unique
-end
-
-IX = zeros(size(S.x));
-[~,b] = ismember(ixgrid,S.IXgrid);
-n  = numel(ixgrid);
-IX(b) = 1:n;
-for r = numel(S.ix):-1:1
-    if IX(S.ixc(r)) ~= 0 && IX(S.ix(r)) == 0
-        IX(S.ix(r)) = IX(S.ixc(r));
-    end
-end
-
-% Get a reduced stream network
-I = (IX(S.ix) ~= IX(S.ixc)) & ...
-    (IX(S.ixc) ~= 0);
-
-% Transclosure (maybe use digraph/transclosure) 
-A = sparse(IX(S.ix(I)),IX(S.ixc(I)),true,n,n);
-A  = (speye(n)-A)\speye(n);
-
-C  = cell(0);
-ct = 0;
-while nnz(A)>0
-    I = sum(A,1) == 1;
-    if any(I)
-        ct = ct+1;
-        C{ct} = ixgrid(I);
-        A(I,:) = 0;
-    end
-end
-end
-
-
-    
 
