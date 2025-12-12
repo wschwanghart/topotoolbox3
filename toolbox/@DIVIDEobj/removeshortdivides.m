@@ -25,7 +25,7 @@ function DOUT = removeshortdivides(DIN,FD,d)
 % Example
 %     
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     ST = STREAMobj(FD,flowacc(FD)>1000);
 %     D = DIVIDEobj(FD,ST);
 %     D = divorder(D,'topo');

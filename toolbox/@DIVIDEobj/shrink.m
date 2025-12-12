@@ -34,15 +34,15 @@ function DOUT = shrink(DIN,FD,varargin)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     ST = STREAMobj(FD,flowacc(FD)>1000);
 %     D = DIVIDEobj(FD,ST);
 %     D2 = shrink(D,FD,1000);
 %     subplot(2,1,1)
-%     plot(D,'color','k')
+%     plot(D)
 %     axis image
 %     subplot(2,1,2)
-%     plot(D2,'color','r')
+%     plot(D2)
 %     axis image
 %
 % See also: DIVIDEobj, DIVIDEobj/plot

@@ -24,14 +24,16 @@ function DOUT = cleanedges(DIN,FD)
 % Examples
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     S = STREAMobj(FD,flowacc(FD)>1000);
 %     D = DIVIDEobj(FD,S);
 %     subplot(1,2,1)
 %     plot(D)
+%     axis image
 %     D2 = cleanedges(D,FD);
 %     subplot(1,2,2)
 %     plot(D2)
+%     axis image
 %  
 % See also: DIVIDEobj, DIVIDEobj/divnet
 %

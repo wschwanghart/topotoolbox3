@@ -47,7 +47,7 @@ function varargout = plot(D,varargin)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     ST = STREAMobj(FD,flowacc(FD)>1000);
 % 
 %     figure
@@ -116,6 +116,13 @@ addParameter(p,'legend',true)
 % Parse
 parse(p,varargin{:});
 
+if ischar(p.Results.colormap)
+    cmap = validatecolor(p.Results.colormap);
+else
+    cmap = p.Results.colormap;
+end
+
+
 % default values
 if isempty(p.Results.style) 
     if not(isempty(D.order))
@@ -168,9 +175,9 @@ if ismember(style,{'order','animated'})
     mindo = min(uqdo);
     a = (siz(2)-siz(1))/(maxdo-mindo);
     b = siz(1)-a*mindo;
-
+    
     % Colormap
-    rgb = num2rgb(uqdo,p.Results.colormap,[mindo maxdo]);
+    rgb = num2rgb(uqdo,cmap,[mindo maxdo]);
 end
 
 [x,y] = ind2coord(D,D.IX(ix));

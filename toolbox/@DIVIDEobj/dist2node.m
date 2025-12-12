@@ -28,7 +28,7 @@ function dist = dist2node(DIN,ixep,varargin)
 % Examples
 %     
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','carve');
+%     FD = FLOWobj(DEM);
 %     FA = flowacc(FD);
 %     ST = STREAMobj(FD,FA>500);
 %     D = DIVIDEobj(FD,ST);
