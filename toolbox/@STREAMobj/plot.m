@@ -30,7 +30,7 @@ function h = plot(S,varargin)
 %             cell array. The cell array must have two elements where the 
 %             first element contains a numeric array with distances and the
 %             second element contains a string with a line specification
-%             syntax (e.g., '+r' will draw ret crosses). If you specify
+%             syntax (e.g., '+r' will draw red crosses). If you specify
 %             'text' as second element, than text labels will be drawn at
 %             the distance locations. When called with one output argument,
 %             h will contain several handles to line and text objects.
@@ -57,7 +57,7 @@ function h = plot(S,varargin)
 %     plot(S,'labeldist',{[10000 30000] 'text'})
 %
 %
-% See also: STREAMobj, STREAMobj/plotdz
+% See also: STREAMobj, STREAMobj/plotdz, STREAMobj/plotc
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 3. July, 2024

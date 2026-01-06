@@ -45,8 +45,7 @@ function s = gradient(S,DEM,options)
 %
 %     s      stream gradient as node-attribute list
 %
-% 
-% Example
+% Example 1
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     FD = FLOWobj(DEM,'preprocess','c');
@@ -55,6 +54,15 @@ function s = gradient(S,DEM,options)
 %     g  = gradient(S,DEM,'method','robust');
 %     subplot(2,1,1); plotdz(S,DEM);
 %     subplot(2,1,2); plotdz(S,g); ylabel('Gradient [-]')
+%
+% Example 2: Using the gradient function to calculate a Ksn map
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD = FLOWobj(DEM,'preprocess','c');
+%     S  = STREAMobj(FD,'minarea',1000);    
+%     c = chitransform(S,A,'mn',0.45,'a0',1);
+%     k = gradient(S,z,'distance',c);
+%     plotc(S,smooth(S,g,"K",10000)); clim([0 200])
 %
 % See also: STREAMobj/diff, STREAMobj/cumtrapz, STREAMobj/chitransform
 %
@@ -68,6 +76,7 @@ arguments
     options.method {mustBeTextScalar} = 'forward'
     options.imposemin (1,1) = false
     options.drop (1,1) {mustBeNumeric,mustBePositive} = 10
+    options.distance {mustBeNumeric} = S.distance
 end
 
 validunits = {'tangent' 'degree' 'radian' 'percent' 'sine'};
@@ -82,8 +91,7 @@ if options.imposemin
 end
 
 % Inter-node distances
-d = hypot(S.x(S.ix)-S.x(S.ixc),S.y(S.ix)-S.y(S.ixc));
-
+d = options.distance(S.ix) - options.distance(S.ixc);
 
 switch validatestring(options.method,validmethods)
     case 'forward'

@@ -100,7 +100,7 @@ if ~(exist(['flowacc_mex.' mexext],'file') == 3 && nargin<3 && strcmp(FD.type,'s
                     % coefficient of a homogenous differential equation
                     
                     dx = getdistance(ix,ixc,FD.size,FD.cellsize);
-                    RR = RR.^dx;
+                    RR = exp(-(1-RR).*dx);
                     clear dx
                     
                     for r = 1:numel(ix)
