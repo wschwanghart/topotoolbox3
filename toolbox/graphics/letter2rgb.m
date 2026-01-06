@@ -8,15 +8,14 @@ function rgb = letter2rgb(letter)
 %
 % Description
 %
-%     This function converts a letter that can be used as short-cut for color by
-%     functions such as plot to a rgb triple.
+%     This function converts a letter that can be used as short-cut for 
+%     color by functions such as plot to a rgb triple.
 %
 % Example
 %
 %     rgb = letter2rgb('y')
 %
-%     returns [1 1 0]
-%
+% See also: validatecolor 
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 12. November, 2024

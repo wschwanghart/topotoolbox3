@@ -51,17 +51,17 @@ function rgb = imageschs(DEM,A,options)
 %     truecolor        three element vector (rgb) with values between 0 and
 %                      1 that indicates how true values are plotted if A is
 %                      logical. This option also takes color names that can
-%                      be interpreted by letter2rgb or ttclrr. Default is
-%                      [0 1 0].
+%                      be interpreted by validatecolor or ttclrr. Default 
+%                      is [0 1 0].
 %     falsecolor       three element vector (rgb) with values between 0 and   
 %                      1 that indicates how false values are plotted if A  
 %                      is logical. This option also takes color names that 
-%                      can be interpreted by letter2rgb or ttclrr.
-%                      Default is [1 1 1].
+%                      can be interpreted by validatecolor or ttclrr.  
+%                      Default is [0 1 0].
 %     nancolor         three element vector (rgb) with values between 0 and   
 %                      1 that indicates how NaNs and Infs are plotted 
 %                      Default is [1 1 1]. This option also takes color 
-%                      names that can be interpreted by letter2rgb or 
+%                      names that can be interpreted by validatecolor or 
 %                      ttclrr.
 %     brighten         Scalar between -1 and 1. Shift intensities of all 
 %                      colors in the colormap. If <0, then colormap will be
@@ -152,7 +152,7 @@ function rgb = imageschs(DEM,A,options)
 %     to shaded relief representation. Computers & Geosciences, 29,
 %     1137-1142.
 %
-% See also: GRIDobj/hillshade, imagesc, ttclrr, letter2rgb,
+% See also: GRIDobj/hillshade, imagesc, ttclrr, validatecolor,
 %     GRIDobj/prcclip, adjustgeoaspectratio 
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
@@ -350,13 +350,9 @@ if ~isa(A,'logical')
     
 else
     ncolors = 2;
-    % Convert letters to rgb
-    if ischar(falsecol) || isstring(falsecol)
-        falsecol = getclr(falsecol);
-    end
-    if ischar(truecol) || isstring(truecol)
-        truecol = getclr(truecol);
-    end
+    % Validate colors
+    falsecol = getclr(falsecol);
+    truecol  = getclr(truecol);
     cmap = [falsecol; truecol];
 	nans = false;
     alims = [0 1];
@@ -378,9 +374,8 @@ IND  = uint16(H+1) + nhs*uint16(A) + 1;
 
 % handle NaNs
 if nans
-    if ischar(nancolor) || isstring(nancolor)
-        nancolor = getclr(nancolor);
-    end
+    nancolor = getclr(nancolor);
+
     cmapnan   = bsxfun(@times,nancolor,linspace(0,1,nhs)');
     IND(Inan) = uint16(H(Inan)) + nhs*(ncolors) +1;% unclear if this is ok...
     cmap      = [cmap;cmapnan];
@@ -452,7 +447,7 @@ function clr = getclr(str)
 % This function retrieves a color triplet based on a character or string
 % input
 try 
-    clr = letter2rgb(str);
+    clr = validatecolor(str);
 catch
     clr = ttclrr(str);
 end

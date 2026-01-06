@@ -77,6 +77,11 @@ function h = plotdz(S,DEM,options)
 %
 %     'cbarlabel' {''}
 %     string to label colorbar
+%
+%     'ncolors' {20}
+%     If 'colormethod' is 'split', then 'ncolors' specifies the numbers of
+%     different colors to use. A larger number of colors will increase
+%     computation time.
 %     
 % Output arguments
 %
@@ -264,6 +269,8 @@ else
                 keephold = true;
             else
                 keephold = false;
+                % Clear current axes
+                cla(ax)
             end
             hold(ax,'on');
             ht = cellfun(@(Ssub,col) ...
