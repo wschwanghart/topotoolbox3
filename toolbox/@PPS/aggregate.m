@@ -1,4 +1,4 @@
-function [P,locb] = aggregate(P,c,varargin)
+function [P,locb] = aggregate(P,c,options)
 
 %AGGREGATE Aggregate points in PPS to new point pattern
 %
@@ -58,18 +58,14 @@ function [P,locb] = aggregate(P,c,varargin)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 5. July, 2024
 
+arguments
+    P PPS
+    c {nEqualsNumPoints(c,P)}
+    options.type = 'centroid'
+    options.useparallel (1,1) = true
+end
 
-p = inputParser;
-p.KeepUnmatched = true;
-addRequired(p,'P');
-addRequired(p,'c',@(x) numel(x) == npoints(P));
-addParameter(p,'type','centroid');
-addParameter(p,'useparallel',true);
-
-% Parse
-parse(p,P,c,varargin{:});
-
-type = validatestring(p.Results.type,...
+type = validatestring(options.type,...
     {'centroid','euclideancentroid',...
     'nearesttocentroid','mostupstream','mostdownstream'});
 
@@ -96,7 +92,7 @@ switch lower(type)
     
     case 'nearesttocentroid'
         % Calculate centroids
-        [Pc,locb] = aggregate(P,c,'useparallel',p.Results.useparallel);
+        [Pc,locb] = aggregate(P,c,'useparallel',options.useparallel);
         % Nearest to centroid
         G  = as(P,'graph');
         d = distances(G,P.PP,Pc.PP);
@@ -191,3 +187,9 @@ E = find(E);
 end
 end
 
+function nEqualsNumPoints(x,P)
+
+if numel(x) ~= npoints(P)
+    error('Vector must have as many elements as there are points.')
+end
+end

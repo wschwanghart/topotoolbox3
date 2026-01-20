@@ -152,7 +152,8 @@ pnpv    = expandstruct(Results);
 
 %% Plotting
 % Plot line
-hl = plotdz(P.S,zz,UnMatched,'Color',lc);
+UnMatched = namedargs2cell(UnMatched);
+hl = plotdz(P.S,zz,UnMatched{:},'color',lc);
 hold on
 
 if olderthan2020b || isscalar(sz) 
