@@ -124,7 +124,7 @@ elseif ischar(varargin{1})
         DEM = interpneighborpixels(DEM);
         return
     elseif strcmpi(varargin{1},'interactive')
-        MASK = createmask(DEM,true);
+        MASK = createmask(DEM,'hillshade',true);
         DEM.Z(MASK.Z) = nan;
         DEM = inpaintnans(DEM);
         DEM.Z(isnan(DEM.Z) & (~MASK.Z)) = nan;

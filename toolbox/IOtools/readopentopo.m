@@ -41,16 +41,17 @@ function DEM = readopentopo(options)
 %                      the DEM to a temporary file in the system's temporary 
 %                      folder. The option 'deletefile' controls whether the
 %                      file is kept on the hard drive.
-%     'extent'         GRIDobj or four element vector with geographical 
-%                      coordinates in the order [west east south north].
-%                      If a GRIDobj is supplied, readopentopo uses the
-%                      function GRIDobj/getextent to obtain the bounding
-%                      box in geographical coordinates. If extent is set,
-%                      then the following parameter names 'north',
+%     'extent'         GRIDobj, geopolyshape or four element vector with
+%                      geographical coordinates in the order [west east
+%                      south north]. If a GRIDobj is supplied, readopentopo
+%                      uses the function GRIDobj/getextent to obtain the
+%                      bounding box in geographical coordinates. If extent
+%                      is set, then the following parameter names 'north',
 %                      'south', ... are ignored.
 %     'addmargin'      Expand the extent derived from 'extent',GRIDobj by a
 %                      scalar value in °. Default is 0.01. The option is
-%                      only applicable if extent is provided by a GRIDobj.
+%                      only applicable if extent is provided by a GRIDobj, 
+%                      or a geopolyshape
 %     'north'          northern boundary in geographic coordinates (WGS84).
 %                      The option is ignored if the option 'extent' is
 %                      provided or if 'interactive', true.
@@ -183,7 +184,6 @@ else
     apikey = options.apikey;
 end
 
-
 % save to drive
 woptions = weboptions('Timeout',100000);
 
@@ -195,8 +195,15 @@ if ~isempty(options.extent)
         east  = ext(2) + options.addmargin;
         south = ext(3) - options.addmargin;
         north = ext(4) + options.addmargin;
+
+    elseif isa(options.extent,"geopolyshape")
+        [latlim,lonlim] = bounds(options.extent);
+        west  = lonlim(1) - options.addmargin;
+        east  = lonlim(2) + options.addmargin;
+        south = latlim(1) - options.addmargin;
+        north = latlim(2) + options.addmargin; 
         
-    elseif numel(options.extent) == 4
+    elseif isnumeric(options.extent) & (numel(options.extent) == 4)
         west = options.extent(1);
         east = options.extent(2);
         south = options.extent(3);
@@ -211,8 +218,9 @@ else
     north = options.north;
 end
 
+
 % now we have an extent. Or did the user request interactively choosing
-% the extent.
+% the extent?
 if any([isempty(west) isempty(east) isempty(south) isempty(north)]) || options.interactive
     if options.interactive 
         ext = roipicker('requestlimit',requestlimit);
@@ -225,6 +233,16 @@ if any([isempty(west) isempty(east) isempty(south) isempty(north)]) || options.i
         south = ext(1);
         north = ext(3);
     end
+end
+
+% make sure that coordinates are within bounds
+west = min(max(west,-180),180);
+east = max(min(east,180),-180);
+south = min(max(south,-90),90);
+north = max(min(north,90),-90);
+
+if west == east || south == north
+    error('The provided extent is a line or point.')
 end
 
 % Check request limit
