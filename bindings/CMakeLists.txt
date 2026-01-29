@@ -12,7 +12,7 @@ include(FetchContent)
 FetchContent_Declare(
   topotoolbox
   GIT_REPOSITORY https://github.com/TopoToolbox/libtopotoolbox.git
-  GIT_TAG d396af7237f0d2d27fd01ed17dbb39c9443c29ed
+  GIT_TAG 220457172ee2aae4b69e49363507904ea1ecaadc
 )
 FetchContent_MakeAvailable(topotoolbox)
 
@@ -88,10 +88,37 @@ matlab_add_mex(
   LINK_TO topotoolbox
 )
 
+matlab_add_mex(
+  NAME tt_excesstopography_fmm2d
+  MODULE
+  SRC tt_excesstopography_fmm2d.c
+  R2018a
+  LINK_TO topotoolbox
+)
+
+matlab_add_mex(
+  NAME tt_excesstopography_fmm3d
+  MODULE
+  SRC tt_excesstopography_fmm3d.c
+  R2018a
+  LINK_TO topotoolbox
+)
+
+matlab_add_mex(
+  NAME tt_excesstopography_fsm2d
+  MODULE
+  SRC tt_excesstopography_fsm2d.c
+  R2018a
+  LINK_TO topotoolbox
+)
+
 install(
   TARGETS tt_has_topotoolbox tt_fillsinks tt_identifyflats tt_gwdt_computecosts
           tt_lowerenv tt_hillshade tt_hillshade_fused tt_graphflood
           tt_gradient8
+          tt_excesstopography_fsm2d
+          tt_excesstopography_fmm3d
+          tt_excesstopography_fmm2d
   DESTINATION "."
   COMPONENT Runtime
 )
