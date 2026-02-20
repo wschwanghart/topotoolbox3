@@ -175,6 +175,7 @@ if strlength(options.apikey) == 0
         apikey = apikey{1}';
         % Remove leading and trailing blanks, if there are any
         apikey = strip(apikey);
+        fclose(fid);
     else
         apikey = strip(getApiKeyDialog(apikeyfile));
         % error('Readopentopo requires an API Key. Please read the help.')

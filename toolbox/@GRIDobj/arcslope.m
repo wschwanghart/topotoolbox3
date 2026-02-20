@@ -54,9 +54,14 @@ zp=padarray(z,[1 1],'replicate');
 I = isnan(zp);
 in = any(I(:));
 if in
-    [~,L] = bwdist(~I);
-    zp = zp(L);
+    % Get boundary pixels
+    B = imdilate(~I,ones(3)) & I;
+    % Get their connections to valid adjacent pixels
+    [ic,icd] = ixneighbors(~I,B);
+    M = accumarray(ic,zp(icd),[numel(B) 1],@mean);
+    zp(B) = M(B);
 end
+    
 
 % Define anon function to calculate the mean gradient of 8 connected neighborhood 
 % by same algorithm as the ArcGIS slope function

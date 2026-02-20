@@ -115,6 +115,8 @@ elseif isa(maxgradient,'GRIDobj')
     G = single(maxgradient.Z);
 end
 
+G(isnan(DEM.Z)) = nan;
+
 switch lower(method)
     case 'fmm'
         DEM.Z = tt_excesstopography_fmm2d(single(DEM.Z),G,single(DEM.cellsize));
