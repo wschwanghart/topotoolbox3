@@ -1,4 +1,4 @@
-function slopeareatool(FD,DEM,varargin)
+function slopeareatool(FD,DEM,options)
 
 %SLOPEAREATOOL Interactively create slope area plots and fit power laws
 %
@@ -44,30 +44,23 @@ function slopeareatool(FD,DEM,varargin)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 14. June, 2024
 
-
-p = inputParser;
-p.FunctionName = 'slopeareatool';
-
-addRequired(p,'FD',@(x) isa(x,'FLOWobj'));
-addRequired(p,'DEM',@(x) isa(x,'GRIDobj'));
-
-validfitmethods  = {'ls','lad'};
-addParameter(p,'minarea',0,@(x) isscalar(x));
-addParameter(p,'maxarea',inf,@(x) isscalar(x));
-addParameter(p,'nrbins',50,@(x) isscalar(x));
-addParameter(p,'mingradient',0.0001,@(x) isscalar(x) && x>0);
-addParameter(p,'fitmethod','ls');
-
-parse(p,FD,DEM,varargin{:});
+arguments
+    FD   FLOWobj
+    DEM  GRIDobj
+    options.minarea (1,1) {mustBeNonnegative} = 0
+    options.maxarea (1,1) {mustBeNonnegative} = inf
+    options.nrbins  (1,1) {mustBeNonnegative,mustBeInteger} = 50
+    options.mingradient (1,1) {mustBeNonnegative} = 0.0001
+    options.fitmethod {mustBeMember(options.fitmethod,{'ls','lad'})} = 'ls'
+end
 
 % required
-FD         = p.Results.FD;
-DEM        = p.Results.DEM;
-minarea    = p.Results.minarea;
-maxarea    = p.Results.maxarea;
-nrbins     = p.Results.nrbins;
+minarea    = options.minarea;
+maxarea    = options.maxarea;
+nrbins     = options.nrbins;
+mingradient = options.mingradient;
 
-fitmethod = validatestring(p.Results.fitmethod,validfitmethods);
+fitmethod = options.fitmethod;
 
 % validate alignment of FD and DEM
 validatealignment(FD,DEM)
@@ -115,7 +108,7 @@ RGB  = imageschs(DEM,DEM);
 % Upslope area (we will use pixel units and switch to map units when plotting)
 A = flowacc(FD);
 % gradient
-DEM = imposemin(FD,DEM,p.Results.mingradient);
+DEM = imposemin(FD,DEM,mingradient);
 G = gradient(FD,DEM);
 
 % Set minarea and maxarea to pixel units
@@ -127,7 +120,7 @@ maxarea = maxarea/(A.cellsize^2);
 if isinf(maxarea)
     maxarea = max(A);
 elseif maxarea < minarea
-    error('TopoToolbox:slopeareatool','maxarea must be larger than minarea')
+    error('TopoToolbox:slopeareatool','maxarea must be greater than minarea')
 else
     FD.ixcix(A.Z>maxarea) = 0;  
 end    
@@ -141,8 +134,12 @@ if minarea > 0
     end
     W = A.Z>(minarea) & A.Z<(maxarea);
     
-    RGB(repmat(W,[1 1 3])) = 150;    
-    [~,SNAPRASTER] = bwdist(W,'q');
+    RGB(repmat(W,[1 1 3])) = 150; 
+    if isMATLABReleaseOlderThan("R2025b")
+        [~,SNAPRASTER] = bwdist(W,'q');
+    else
+        [~,SNAPRASTER] = bwdist_old(W,'q');
+    end
 
     snap = true;
 else
