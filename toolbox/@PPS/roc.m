@@ -13,7 +13,7 @@ function varargout = roc(P,c,varargin)
 % Description
 %
 %     roc computes the Receiver Operating Characteristic curve for a point 
-%     pattern or a fitted point process modelf.
+%     pattern or a fitted point process model.
 %
 % Input arguments
 %
@@ -42,11 +42,23 @@ function varargout = roc(P,c,varargin)
 %     X,Y         X and Y coordinates of an ROC curve
 %     AUC         area-under-the-curve metric
 %
+% Example
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD  = FLOWobj(DEM);
+%     S = STREAMobj(FD,'minarea',1000);
+%     S = klargestconncomps(S);
+%     P = PPS(S,'runif',10,'z',DEM);
+%     d = netdist(P);
+%     dens = exp(-d/1000)/.5e3;
+%     P2  = simulate(P,'intensity',dens);
+%     mdl = fitloglinear(P2,d);
+%     roc(P2,d)
 % 
 % See also: PPS, fitloglinear 
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 11. February, 2019
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 5. March, 2026
 
 
 if nargin == 1

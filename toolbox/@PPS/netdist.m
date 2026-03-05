@@ -1,10 +1,11 @@
-function d = netdist(P,varargin)
+function d = netdist(P,options)
 
 %NETDIST Shortest network distance
 %
 % Syntax
 %
 %     d = netdist(P)
+%     d = netdist(P,pn,pv,...)
 %
 % Description
 %
@@ -44,19 +45,31 @@ function d = netdist(P,varargin)
 %     FD  = FLOWobj(DEM);
 %     S   = STREAMobj(FD,'minarea',500);
 %     S   = klargestconncomps(S);
-%     P   = PPS(S,'runif',100,'z',DEM);
+%     P   = PPS(S,'runif',10,'z',DEM);
 %     d   = netdist(P);
-%     plotc(P.S,d);
+%     tiledlayout(2,2)
+%     nexttile; plotc(P.S,d); box on
+%     nexttile; plotdz(P,'z',d); ylabel('Distance from point');
+%     d   = netdist(P,'dir','up');
+%     nexttile; plotc(P.S,d); box on
+%     nexttile; plotdz(P,'z',d); ylabel('Distance from point');
 %
 % See also: STREAMobj/netdist, PPS/voronoi
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 31. March, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 5. March, 2026
 
+arguments
+    P  PPS
+    options.dir = 'both'
+    options.split (1,1) = false
+    options.distance = P.S.distance
+end
 
 if npoints(P) == 0
     d = inf(size(P.S.x));
     return
 end
 
-d = netdist(P.S,P.S.IXgrid(P.PP),varargin{:});
+options = namedargs2cell(options);
+d = netdist(P.S,P.S.IXgrid(P.PP),options{:});
