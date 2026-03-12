@@ -27,7 +27,8 @@ function CP = simulate(P,varargin)
 %
 % Output arguments
 %
-%     
+%      PSIM   Simulated PPS object
+%      CP     Cell array of simulated PPS objects (if nsim > 1)
 %
 % Algorithm
 %
@@ -38,7 +39,8 @@ function CP = simulate(P,varargin)
 % See also: PPS, PPS/convhull
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 11. February, 2019
+% Date: 10. March, 2026
+
 
 narginchk(3,inf)
 

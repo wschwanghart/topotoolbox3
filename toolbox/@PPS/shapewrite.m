@@ -10,13 +10,13 @@ function shapewrite(P,filename,options)
 % Description
 %
 %     shapewrite writes both the point pattern and the stream network to a
-%     shapefile. The points are written to a point shapefile
-%     and the stream network to a line shapefile. 
+%     shapefile. The points are written to a point shapefile and the stream
+%     network to a line shapefile.
 %
 % Input arguments
 %
-%     P         point pattern (PPS)
-%     filename  filename of the output shapefile (no *.shp required)
+%     P          point pattern (PPS)
+%     filename   filename of the output shapefile (no *.shp required)
 %
 %     Parameter name/value pairs
 %
@@ -31,6 +31,8 @@ function shapewrite(P,filename,options)
 %                with marks.
 %
 % Output arguments
+%
+%      none
 %
 % See also: STREAMobj/STREAMobj2mapstruct 
 %

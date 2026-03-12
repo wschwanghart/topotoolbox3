@@ -112,14 +112,19 @@ end
 MASK = false(DEM.size);
 MASK(ix) = true;
 
-D = GRIDobj(DEM);
 
 if nargout == 1
-    D.Z = bwdist(MASK,'e');
+    D = bwdist(MASK,'e');
 else    
-    [D.Z,L] = bwdist(MASK,'e');
+    if isMATLABReleaseOlderThan('R2025b') || numel(MASK) < 2^24
+        [D,L] = bwdist(MASK,'euclidean');
+    else
+        [D,L] = bwdist_old(MASK,'euclidean');
+    end
+
 end
 D = D.*DEM.cellsize;
+D = GRIDobj(DEM,D);
                 
         
         
