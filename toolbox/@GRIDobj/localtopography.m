@@ -1,4 +1,4 @@
-function OUT = localtopography(DEM,varargin)
+function OUT = localtopography(DEM,radius,options)
 
 %LOCALTOPOGRAPHY Local topography
 %
@@ -61,22 +61,14 @@ function OUT = localtopography(DEM,varargin)
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 28. January, 2024
 
-
-narginchk(1,inf)
-
-p = inputParser;
-p.FunctionName = 'GRIDobj/localtopography';
-expectedTypes = {'range','max','min','mean','median','prctile','std'};
-
-addRequired(p,'DEM',@(x) issparse(x) || isa(x,'GRIDobj'));
-addOptional(p,'radius',5000,@(x) isscalar(x) && x>DEM.cellsize);
-
-addParameter(p,'type','range',@(x) ischar(validatestring(x,expectedTypes)));
-addParameter(p,'N',8,@(x) isscalar(x) && ismember(x,[0 4 6 8]));
-addParameter(p,'thin',1,@(x) x>0.1 && x<=1);
-addParameter(p,'prc',90,@(x) x>0 && x<100);
-
-parse(p,DEM,varargin{:});
+arguments
+    DEM  GRIDobj
+    radius (1,1) = 5000
+    options.type {mustBeMember(options.type, ...
+        {'range','max','min','mean','median','prctile','std'})} = 'range'
+    options.N (1,1) {mustBeMember(options.N,[0 4 6 8])} = 8
+    options.prc (1,1) {mustBeInRange(options.prc,0, 100,'exclusive')} = 90
+end
 
 dem = DEM.Z;
 cs  = DEM.cellsize;
@@ -86,11 +78,10 @@ INAN = isnan(dem);
 flaginan = any(INAN(:));
 
 % structuring element
-radiuspx = ceil(p.Results.radius/cs);
-SE = strel('disk',radiuspx,p.Results.N);
+radiuspx = ceil(radius/cs);
+SE = strel('disk',radiuspx,options.N);
 
-
-switch p.Results.type
+switch options.type
     case 'max'
         % Maximum filter
         if flaginan
@@ -115,15 +106,15 @@ switch p.Results.type
         H  = H1-H2;
     case {'mean','average'}
         if flaginan
-            [~,L] = bwdist(~INAN,'e');
-            dem = dem(L);
+            DEM = inpaintnearest(DEM);
+            dem = DEM.Z;
         end            
         H   = fspecial('disk',radiuspx);
         H   = imfilter(dem,H,'symmetric','same','conv');
     case 'median'
         if flaginan
-            [~,L] = bwdist(~INAN,'e');
-            dem = dem(L);
+            DEM = inpaintnearest(DEM);
+            dem = DEM.Z;
         end
         H   = getnhood(SE);
         n   = round(sum(H(:))/2);
@@ -131,17 +122,17 @@ switch p.Results.type
         
     case 'prctile'
         if flaginan
-            [~,L] = bwdist(~INAN,'e');
-            dem = dem(L);
+            DEM = inpaintnearest(DEM);
+            dem = DEM.Z;
         end
         H   = getnhood(SE);
-        n   = round(sum(H(:))*p.Results.prc/100);
+        n   = round(sum(H(:))*options.prc/100);
         H   = ordfilt2(dem,n,H,'symmetric');
     
     case 'std'
         if flaginan
-            [~,L] = bwdist(~INAN,'e');
-            dem = dem(L);
+            DEM = inpaintnearest(DEM);
+            dem = DEM.Z;
         end
         H   = getnhood(SE);
         H   = stdfilt(dem,H);        
@@ -156,5 +147,5 @@ end
 % prepare output
 OUT = DEM;
 OUT.Z = H;
-OUT.name = ['local topography (' p.Results.type ')'];
+OUT.name = ['local topography (' options.type ')'];
 
