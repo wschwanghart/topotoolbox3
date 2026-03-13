@@ -6,6 +6,7 @@ function varargout = as(P,outtype)
 %
 %     S = as(P,'STREAMobj')
 %     G = as(P,'GRIDobj')
+%     [MSS,MSP] = as(P,'geotable')
 %     [MSS,MSP] = as(P,'mapstruct')
 %     [MSS,MSP] = as(P,'mapshape')
 %     [xs,ys,xp,yp] = as(P,'nanpunctuated')
@@ -22,6 +23,10 @@ function varargout = as(P,outtype)
 %
 %     G = as(P,'GRIDobj') generates a GRIDobj. G has values of 1 along
 %     streams, values of 2 at points, and zeros elsewhere.
+%
+%     [MSS,MSP] = as(P,'geotable') creates geotables that can be exported
+%     to shapefiles (see also function PPS/shapewrite). MSS is a geotable
+%     containing the stream network and MSP contains the points.
 %
 %     [MSS,MSP] = as(P,'mapstruct') creates structure arrays that can be
 %     exported to shapefiles (see also function PPS/shapewrite). MSS is a
@@ -56,7 +61,7 @@ function varargout = as(P,outtype)
 %
 %     see description above
 %
-% Example
+% Example 1
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     FD  = FLOWobj(DEM);
@@ -65,12 +70,25 @@ function varargout = as(P,outtype)
 %     [G,p,xdata,ydata] = as(P,'digraph');
 %     plot(G,'-','xdata',xdata,'ydata',ydata,...
 %         'arrowsize',0,'marker','none')
-% 
+%
+% Example 2
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD  = FLOWobj(DEM);
+%     S   = STREAMobj(FD,'minarea',10000);
+%     P   = PPS(S,'rpois',0.0005);
+%
+%     [MSS,MSP] = as(P,'geotable');
+%     geoplot(MSS)
+%     hold on
+%     geoplot(MSP)
+%     hold off
+%     
 % See also: GRIDobj, FLOWobj, STREAMobj, PPS/shapewrite,
 %           STREAMobj/STREAMobj2mapstruct, STREAMobj/STREAMobj2XY
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 28. October, 2024
+% Date: 10. March, 2026
 
 arguments
     P   PPS

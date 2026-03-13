@@ -1,6 +1,6 @@
 function [in,inci,pd] = intensity(P,alpha)
 
-%INTENSITY calculate intensity (density) of points on the stream network
+%INTENSITY Calculate intensity (density) of points on the stream network
 %
 % Syntax
 %
@@ -9,7 +9,8 @@ function [in,inci,pd] = intensity(P,alpha)
 %
 % Description
 %
-%     intensity measures the expected number of points per unit length. 
+%     intensity measures the expected number of points per unit length, 
+%     which is referred to as the intensity of a point process.
 % 
 % Input arguments
 %
@@ -26,10 +27,8 @@ function [in,inci,pd] = intensity(P,alpha)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     S = STREAMobj(FD,'minarea',1000);
-%     S = removeshortstreams(S,100);
-%     S = clean(S);
 %     P = PPS(S,'rpois',0.001,'z',DEM);
 %     [int,inci,pd] = intensity(P);
 %
@@ -51,8 +50,13 @@ function [in,inci,pd] = intensity(P,alpha)
 %            process.
 % https://my.vanderbilt.edu/davidjonfurbish/files/2013/06/Uncertainty-Principle.pdf
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 13. July, 2021
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 4. March, 2026
+
+arguments
+    P PPS
+    alpha (1,1) {mustBePositive} = 0.05
+end
 
 n  = npoints(P);
 s  = tlength(P);

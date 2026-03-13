@@ -1,4 +1,4 @@
-function [dmax,IX] = diameter(P,varargin)
+function [dmax,IX] = diameter(P,options)
 
 %DIAMETER Returns the maximum possible distance in a stream network
 %
@@ -41,28 +41,27 @@ function [dmax,IX] = diameter(P,varargin)
 %
 % See also: PPS
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 22. December, 2020
 
+arguments
+    P   PPS
+    options.d3d (1,1) = false
+    options.val = []
+    options.plot (1,1) = false
+    options.usepoints (1,1) = false
+end
 
-p  = inputParser;
-addParameter(p,'d3d',false);
-addParameter(p,'val',[]);
-addParameter(p,'plot',false);
-addParameter(p,'usepoints',false);
-parse(p,varargin{:});
-
-Results = p.Results;
-plotit  = Results.plot;
-usepoints = Results.usepoints;
-Results = rmfield(Results,{'plot' 'usepoints'});
+plotit  = options.plot;
+usepoints = options.usepoints;
+options = rmfield(options,{'plot' 'usepoints'});
 
 if ~usepoints
     P = generatepoints(P,'type',{'outlet','channelhead'});
 end
 
-Results = namedargs2cell(Results);
-d  = pointdistances(P,Results{:});
+options = namedargs2cell(options);
+d       = pointdistances(P,options{:});
 d(isinf(d)) = -inf;
 [dmax,ix] = max(d(:));
 [r,c]  = ind2sub(size(d),ix);

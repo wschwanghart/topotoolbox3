@@ -18,11 +18,8 @@ function G = gradient8(DEM,unit,options)
 % Input
 %
 %     DEM       Digital elevation model (class: GRIDobj)
-%     unit      'tan' --> tangent (default)
-%               'rad' --> radian
-%               'deg' --> degree
-%               'sin' --> sine
-%               'per' --> percent
+%     unit      'tangent','degree','radian','percent' or 'sine'. 'tangent'
+%               is the default. 
 %
 %     Parameter name value/pairs (pn,pv,...)
 %     

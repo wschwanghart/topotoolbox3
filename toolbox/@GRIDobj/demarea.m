@@ -61,8 +61,9 @@ function [DEM, totalarea] = demarea(DEM,correctEdges)
 % http://www.mathworks.com/matlabcentral/fileexchange/42204-calculate-dem-surface-area
 % Date: 18. September, 2017
 
-if nargin == 1
-    correctEdges = true;
+arguments
+    DEM
+    correctEdges (1,1) = true
 end
 
 [totalarea, DEM.Z] = demareasub(DEM.Z, DEM.cellsize, correctEdges);

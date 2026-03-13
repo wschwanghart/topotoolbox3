@@ -7,6 +7,7 @@ function stats = drainagebasinstats(FD,L,varargin)
 %     stats = drainagebasinstats(FD,IX)
 %     stats = drainagebasinstats(FD,L)
 %     stats = drainagebasinstats(FD,MS)
+%     stats = drainagebasinstats(FD,S)
 %     stats = drainagebasinstats(...,'name1',GRIDobj1,...)
 %
 % Description
@@ -23,6 +24,8 @@ function stats = drainagebasinstats(FD,L,varargin)
 %                derived.
 %     L          label grid (GRIDobj). 
 %     MS         polygon mapping structure array
+%     S          STREAMobj. The function will take the outlet locations of
+%                the stream network in S as basin outlets. 
 %
 %     Additional parameter name/value pairs
 %
@@ -82,8 +85,12 @@ elseif isstruct(L)
     l   = 1:nrlabels;
     stats = L;
 else
+    if isa(L,'STREAMobj')
+        ix = streampoi(S,'outlet','ix');
+    else
+        ix = L;
+    end
     inp = 'index';
-    ix  = L;
     nrlabels = numel(ix);
     l   = 1:nrlabels;
 end
@@ -189,5 +196,7 @@ end
 
 if wb
     close(h);
+end
+
 end
 

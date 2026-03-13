@@ -18,12 +18,18 @@ function [P,a,locb] = removeduplicates(P)
 %
 % Output arguments
 %
-%     P      point pattern on stream network (class PPS)
+%     P2     point pattern on stream network (class PPS)
+%     a      linear index into points, so that P2.PP = P.PP(a)
+%     locb   linear index, so that P.PP = P2.PP(locb).
 %
-% See also: PPS, PPS/hasduplicates
+% See also: PPS, PPS/hasduplicates, unique
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 11. November, 2024
+% Date: 10. March, 2026
+
+arguments
+    P   PPS
+end
 
 [u,a,b] = unique(P.PP,'stable');
 

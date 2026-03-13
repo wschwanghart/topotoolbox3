@@ -83,7 +83,7 @@ if isempty(I) || isa(I,"GRIDobj")
         if isfloat(I.Z)
             clipval = nan(1,class(I.Z));
         else
-            clipval = zero(1,class(I.Z));
+            clipval = zeros(1,class(I.Z));
         end
     end
 
