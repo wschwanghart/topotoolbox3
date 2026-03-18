@@ -99,8 +99,8 @@ if ~nnan
 else
     I = ~I;
     
-    [GT,x,y] = GRIDobj2geotable(I,'excludezero',true,'conn',8,...
-        'parallel',false,'multipart',true);
+    [GT,x,y] = GRIDobj2geotable(I,'conn',8,...
+        'parallel',false);
 
 end
 
