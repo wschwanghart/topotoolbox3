@@ -18,6 +18,7 @@ function DEM = readexample(example,options)
 %     'taalvolcano'
 %     'taiwan'
 %     'tibet'
+%     'bigtujunga'
 %
 %     The function requires internet connection.
 %
@@ -36,7 +37,9 @@ function DEM = readexample(example,options)
 % Date: 1. August, 2025
 
 arguments
-    example 
+    example {mustBeMember(example,{'taiwan','tibet','taalvolcano',...
+        'kunashiri','perfectworld','kedarnath', ...
+        'bigtujunga','greenriver'})}
     options.filename = [tempname '.tif']
     options.deletefile (1,1) = true
     options.verbose (1,1) = true
