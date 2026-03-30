@@ -77,7 +77,7 @@ function data = readopenalti(options)
 % Date: 12. September, 2024
 
 arguments
-    options.filename = [tempname '.csv']
+    options.filename = strcat(tempname(ttcachedir), '.csv')
     options.interactive = false
     options.addmargin = 0.01 %°
     options.extent   = []

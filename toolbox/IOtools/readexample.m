@@ -37,8 +37,8 @@ function DEM = readexample(example,options)
 
 arguments
     example 
-    options.filename = [tempname '.tif']
-    options.deletefile (1,1) = true
+    options.filename = fullfile(ttcachedir, strcat(example, '.tif'))
+    options.deletefile (1,1) = false
     options.verbose (1,1) = true
 end
 
@@ -46,6 +46,13 @@ example = lower(example);
 
 % create file to which the data will be saved
 f = fullfile(options.filename);
+
+% If the file already exists, open and return it.
+if isfile(f)
+    DEM = GRIDobj(f);
+    DEM.name = example;
+    return;
+end
 
 switch example
     case 'taiwan'
