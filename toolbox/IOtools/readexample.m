@@ -33,10 +33,12 @@ function DEM = readexample(example,options)
 % See also: GRIDobj, websave, readopentopo
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 1. August, 2025
+% Date: 2. April, 2026
 
 arguments
-    example 
+    example {mustBeMember(example,{'taiwan','tibet','taalvolcano',...
+        'kunashiri','perfectworld','kedarnath', ...
+        'bigtujunga','greenriver'})}
     options.filename = fullfile(ttcachedir, strcat(example, '.tif'))
     options.deletefile (1,1) = false
     options.verbose (1,1) = true

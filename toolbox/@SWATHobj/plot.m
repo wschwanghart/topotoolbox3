@@ -95,25 +95,25 @@ function h = plot(SW,options)
 %
 %
 % Author: Dirk Scherler (scherler[at]gfz-potsdam.de)
-% Date: May, 2015
+% Date: March, 2026
 
 arguments
     SW SWATHobj
-    options.trace (1,1) = true
+    options.trace (1,1) {mustBeFinite} = true
     options.tracecolor = 'k'
-    options.outline (1,1) = true
+    options.outline (1,1) {mustBeFinite} = true
     options.outlinecolor = 'k'
-    options.points (1,1) = false
-    options.left (1,1) = true
-    options.right (1,1) = true
-    options.legend (1,1) = true
+    options.points (1,1) {mustBeFinite} = false
+    options.left (1,1) {mustBeFinite} = true
+    options.right (1,1) {mustBeFinite} = true
+    options.legend (1,1) {mustBeFinite} = true
     options.labeldist {mustBeNumeric} = []
     options.plotmode {mustBeMember(options.plotmode,{'plot','scatter'})} = 'plot'
-    options.colorz (1,1) = false
+    options.colorz (1,1) {mustBeFinite} = false
     options.colormap = 'turbo'
     options.colorrange (1,2) = [-inf inf]
     options.colormode {mustBeMember(options.colormode,{'normal','inverse'})} = 'normal'
-    options.colorbar (1,1) = true
+    options.colorbar (1,1) {mustBeFinite} = true
     options.markersize (1,1) {mustBeNumeric,mustBePositive} = 2
 end
 
