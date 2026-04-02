@@ -18,7 +18,6 @@ function DEM = readexample(example,options)
 %     'taalvolcano'
 %     'taiwan'
 %     'tibet'
-%     'bigtujunga'
 %
 %     The function requires internet connection.
 %
@@ -34,14 +33,14 @@ function DEM = readexample(example,options)
 % See also: GRIDobj, websave, readopentopo
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 1. August, 2025
+% Date: 2. April, 2026
 
 arguments
     example {mustBeMember(example,{'taiwan','tibet','taalvolcano',...
         'kunashiri','perfectworld','kedarnath', ...
         'bigtujunga','greenriver'})}
-    options.filename = [tempname '.tif']
-    options.deletefile (1,1) = true
+    options.filename = fullfile(ttcachedir, strcat(example, '.tif'))
+    options.deletefile (1,1) = false
     options.verbose (1,1) = true
 end
 
@@ -49,6 +48,13 @@ example = lower(example);
 
 % create file to which the data will be saved
 f = fullfile(options.filename);
+
+% If the file already exists, open and return it.
+if isfile(f)
+    DEM = GRIDobj(f);
+    DEM.name = example;
+    return;
+end
 
 switch example
     case 'taiwan'
