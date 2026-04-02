@@ -121,7 +121,7 @@ arguments
      'NASADEM','COP30','COP90',...
      'EU_DTM','GEDI_L3','GEBCOSubIceTopo','GEBCOIceTopo',...
      'CA_MRDEM_DSM','CA_MRDEM_DTM'})} = 'SRTMGL3'
-    options.filename = [char(tempname) '.tif']
+    options.filename = ''
     options.interactive (1,1) = false
     options.extent = []
     options.addmargin (1,1) = 0.01
@@ -129,7 +129,7 @@ arguments
     options.south (1,1) = 36.738884
     options.west  (1,1) = -120.168457
     options.east  (1,1) = -119.465576
-    options.deletefile (1,1) = true
+    options.deletefile (1,1) = false
     options.verbose (1,1) = true
     options.apikey  = ''
     options.checkrequestlimit (1,1) = true
@@ -160,8 +160,32 @@ requestlimit  = requestlimits(strcmp(demtype,validdems));
 % API URL
 url = 'https://portal.opentopography.org/API/globaldem?';
 
+if options.filename == ""
+    options.filename = fullfile(ttcachedir, strcat("OpenTopo_", ...
+        string(options.south), "_", ...
+        string(options.north), "_", ...
+        string(options.west), "_", ...
+        string(options.east), "_", options.demtype, ".tif"));
+end
+
 % create output file
 f = fullfile(options.filename);
+
+% If the file already exists, open and return it
+if isfile(f)
+    DEM = GRIDobj(f);
+    
+    if ~isProjected(DEM)
+        disp(' ')
+        disp('The downloaded DEM is not in a projected coordinate system.')
+        disp('Make sure to project the DEM using GRIDobj/project or')
+        disp('GRIDobj/reproject2utm.')
+        disp('  ')
+    end
+    
+    DEM.name = demtype;
+    return;
+end
 
 % check api
 options.apikey = strip(options.apikey);
