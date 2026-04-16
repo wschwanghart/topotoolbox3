@@ -157,7 +157,7 @@ methods
         % If there are input arguments, the first input must be a GRIDobj
         assert(isa(DEM,'GRIDobj'),'TopoToolbox:WrongInput', ...
             'First input argument must be a GRIDobj')
-        type = validatestring(type,{'single','multi','dinf'},'FLOWobj','type',2);
+        type = validatestring(type,{'single','libtt', 'multi','dinf'},'FLOWobj','type',2);
 
 
         % Transfer DEM (GRIDobj) properties to FLOWobj
@@ -169,7 +169,7 @@ methods
         nrc         = numel(DEM.Z);
 
         % Compute auxiliary topography
-        [D,DEM,SILLS] = createAuxiliaryTopo(DEM,...
+        [D, DEM, FLATS, SILLS] = createAuxiliaryTopo(DEM,...
             'internaldrainage',options.internaldrainage,...
             'preprocess',options.preprocess,...
             'verbose',options.verbose,...
@@ -182,9 +182,18 @@ methods
         % SILLS = logical matrix with locations of sills
         
         switch type
-            case 'single'  
-                  
-                if options.mex
+            case 'single'
+                if options.uselibtt
+                    D(~FLATS) = 0.0;
+                    [ix, ixc, count] = tt_flow_routing_d8_carve( ...
+                        single(DEM.Z), single(D), int32(FLATS));
+
+                    % libtopotoolbox ix and ixc arrays are 0-based. Add 1
+                    % to make them 1-based for MATLAB.
+                    FD.ix = uint32(ix(1:count)) + 1;
+                    FD.ixc = uint32(ixc(1:count)) + 1;
+                    return
+                elseif options.mex
                     % mexed version: 
                     % identifies steepest downward neighbors in the DEM and 
                     % the distance grid obtained from graydist and performs
@@ -292,7 +301,6 @@ methods
                     disp([char(datetime("now"))  ' -- Ordered topology established'])
                 end
                 
-            
         case 'multi'
             %% Multiple flow direction
             D(SILLS) = 0;

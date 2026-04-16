@@ -1,4 +1,4 @@
-function [D,DEMF,SILLS] = createAuxiliaryTopo(DEM,options)
+function [D,DEMF, I, SILLS] = createAuxiliaryTopo(DEM,options)
 
 %CREATEAUXILIARYTOPO Calculate auxiliary topography from DEM
 %
@@ -78,14 +78,25 @@ end
 % internally drained basin (e.g. a flat lake surface).
 if options.internaldrainage
     [Iobj,SILLSobj,IntBasin] = identifyflats(DEMF,'uselibtt',options.uselibtt);
+    I     = Iobj.Z;
+    SILLS = SILLSobj.Z;
+
+    clear Iobj SILLSobj
 else
-    [Iobj,SILLSobj] = identifyflats(DEMF,'uselibtt',options.uselibtt);
+    if options.uselibtt
+        FLATS = tt_identifyflats(single(DEMF.Z));
+        I = bitget(FLATS, 1) == 1;
+        SILLS = bitget(FLATS, 2) == 1;
+    else
+        [Iobj,SILLSobj] = identifyflats(DEMF,'uselibtt',options.uselibtt);
+        I     = Iobj.Z;
+        SILLS = SILLSobj.Z;
+
+        clear Iobj SILLSobj
+    end
 end
 
-I     = Iobj.Z;
-SILLS = SILLSobj.Z;
 
-clear Iobj SILLSobj
 
 % calculate sills for internal lake basins. These should be
 % located within the lake to force convergent flows
@@ -140,7 +151,9 @@ switch options.preprocess
             % of pixels. It is correct to supply an int32 version of
             % the logical I array, since that will have 1 for all flats and
             % 0 for all other pixels.
-            D = tt_gwdt_computecosts(single(DEM.Z), single(DEMF.Z), int32(I));
+            D = tt_gwdt_computecosts(single(DEM.Z), single(DEMF.Z), int32(FLATS));
+            D = tt_gwdt(single(DEM.Z), single(DEMF.Z), int32(FLATS), single(D));
+            D(~I) = -inf;
         else
             D = DEMF.Z-DEM.Z;
 
@@ -191,12 +204,15 @@ if options.verbose
     disp([char(datetime("now"))  ' -- Weights for graydist calculated'])
 end
 
-% Here we calculate the auxiliary topography. That is, the
-% cost surface seeded at socalled PreSillPixels, i.e. the
-% pixel immediately upstream to sill pixels.
-D(I) = inf;
-D = graydist(double(D),double(PreSillPixel),'q') + 1;
-D(I) = -inf;
+if ~options.uselibtt
+    % Here we calculate the auxiliary topography. That is, the
+    % cost surface seeded at socalled PreSillPixels, i.e. the
+    % pixel immediately upstream to sill pixels.
+    D(I) = inf;
+    D = graydist(double(D),double(PreSillPixel),'q') + 1;
+    D(I) = -inf;
+end
+I = ~I;
 
 if options.verbose
     disp([char(datetime("now")) ' -- Auxiliary topography in flats calculated'])
