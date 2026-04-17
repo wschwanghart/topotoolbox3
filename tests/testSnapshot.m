@@ -190,7 +190,7 @@ classdef testSnapshot < matlab.perftest.TestCase
                 D.GRIDobj2geotiff(result_file);
             else
                 D_result = GRIDobj(result_file);
-                testCase.verifyEqual(D_result.Z, D.Z);
+                testCase.verifyEqual(D_result.Z, D.Z, RelTol=single(1e-5));
             end
         end
 

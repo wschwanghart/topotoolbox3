@@ -49,6 +49,22 @@ matlab_add_mex(
 )
 
 matlab_add_mex(
+  NAME tt_gwdt
+  MODULE
+  SRC tt_gwdt.c
+  R2018a
+  LINK_TO topotoolbox
+)
+
+matlab_add_mex(
+  NAME tt_flow_routing_d8_carve
+  MODULE
+  SRC tt_flow_routing_d8_carve.c
+  R2018a
+  LINK_TO topotoolbox
+)
+
+matlab_add_mex(
   NAME tt_lowerenv
   MODULE
   SRC tt_lowerenv.c
@@ -113,7 +129,8 @@ matlab_add_mex(
 )
 
 install(
-  TARGETS tt_has_topotoolbox tt_fillsinks tt_identifyflats tt_gwdt_computecosts
+  TARGETS tt_has_topotoolbox tt_fillsinks tt_identifyflats
+          tt_gwdt_computecosts tt_gwdt tt_flow_routing_d8_carve
           tt_lowerenv tt_hillshade tt_hillshade_fused tt_graphflood
           tt_gradient8
           tt_excesstopography_fsm2d
