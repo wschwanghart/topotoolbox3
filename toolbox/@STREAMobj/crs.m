@@ -187,6 +187,9 @@ if nr < 3
     % a special case. The stream network needs at least three nodes in a row. If
     % there are less, the second derivative matrix is empty, and crs uses
     % quantile carving instead
+    if isnan(options.mingradient)
+        options.mingradient = 0;
+    end
     zs = quantcarve(S,z,options.tau,...
                         'split',options.split,...
                         'mingradient',options.mingradient,...

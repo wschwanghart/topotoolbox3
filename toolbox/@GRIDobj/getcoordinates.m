@@ -48,10 +48,6 @@ switch type
         [x,y] = meshgrid(x,y);
     case 'GRIDobj'
         [x,y] = meshgrid(x,y);
-        X = GRIDobj(DEM);
-        X.Z = x;
-        Y = GRIDobj(DEM);
-        Y.Z = y;
-        x = X;
-        y = Y;
+        x = GRIDobj(DEM,x);
+        y = GRIDobj(DEM,y);    
 end
