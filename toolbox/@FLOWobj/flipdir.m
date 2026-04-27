@@ -74,7 +74,7 @@ end
 if isempty(options.weights)
     A = flowacc(FD);
     w = A.Z(FD.ix).*FD.fraction;
-elseif ischar(options.weights)
+elseif ischar(options.weights) || isstring(options.weights)
     switch  lower(options.weights)
         case 'rand'
            w = rand(size(FD.fraction));
