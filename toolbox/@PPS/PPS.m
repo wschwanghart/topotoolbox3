@@ -259,7 +259,7 @@ methods
             elseif isa(PS,'geoshape')
                 lat = PS.Latitude;
                 lon = PS.Longitude;
-                [X1,Y1] = mfwdtran(P.S.georef.mstruct,lat,lon);
+                [X1,Y1] = projfwd(P.S.georef.ProjectedCRS,lat,lon);
             end
             [X,Y] = STREAMobj2XY(P.S);
             [Xi,Yi] = polyxpoly(X1,Y1,X,Y);
