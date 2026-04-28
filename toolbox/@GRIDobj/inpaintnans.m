@@ -331,32 +331,33 @@ function DEM = interpneighborpixels(DEM)
 %     DEMi     GRIDobj with
 %
 
+DEM.Z = fillmissing2(DEM.Z,"movmean",3);
 
-I = isnan(DEM.Z);
-sq2 = sqrt(2);
-w = 1./[sq2 1 sq2; ...
-     1   0   1; ...
-     sq2 1 sq2];
-w = w(:);
-
-Z = nlfilter(DEM.Z,[3 3],@fun);
-DEM.Z = Z;
-
-function b = fun(a)
-
-a = a(:);    
-if ~isnan(a(5))
-    b = a(5);
-    return
-end
-
-I = isnan(a);
-if all(I)
-    b = nan;
-    return
-end
-
-I = ~I;
-b = sum(a(I).*(w(I)./sum(w(I))));
-end
+% I = isnan(DEM.Z);
+% sq2 = sqrt(2);
+% w = 1./[sq2 1 sq2; ...
+%      1   0   1; ...
+%      sq2 1 sq2];
+% w = w(:);
+% 
+% Z = nlfilter(DEM.Z,[3 3],@fun);
+% DEM.Z = Z;
+% 
+% function b = fun(a)
+% 
+% a = a(:);    
+% if ~isnan(a(5))
+%     b = a(5);
+%     return
+% end
+% 
+% I = isnan(a);
+% if all(I)
+%     b = nan;
+%     return
+% end
+% 
+% I = ~I;
+% b = sum(a(I).*(w(I)./sum(w(I))));
+% end
 end

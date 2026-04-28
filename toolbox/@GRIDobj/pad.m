@@ -20,8 +20,10 @@ function DEM = pad(DEM,px,val)
 % Input arguments
 %
 %     DEM     GRIDobj
-%     px      amount of padding on each of the four edges of the grid. 
-%             For px=1 the resulting size of DEMp is DEM.size+2. 
+%     px      scalar or 1x4 vector indicating the amount of padding on each 
+%             of the four edges of the grid. For px=1 the resulting size of
+%             DEMp is DEM.size+2. If px is a vector, then elements indicate
+%             the amount of padding in [north south west east] direction.             
 %     val     pad value (default=0). This value does not have any effects 
 %             if px<0.
 %
@@ -46,18 +48,22 @@ function DEM = pad(DEM,px,val)
 
 arguments
     DEM   GRIDobj
-    px    {mustBeNumeric} = 1
+    px    (1,4) {mustBeNumeric} = 1
     val   {mustBeScalarOrEmpty} = 0
 end
 
-if px == 0
+% If all px are zero, we can return the original GRIDobj
+if all(px == 0)
     return
 end
 
-px  = sign(px)*ceil(abs(px));
+% Make sure that we have integer values
+px  = sign(px).*ceil(abs(px));
 
 % new size of output grid
-newsize = DEM.size + px*2;
+% px(1): north px(2):south px(3): west px(4): east
+newsize = [DEM.size(1) + px(1) + px(2) ... 
+           DEM.size(2) + px(3) + px(4)];
 
 % check if size is negative and issue an error
 if any(newsize < 0)
@@ -75,16 +81,22 @@ else
 end
 
 % transfer values to new array
-if px>0
-    Znew(px+1:end-px,px+1:end-px) = DEM.Z;
-elseif px<0
+if all(px>0)
+    Znew(px(1)+1:end-px(2),px(3)+1:end-px(4)) = DEM.Z;
+elseif all(px<0)
     abspx = abs(px);
-    Znew = DEM.Z(abspx+1:end-abspx,abspx+1:end-abspx);
+    Znew = DEM.Z(abspx(1)+1:end-abspx(2),abspx(3)+1:end-abspx(4));
+else
+    pxpos = max(px,0);
+    pxneg = -min(px,0);
+
+    Znew(pxpos(1)+1:end-pxpos(2),pxpos(3)+1:end-pxpos(4)) = ...
+        DEM.Z(pxneg(1)+1:end-pxneg(2),pxneg(3)+1:end-pxneg(4));
 end
 
 % adjust referencing
 DEM.Z           = Znew;
-DEM.wf(:,3)     = DEM.wf(:,3) -px.*[DEM.wf(1,1) DEM.wf(2,2)]';
+DEM.wf(:,3)     = DEM.wf(:,3) -[px(3) px(1)]'.*[DEM.wf(1,1) DEM.wf(2,2)]';
 DEM.size        = size(DEM.Z);
 
 if ~isempty(DEM.georef)
@@ -106,7 +118,7 @@ if ~isempty(DEM.georef)
             case 'map.rasterref.MapCellsReference'
                 Rnew = maprasterref(DEM.wf,DEM.size,R.RasterInterpretation);
             case 'map.rasterref.GeographicCellsReference'
-            Rnew = georasterref(DEM.wf,DEM.size,R.RasterInterpretation);
+                Rnew = georasterref(DEM.wf,DEM.size,R.RasterInterpretation);
         end
     end
 

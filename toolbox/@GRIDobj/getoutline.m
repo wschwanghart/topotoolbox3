@@ -47,7 +47,7 @@ function varargout = getoutline(DEM,options)
 %     
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 30. May, 2024
+% Date: 20. April, 2026
 
 
 arguments (Input)
@@ -61,13 +61,14 @@ I = isnan(DEM);
 nnan = options.shownans && any(I);
 
 if ~nnan
-    csh   = DEM.cellsize/2;
-    [x,y] = getcoordinates(DEM);
-    maxx = max(x)+csh/2;
-    minx = min(x)-csh/2;
     
-    maxy = max(y)+csh/2;
-    miny = min(y)-csh/2;
+    [x,y] = getcoordinates(DEM);
+
+    csh   = DEM.cellsize/2;
+    maxx = max(x)+csh;
+    minx = min(x)-csh;    
+    maxy = max(y)+csh;
+    miny = min(y)-csh;
     
     x = [minx minx maxx maxx minx];
     y = [miny maxy maxy miny miny];
@@ -79,15 +80,19 @@ if ~nnan
         GT.Properties.VariableNames = {'Lat','Lon'};
         GT = table2geotable(GT,"CoordinateReferenceSystem",DEM.georef.GeographicCRS,...
             "GeometryType","polygon");
+        GT = removevars(GT,["Lat" "Lon"]);
+        
     elseif isProjected(DEM)
         GT = table(x,y);
         GT.Properties.VariableNames = {'X','Y'};
         GT = table2geotable(GT,"CoordinateReferenceSystem",DEM.georef.ProjectedCRS,...
             "GeometryType","polygon");
+        GT = removevars(GT,["X" "Y"]);
     else
         GT = table(x,y);
         GT.Properties.VariableNames = {'X','Y'};
         GT = table2geotable(GT,"GeometryType","polygon");
+        GT = removevars(GT,["X" "Y"]);
 
     end
     else
