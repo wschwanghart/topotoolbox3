@@ -58,7 +58,8 @@ function FD = reweight(FD,DEM,beta,options)
 %     ext = {[3.7769e+05 3.8353e+05]   [3.7911e+06 3.7948e+06]};
 %     setextent(ext,ax(1))
 %
-% See also: FLOWobj, FLOWobj/multi_normalize
+% See also: FLOWobj, FLOWobj/multi_normalize, FLOWobj/removesmallfractions,
+%           FLOWobj/randomize, FLOWobj/multi2single
 %  
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 6. April, 2026
