@@ -9,6 +9,7 @@ function [OUT,varargout] = drainagebasins(FD,varargin)
 %     L = drainagebasins(FD,S)
 %     L = drainagebasins(FD,x,y)
 %     L = drainagebasins(FD,SO,order)
+%     L = drainagebasins(FD,S,order)
 %     [L,outlets] = ...
 %     [L,x,y] = ...
 %
@@ -36,6 +37,10 @@ function [OUT,varargout] = drainagebasins(FD,varargin)
 %     drainage basins are not calculated for stream links of specified 
 %     order that are attached to the grids edges. 
 %
+%     drainagebasins(FD,S,order) takes a STREAMobj S calculated scalar that
+%     indicates the stream order for which drainage basins are to be
+%     derived.
+%
 % Input
 %
 %     FD        flow direction object (FlowDirObj)
@@ -57,21 +62,21 @@ function [OUT,varargout] = drainagebasins(FD,varargin)
 %
 %     % get all drainagebasins
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     D   = drainagebasins(FD);
 %     imageschs(DEM,D)
 %
 % Example 2
 %
 %     % get all drainage basins with streamorder 3
-%     S = streamorder(FD,flowacc(FD)>100);
+%     S = STREAMobj(FD,'minarea',100);
 %     D = drainagebasins(FD,S,3);
 %     imageschs(DEM,D)
 %
 % Example 3: map values to drainage basins (e.g. basin wide erosion rates).
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','carve');
+%     FD = FLOWobj(DEM);
 %     S  = STREAMobj(FD,'minarea',1000);
 %     IX = randlocs(S,10);
 %     erosrate = rand(size(IX));
@@ -85,7 +90,7 @@ function [OUT,varargout] = drainagebasins(FD,varargin)
 %           GRIDobj/shufflelabel
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 31. August, 2024
+% Date: 13. May, 2026
 
 
 % 4/3/2016: the function now makes copies of FD.ix and FD.ixc (see 
@@ -148,6 +153,10 @@ elseif nargin > 1
             S.Z(S.Z ~= varargin{2}) = 0;            
             I = (S.Z(ixtemp) & ~S.Z(ixctemp));
             IX = ixtemp(I);
+        elseif isa(varargin{1},'STREAMobj')
+            S = varargin{1};
+            S = modify(S,'streamorder',varargin{2});
+            IX = streampoi(S,'outlet','ix');
         else
             % SEED pixels are supplied as coordinate pairs
             IX   = coord2ind(FD,varargin{1},varargin{2});
