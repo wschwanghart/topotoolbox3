@@ -160,34 +160,7 @@ requestlimit  = requestlimits(strcmp(demtype,validdems));
 % API URL
 url = 'https://portal.opentopography.org/API/globaldem?';
 
-if options.filename == ""
-    options.filename = fullfile(ttcachedir, strcat("OpenTopo_", ...
-        string(options.south), "_", ...
-        string(options.north), "_", ...
-        string(options.west), "_", ...
-        string(options.east), "_", options.demtype, ".tif"));
-end
-
-% create output file
-f = fullfile(options.filename);
-
-% If the file already exists, open and return it
-if isfile(f)
-    DEM = GRIDobj(f);
-    
-    if ~isProjected(DEM)
-        disp(' ')
-        disp('The downloaded DEM is not in a projected coordinate system.')
-        disp('Make sure to project the DEM using GRIDobj/project or')
-        disp('GRIDobj/reproject2utm.')
-        disp('  ')
-    end
-    
-    DEM.name = demtype;
-    return;
-end
-
-% check api
+% Remove leading and trailing characters from api string
 options.apikey = strip(options.apikey);
 
 if strlength(options.apikey) == 0
@@ -268,6 +241,34 @@ north = max(min(north,90),-90);
 
 if west == east || south == north
     error('The provided extent is a line or point.')
+end
+
+% Construct a filename unless the filename is defined as option
+if options.filename == "" % Note that '' == ""
+    options.filename = fullfile(ttcachedir, strcat("OpenTopo_", ...
+        string(south), "_", ...
+        string(north), "_", ...
+        string(west), "_", ...
+        string(east), "_", options.demtype, ".tif"));
+end
+
+% create output file
+f = fullfile(options.filename);
+
+% If the file already exists, open and return it
+if isfile(f)
+    DEM = GRIDobj(f);
+    
+    if ~isProjected(DEM)
+        disp(' ')
+        disp('The downloaded DEM is not in a projected coordinate system.')
+        disp('Make sure to project the DEM using GRIDobj/project or')
+        disp('GRIDobj/reproject2utm.')
+        disp('  ')
+    end
+    
+    DEM.name = demtype;
+    return;
 end
 
 % Check request limit
