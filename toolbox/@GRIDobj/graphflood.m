@@ -107,6 +107,7 @@ if isnumeric(options.manning) && isscalar(options.manning)
 else
     validatealignment(DEM,options.manning)
     manning = options.manning;
+    manning.Z = double(manning.Z);
 end
 
 % BCs
