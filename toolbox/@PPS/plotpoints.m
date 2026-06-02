@@ -1,6 +1,6 @@
 function h = plotpoints(P,varargin)
 
-%PLOTPOINTS plot points of PPS
+%PLOTPOINTS Plot points of PPS
 %
 % Syntax
 %
@@ -61,7 +61,7 @@ p.KeepUnmatched = true;
 addParameter(p,'Marker','o');
 addParameter(p,'MarkerEdgeColor','k');
 addParameter(p,'MarkerFaceAlpha',0.5);
-addParameter(p,'MarkerFaceColor','w');
+% addParameter(p,'MarkerFaceColor','w');
 
 addParameter(p,'LineWidth',1)
 addParameter(p,'SizeData',20);

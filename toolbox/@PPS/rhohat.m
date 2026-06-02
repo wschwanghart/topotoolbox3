@@ -140,7 +140,7 @@ if p.Results.plot
         ISHOLD = true;
     else
         ISHOLD = false;
-        cla(ax, 'reset')
+        cla(ax)
         hold(ax,'on')
         box(ax,'on')
     end
