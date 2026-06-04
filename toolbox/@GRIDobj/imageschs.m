@@ -330,9 +330,14 @@ if ~isa(A,'logical')
         
     else
         ncolors = size(colmapfun,1);
-        if nans && (ncolors >= 256)
-            error('TopoToolbox:GRIDobj',['NaNs found in the second input grid. \n'...
-                  'Please provide colormap with less than 256 colors']);
+        if nans & ncolors >= 256
+            cmap = interp1(linspace(1,255,ncolors)',...
+                colmapfun,(1:255)');
+            ncolors = 255;
+        elseif ncolors > 256
+            cmap = interp1(linspace(1,256,ncolors)',...
+                colmapfun,(1:256)');
+            ncolors = 256;
         else
             cmap = colmapfun;
         end        
