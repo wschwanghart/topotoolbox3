@@ -135,7 +135,7 @@ methods
 
         arguments
             DEM = []
-            type {mustBeTextScalar} = 'single'
+            type {mustBeTextScalar,mustBeMember(type,{'single','multi','dinf'})} = 'single'
             options.preprocess {mustBeTextScalar,...
                 mustBeMember(options.preprocess,{'carve','fill','none'})} ...
                                     = 'carve'
