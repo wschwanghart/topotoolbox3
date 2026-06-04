@@ -30,11 +30,24 @@ function V = propagatevaluesupstream(FD,IX,v,options)
 %
 %     V    GRIDobj
 %
+% Example
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD  = FLOWobj(DEM);
+%     S   = STREAMobj(FD,'minarea',500);
+%     ix  = streampoi(S,'confl','ix');
+%     V1 = propagatevaluesupstream(FD,ix,1:numel(ix));
+%     subplot(1,2,1)
+%     imagesc(V1)
+%     V2 = propagatevaluesupstream(FD,ix,1:numel(ix),...
+%                                  "overwrite",true);
+%     subplot(1,2,2)
+%     imagesc(V2)
 %
 % See also: FLOWobj, FLOWobj/mapfromnal
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 27. October, 2024
+% Date: 3. June, 2026
 
 arguments
     FD FLOWobj
