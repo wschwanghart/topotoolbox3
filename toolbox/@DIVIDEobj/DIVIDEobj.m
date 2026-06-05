@@ -24,8 +24,8 @@ classdef DIVIDEobj
     %
     %     FD     instance of flow direction object (FLOWobj)
     %     ST     instance of stream object (STREAMobj) or logical grid
-    %            (GRIDobj) that indicates stream locations (e.g. obtained from
-    %            thresholding the flow accumulation raster)
+    %            (GRIDobj) that indicates stream locations (e.g. obtained
+    %            from thresholding the flow accumulation raster)
     %
     % Parameter name/value pairs
     %
@@ -35,8 +35,8 @@ classdef DIVIDEobj
     %                  assigned divide distances (divdist). Turn off to
     %                  obtain only divide segments. Usually this is used
     %                  only for code development.
-    %     verbose      toggle for displaying function execution progress in the
-    %                  command window
+    %     verbose      toggle (default=false) for displaying function 
+    %                  execution progress in the command window.
     %
     % Output arguments
     %
@@ -71,7 +71,7 @@ classdef DIVIDEobj
         ep        % linear indices of divide network endpoints
         jct       % linear indices of divide network junctions
         jctedg    % number of edges per junction (divides)
-        %endo      % linear indices of endorheic nodes
+        endo      % linear indices of endorheic nodes
         issorted  % flag to indicate if divide network is sorted
         ordertype % name of ordering scheme
     end
@@ -135,8 +135,8 @@ classdef DIVIDEobj
                 end
             end
             
-            
-            % Coordinates of flow edges that change basin ID
+            % Coordinates of all flow edges in stream object
+            % (to find those that change basin ID)
             st_giver = ST.IXgrid(ST.ix);
             st_receiver = ST.IXgrid(ST.ixc);
             [x1,y1] = ind2coord(FD,st_giver);
@@ -153,14 +153,14 @@ classdef DIVIDEobj
             % Flow edge midpoints
             mx = (x1+x2)./2;
             my = (y1+y2)./2;
-
+            
             % Loop over basin outlines to get divides
             if (options.verbose)
                 f = waitbar(0,'Processing divides');
             end
 
             for i = 1 : numel(MS)
-
+                
                 if (options.verbose)
                     waitbar(i/numel(MS),f,sprintf('Processing divides: %d / %d',i,numel(MS)))
                 end
@@ -168,10 +168,12 @@ classdef DIVIDEobj
                 tx = MS(i).X;
                 ty = MS(i).Y;
                 
-                % split divide edges crossing rivers (insert nans)
+                % split divide edges crossing rivers (insert nans where 
+                % divide edge midpoints == flow edge midpoints)
                 tmx = (tx(1:end-1)+tx(2:end))./2;
                 tmy = (ty(1:end-1)+ty(2:end))./2;
-                ix = ismember([tmx,tmy],[mx,my],'rows');
+                %ix = ismember([tmx,tmy],[mx,my],'rows');
+                ix = ismembertol([tmx,tmy],[mx,my],1e-12,'ByRows',true);
                 iy = find(ix);
                 [~,isort] = sort([(1:numel(tx))';iy]);
                 tx = [tx;nan(numel(iy),1)];
@@ -180,7 +182,8 @@ classdef DIVIDEobj
                 ty = ty(isort);
 
                 % identify divide nodes on river edges
-                ix = ismember([tx,ty],[mx,my],'rows');
+                %ix = ismember([tx,ty],[mx,my],'rows');
+                ix = ismembertol([tx,ty],[mx,my],1e-12,'ByRows',true);
                 iy = find(ix);
                 % insert nans and duplicate point
                 [~,isort] = sort([(1:numel(tx))';repmat(iy,2,1)]);
@@ -208,7 +211,8 @@ classdef DIVIDEobj
                     if (isendo)
                         warning('Warning: found endorheic drainage. Results may be erroneous.')
                     else
-                        iy = ismember([tx,ty],[fx(ix)' fy(ix)'],'rows');
+                        iy = ismember(tix,fi(ix)','rows');
+                        %iy = ismember([tx,ty],[fx(ix)',fy(ix)'],'rows');
                         tx(iy) = nan;
                         ty(iy) = nan;
                     end
@@ -231,6 +235,7 @@ classdef DIVIDEobj
                     end
                 end
 
+                % remove duplicate nodes
                 dtx = tx(1:end-1)-tx(2:end);
                 dty = ty(1:end-1)-ty(2:end);
                 ix = not(dtx==0 & dty==0);
@@ -239,7 +244,7 @@ classdef DIVIDEobj
 
                 MS(i).X = tx;
                 MS(i).Y = ty;
-
+                
             end
 
             if (options.verbose)
@@ -253,34 +258,43 @@ classdef DIVIDEobj
             % All divide nodes
             I = coord2ind(D,vertcat(MS.X),vertcat(MS.Y));
             
-            % Remove redundant edges
+            % Remove redundant edges (these arise from overlapping drainage 
+            % basins and are abundant)
             T = [I(1:end-1),I(2:end)]; % edges (connections between nodes)
             % Rows with one NaN in either column become NaN
             T(sum(isnan(T),2)==1,:) = NaN;
             % Set redundant edges to NaN
             sT = sort(T,2); % lower index left (rows unchanged)
-            [~,IX,~] = unique(sT,'rows','stable');
+            [~,IX,~] = unique(sT,'stable','rows');
+            %[~,IX,~] = unique(sT,'rows','legacy');
             T0 = nan(size(T));
             T0(IX,:) = T(IX,:);
-
+            
             % Remove self-connections
             IX = (T0(:,1)-T0(:,2))==0;
             T0(IX,:) = NaN;
             
+            % Remove redundant edges
+            TT = T0';
+            TT = TT(:);
+            dTT = TT(1:end-1)-TT(2:end);
+            IX = not([dTT;NaN]==0);
+            TT = TT(IX);
+        
             % Remove redundant NaN between segments
-            IX = isnan(T0(:,1));
+            IX = isnan(TT(:,1));
             JX = [IX(2:end);true];
             IJ = logical(min([IX JX],[],2));
-            T0 = [T0(not(IJ),:);NaN NaN];
-
+            TT = [TT(not(IJ));NaN];
+        
             % Assemble structure
             M = struct;
-            ix = [0;find(isnan(T0(:,1)))];
+            ix = [0;find(isnan(TT))];
             ct = 0;
             for i = 1 : length(ix)-1
                 if (ix(i+1)-ix(i))>2 % avoid single nodes
                     ct = ct+1;
-                    M(ct).IX = [T0(ix(i)+1,1);T0(ix(i)+1:ix(i+1),2)];
+                    M(ct).IX = TT(ix(i)+1:ix(i+1));
                     M(ct).nix = numel(M(ct).IX);
                     % identify endorheic nodes
                     M(ct).isendo = ismember(M(ct).IX,Ien);
@@ -288,8 +302,8 @@ classdef DIVIDEobj
             end
             
             D.IX = vertcat(M.IX);
-            %D.endo = vertcat(M.isendo);
-
+            D.endo = vertcat(M.isendo);
+            
             D.issorted = false;
             
             % Get junctions and endpoints
@@ -308,6 +322,9 @@ classdef DIVIDEobj
                 D = divdist(D);
                 if (options.verbose)
                     waitbar(1,f,'Sorting divide network');
+                end
+                if (options.verbose)
+                    close(f)
                 end
             end
 
@@ -360,14 +377,14 @@ classdef DIVIDEobj
 
             DOUT = DIN;
 
-            % Divide grid with nodes indicating diagonal flow
+            % Create divide grids as helpers (FX, NEDGE, NST)
             [x,y] = wf2XY(FD.wf,FD.size);
             cs = FD.cellsize;
             hcs = cs/2;
             xn = [x-hcs;x(end)+hcs];
             yn = [y+hcs;y(end)-hcs];
             A = zeros(FD.size+1);
-            FX = GRIDobj(xn,yn,A);
+            FX = GRIDobj(xn,yn,A); % grid that indicates diagonal flow
             NEDGE = FX; % grid that counts the number of divide edges
             NST = FX; % grid that counts the numnber of segment termini
             [x,y] = getcoordinates(FX);
@@ -381,7 +398,7 @@ classdef DIVIDEobj
             mx = (x1+x2)./2;
             my = (y1+y2)./2;
             [mix,res] = coord2ind(DIN,mx,my);
-            % Identify diagonal connections
+            % Identify diagonal flow connections
             FX.Z(mix(res<0.5*hcs & abs(dx+dy)<cs)) = 1; % NW-SE / SE-NW
             FX.Z(mix(res<0.5*hcs & abs(dx+dy)>cs)) = 2; % NE-SW / SW-NE
             % Identify horizontal/vertical connections
@@ -401,18 +418,20 @@ classdef DIVIDEobj
             [e,~,f] = unique(st(:),'stable');
             STIX = [e accumarray(f,1)];
             NST.Z(STIX(:,1)) = STIX(:,2);
-
-            % Junctions (more than two divide edges and no crossing river)
+            
+            % Identify junctions 
+            % (more than two divide edges and no crossing river)
             DOUT.jct = find(NEDGE.Z>2 & FX.Z==0);
             DOUT.jctedg = NEDGE.Z(DOUT.jct);
 
-            % Dead segments
+            % Identify broken segments
+            % (the following cases are clearly identified)
             ixdseg = find((NEDGE.Z==2 & NST.Z==2 & FX.Z==0) | ...
                 (NEDGE.Z==4 & NST.Z==2 & FX.Z>0) | ...
                 (NEDGE.Z==4 & NST.Z==4 & FX.Z>0) | ...
                 (NEDGE.Z==3 & NST.Z==3 & FX.Z>0));
-
-            % Distinguish EP and DST at NST==2,NEDGE==2,ST>0
+            % Distinguish between endpoints and broken segments 
+            % (at NEDGE==2,NST==2,FX>0 both are possible)
             ix = find(NEDGE.Z==2 & NST.Z==2 & FX.Z>0);
             L = ix;
             for i = 1 : length(ix)
@@ -428,8 +447,8 @@ classdef DIVIDEobj
             newix = not(logical(abs(L-FX.Z(ix))));
             %ixep = [ixep; ix(not(newix))];
             ixdseg = [ixdseg; ix(newix)];
-
-            % Merge dead segment termini
+            
+            % Merge broken segments
             M = onl2struct(DIN.IX);
             for i = 1 : length(M)
                 ix = ismember(M(i).st,ixdseg);
@@ -439,8 +458,8 @@ classdef DIVIDEobj
             dst = allst(vertcat(M.dead_st));
             udst = unique(dst(:));
             [M.tag] = deal(true);
-            nn = length(udst);
-            for i = 1:length(udst)
+            %nn = length(udst);
+            for i = 1:length(udst) % i = 709
                 this_dst = udst(i);
                 [r,c] = find(allst==this_dst);
                 if length(r)==2 % 2 segment termini
@@ -458,9 +477,10 @@ classdef DIVIDEobj
                     M(r(2)).tag = false;
 
                 elseif length(r)>2 % 3 or 4 segment termini
-                    k = FX.Z(this_dst);
                     % Get adjacent nodes
                     [tr,tc] = ind2sub(DIN.size,this_dst);
+                    % as a function of the orientation of the flow
+                    k = FX.Z(this_dst);
                     switch k
                         case 1 % 1 = NW-SE
                             p1 = [tr-1,tc;tr,tc+1];
@@ -492,11 +512,15 @@ classdef DIVIDEobj
                             if c(m(2)) == 2
                                 ix2 = flip(ix2);
                             end
+
                             % Merge segments
                             M(r(m(1))).IX = [ix1;ix2(2:end);NaN];
                             M(r(m(1))).st = M(r(m(1))).IX([1,end-1])';
                             M(r(m(2))).tag = false;
-                            if length(r)==3
+                            % remove segments from searchable list
+                            [r,rix] = setdiff(r,r(m(:)));
+                            c = c(rix);
+                            if isscalar(r)
                                 break;
                             end
                         end
@@ -509,7 +533,7 @@ classdef DIVIDEobj
                 allst = vertcat(M.st);
             end
             M = onl2struct(vertcat(M.IX)); % Update structure
-
+            
             % Insert breaks at junctions
             for i = 1:length(M)
                 ix = M(i).IX(1:end-1);
