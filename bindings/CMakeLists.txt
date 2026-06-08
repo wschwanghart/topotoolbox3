@@ -12,7 +12,7 @@ include(FetchContent)
 FetchContent_Declare(
   topotoolbox
   GIT_REPOSITORY https://github.com/TopoToolbox/libtopotoolbox.git
-  GIT_TAG 6982024300cd9216ca76f5d12eef923dcffd262e
+  GIT_TAG 73d67c4deb8b547f6f26f84fe233d5b16a65ac13
 )
 FetchContent_MakeAvailable(topotoolbox)
 
@@ -128,6 +128,23 @@ matlab_add_mex(
   LINK_TO topotoolbox
 )
 
+matlab_add_mex(
+  NAME tt_streamquad_trapz_f32
+  MODULE
+  SRC tt_streamquad_trapz_f32.c
+  R2018a
+  LINK_TO topotoolbox
+)
+
+matlab_add_mex(
+  NAME tt_streamquad_trapz_f64
+  MODULE
+  SRC tt_streamquad_trapz_f64.c
+  R2018a
+  LINK_TO topotoolbox
+)
+
+
 install(
   TARGETS tt_has_topotoolbox tt_fillsinks tt_identifyflats
           tt_gwdt_computecosts tt_gwdt tt_flow_routing_d8_carve
@@ -136,6 +153,8 @@ install(
           tt_excesstopography_fsm2d
           tt_excesstopography_fmm3d
           tt_excesstopography_fmm2d
+          tt_streamquad_trapz_f32
+          tt_streamquad_trapz_f64
   DESTINATION "."
   COMPONENT Runtime
 )

@@ -1,4 +1,4 @@
-function z = cumtrapz(S,G)
+function z = cumtrapz(S,G,options)
 
 %CUMTRAPZ Cumulative trapezoidal numerical integration along a stream network
 %
@@ -20,6 +20,12 @@ function z = cumtrapz(S,G)
 %     G     GRIDobj
 %     g     node attribute list
 %
+%     Parameter name/value pairs
+%     
+%     'uselibtt' - {true},false
+%          if true, then cumtrapz will be calculated using functions in
+%          libtopotoolbox. If false, then native MATLAB code will be used.
+%
 % Output arguments
 %
 %     z     node attribute list
@@ -38,24 +44,44 @@ function z = cumtrapz(S,G)
 % See also: STREAMobj, STREAMobj/gradient
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 13. June, 2024
+% Date: 8. June, 2026
 
 arguments
     S   STREAMobj
     G   {mustBeGRIDobjOrNal(G,S)}
+    options.uselibtt (1,1) = (true && haslibtopotoolbox)
 end
 
 % get node attribute list with elevation values
-g = ezgetnal(S,G);
+if isa(G,"GRIDobj")
+    g = ezgetnal(S,G,underlyingType(G));
+else
+    g = G;
+end
 
-z = zeros(size(g));
+% z = zeros(size(g));
 d = distance(S,'node_to_node');
 
 ix  = S.ix;
 ixc = S.ixc;
 
-for r = numel(ix):-1:1
-    z(ix(r)) = z(ixc(r)) + (g(ixc(r))+(g(ix(r))-g(ixc(r)))/2)*d(ix(r));
+if options.uselibtt && isfloat(g)
+    % Use libtopotoolbox
+    if isa(g,"single")
+        z = tt_streamquad_trapz_f32(g,int64(ix-1),int64(ixc-1),single(d));
+        return
+    elseif isa(g,"double")
+        z = tt_streamquad_trapz_f64(g,int64(ix-1),int64(ixc-1),single(d));
+        return
+    end
+else
+    % Use MATLAB code
+    z = zeros(size(g));
+    g = double(g);
+    for r = numel(ix):-1:1
+        z(ix(r)) = z(ixc(r)) + (g(ixc(r))+(g(ix(r))-g(ixc(r)))/2)*d(ix(r));
+    end
+
 end
 
 %% Is cumtrapz really working correctly. Here is the test:
