@@ -59,13 +59,20 @@ else
     g = G;
 end
 
-% z = zeros(size(g));
+% get inter-node distances as edge properties
 d = distance(S,'node_to_node');
+d = d(S.ix);
 
 ix  = S.ix;
 ixc = S.ixc;
 
-if options.uselibtt && isfloat(g)
+% Using libtt has a couple of requirements
+uselibtt = options.uselibtt && ...
+           haslibtopotoolbox && ...
+           isfloat(g) && ...
+           isreal(g);
+
+if uselibtt
     % Use libtopotoolbox
     if isa(g,"single")
         z = tt_streamquad_trapz_f32(g,int64(ix-1),int64(ixc-1),single(d));
@@ -79,7 +86,7 @@ else
     z = zeros(size(g));
     g = double(g);
     for r = numel(ix):-1:1
-        z(ix(r)) = z(ixc(r)) + (g(ixc(r))+(g(ix(r))-g(ixc(r)))/2)*d(ix(r));
+        z(ix(r)) = z(ixc(r)) + (g(ixc(r))+(g(ix(r))-g(ixc(r)))/2)*d(r);
     end
 
 end

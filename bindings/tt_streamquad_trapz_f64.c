@@ -29,11 +29,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   if (nlhs != 1) {
     mexErrMsgIdAndTxt("tt3:tt_streamquad_trapz64:nlhs", "One output required");
   }
-
+  
   mwSize edge_count = mxGetM(prhs[1]);
+  mwSize r = mxGetM(prhs[0]);
+  mwSize c = mxGetN(prhs[0]);
 
   // Extract input and output array data and dimensions
-  plhs[0] = mxDuplicateArray(prhs[0]);
+  plhs[0] = mxCreateNumericMatrix(r,c,mxDOUBLE_CLASS, mxREAL);
   double *integral = mxGetDoubles(plhs[0]);
   double *integrand = mxGetDoubles(prhs[0]);
   ptrdiff_t *source = mxGetInt64s(prhs[1]);

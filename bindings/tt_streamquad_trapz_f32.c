@@ -31,9 +31,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   }
 
   mwSize edge_count = mxGetM(prhs[1]);
+  mwSize r = mxGetM(prhs[0]);
+  mwSize c = mxGetN(prhs[0]);
 
   // Extract input and output array data and dimensions
-  plhs[0] = mxDuplicateArray(prhs[0]);
+  plhs[0] = mxCreateNumericMatrix(r,c,mxSINGLE_CLASS, mxREAL);
   float *integral = mxGetSingles(plhs[0]);
   float *integrand = mxGetSingles(prhs[0]);
   ptrdiff_t *source = mxGetInt64s(prhs[1]);
