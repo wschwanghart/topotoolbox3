@@ -62,7 +62,7 @@ function [h,bw] = density(P,options)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     S = STREAMobj(FD,'minarea',1000);
 %     S = klargestconncomps(S,1);
 %     rng(2); % make results replicable

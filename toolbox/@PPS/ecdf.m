@@ -58,7 +58,7 @@ function varargout = ecdf(P,options)
 % Example
 %
 %      DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%      FD  = FLOWobj(DEM,'preprocess','c');
+%      FD  = FLOWobj(DEM);
 %      S = STREAMobj(FD,'minarea',1000);
 %      S = klargestconncomps(S,1);
 %      P = PPS(S,'runif',100,'z',DEM);

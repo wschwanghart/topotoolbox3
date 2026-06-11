@@ -26,7 +26,7 @@ function S = intersect(varargin)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     A  = flowacc(FD);
 %     S  = STREAMobj(FD,A>1000);
 %     % get trunk streams of streamorder 3

@@ -31,7 +31,7 @@ function OUT = dependencemap(FD,varargin)
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
 %     I   = GRIDobj(DEM,'logical');
 %     I.Z(300:500,300:500) = true;
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     D  = dependencemap(FD,I);
 %     imageschs(DEM,I+D)
 %

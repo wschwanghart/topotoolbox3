@@ -87,7 +87,7 @@ function OUT = slopearea(S,DEM,A,varargin)
 %     % This DEM is not well suited to show an application of slope area
 %     % plots. The DEM has various sinks located along streams resulting in
 %     % many zero gradients. 
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     A   = flowacc(FD);
 %     S   = STREAMobj(FD,A>1000);     
 %     SA  = slopearea(S,DEM,A);

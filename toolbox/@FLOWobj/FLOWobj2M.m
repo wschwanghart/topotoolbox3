@@ -22,7 +22,7 @@ function M = FLOWobj2M(FD)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     M = FLOWobj2M(FD);
 %     [x,y] = getcoordinates(DEM);
 %     [x,y] = meshgrid(x,y);

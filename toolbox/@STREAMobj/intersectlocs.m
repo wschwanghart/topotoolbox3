@@ -39,7 +39,7 @@ function varargout = intersectlocs(S1,S2)
 %     % http://topotoolbox.wordpress.com/2014/09/09/landslides-hit-rivers/
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c','mex',true);
+%     FD = FLOWobj(DEM);
 %     S = STREAMobj(FD,flowacc(FD)>1000);
 %     LS = GRIDobj(DEM);
 %     LS.Z = logical(LS.Z);

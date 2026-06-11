@@ -33,7 +33,7 @@ function FA = postprocflats(FLATS,FA,fun)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     A  = flowacc(FD);
 %     I  = identifyflats(fillsinks(DEM));
 %     FA = postprocflats(I,A,@max);

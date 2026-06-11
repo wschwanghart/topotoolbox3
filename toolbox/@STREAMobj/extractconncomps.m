@@ -19,7 +19,7 @@ function extractconncomps(S)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     S  = STREAMobj(FD,A>1000);
 %     extractconncomps(S)
 %

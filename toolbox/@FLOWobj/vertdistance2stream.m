@@ -25,7 +25,7 @@ function DZ = vertdistance2stream(FD,S,DEM)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     S = STREAMobj(FD,'minarea',1e6,'unit','m');
 %     DZ = vertdistance2stream(FD,S,DEM);
 %     imageschs(DEM,DZ)
