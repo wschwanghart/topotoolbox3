@@ -57,7 +57,7 @@ function [MS,x,y] = GRIDobj2polygon(DB,options)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     D = drainagebasins(FD);
 %     [MS,x,y] = GRIDobj2polygon(D,'Geometry','Line','simplify',true,'tol',0);
 %     imageschs(DEM,DEM,'colormap','landcolor')

@@ -48,7 +48,7 @@ function s = gradient(S,DEM,options)
 % Example 1
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     S  = STREAMobj(FD,'minarea',1000);
 %     S  = klargestconncomps(trunk(S));
 %     g  = gradient(S,DEM,'method','robust');
@@ -58,7 +58,7 @@ function s = gradient(S,DEM,options)
 % Example 2: Using the gradient function to calculate a Ksn map
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     S  = STREAMobj(FD,'minarea',1000);    
 %     c = chitransform(S,A,'mn',0.45,'a0',1);
 %     k = gradient(S,z,'distance',c);

@@ -64,7 +64,7 @@ function s = rhohat(P,varargin)
 %          chi
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     S = STREAMobj(FD,'minarea',1000);
 %     S = klargestconncomps(S,1);
 %     [~,kp] = knickpointfinder(S,DEM,'tol',30,'split',false);

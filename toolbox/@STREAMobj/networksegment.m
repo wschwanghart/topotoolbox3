@@ -47,7 +47,7 @@ function segment = networksegment(S,FD,DEM,A,mnratio)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     A  = flowacc(FD);
 %     S = STREAMobj(FD,'minarea',1000);
 %     segment = networksegment(S,FD,DEM,A,0.39);

@@ -28,7 +28,7 @@ function tf = isequal(S1,S2,type)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     S = STREAMobj(FD,'minarea',1000);
 %     S2 = trunk(S);
 %     isequal(S,S2)    

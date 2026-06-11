@@ -32,7 +32,7 @@ function [CFD,D,A,cfix] = FLOWobj2cell(FD,IX)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     [CFD,~,a] = FLOWobj2cell(FD);
 %     [~,ix] = max(a);
 %     A = flowacc(CFD{ix});

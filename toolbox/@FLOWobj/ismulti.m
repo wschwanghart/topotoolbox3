@@ -20,7 +20,7 @@ function tf = ismulti(FD,typetest)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     ismulti(FD)
 % 
 %     ans =

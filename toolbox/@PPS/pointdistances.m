@@ -38,7 +38,7 @@ function d = pointdistances(P,options)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     S = STREAMobj(FD,'minarea',1000);
 %     S = removeshortstreams(S,100);
 %     S = clean(S);

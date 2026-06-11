@@ -28,7 +28,7 @@ function dz = diff(S,z,fillval)
 % Example: Calculate elevation offsets along stream network
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     S = STREAMobj(FD,'minarea',1000);
 %     S = trunk(klargestconncomps(S));
 %     dz = diff(S,DEM);

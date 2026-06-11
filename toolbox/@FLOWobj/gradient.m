@@ -28,7 +28,7 @@ function G = gradient(FD,DEM)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     G  = gradient(FD,DEM);
 %     imageschs(DEM,G)
 %

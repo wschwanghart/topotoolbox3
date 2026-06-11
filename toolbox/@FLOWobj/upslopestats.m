@@ -35,7 +35,7 @@ function OUT = upslopestats(FD,VAR,meth,S)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     G  = gradient8(DEM);
 %     Gup = upslopestats(FD,G,'mean');
 %     imageschs(DEM,Gup,'caxis',[0 1])

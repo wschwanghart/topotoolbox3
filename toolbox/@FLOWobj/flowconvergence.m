@@ -25,7 +25,7 @@ function N = flowconvergence(FD)
 % Example
 % 
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     C  = flowconvergence(FD);
 %     imageschs(DEM,C)
 %

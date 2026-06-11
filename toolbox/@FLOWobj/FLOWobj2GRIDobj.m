@@ -25,7 +25,7 @@ function G = FLOWobj2GRIDobj(F)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     ArcFlow = FLOWobj2GRIDobj(FD);
 %     imagesc(ArcFlow)
 %

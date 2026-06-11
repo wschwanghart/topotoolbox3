@@ -27,7 +27,7 @@ function OUT = influencemap(FD,varargin)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     I  = influencemap(FD,540261);
 %     imageschs(DEM,dilate(I,ones(5)));
 %

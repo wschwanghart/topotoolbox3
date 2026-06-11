@@ -46,7 +46,7 @@ function stats = drainagebasinstats(FD,L,varargin)
 % Example: Plot the distribution of mean gradients upstream of channelheads
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     S = STREAMobj(FD,'minarea',1000);
 %     ix = streampoi(S,'channelheads','ix');
 %     G  = gradient8(DEM);

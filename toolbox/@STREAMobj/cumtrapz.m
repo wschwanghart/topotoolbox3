@@ -6,6 +6,7 @@ function z = cumtrapz(S,G,options)
 %
 %     z = cumtrapz(S,G)
 %     z = cumtrapz(S,g)
+%     z = cumtrapz(S,g,'distance',d,'uselibtt',tf)
 %
 % Description
 %
@@ -22,6 +23,9 @@ function z = cumtrapz(S,G,options)
 %
 %     Parameter name/value pairs
 %     
+%     'distance' - {distance(S,'node_to_node')}
+%          a node attribute list with inter-node distances between a node
+%          and its downstream neighbor. 
 %     'uselibtt' - {true},false
 %          if true, then cumtrapz will be calculated using functions in
 %          libtopotoolbox. If false, then native MATLAB code will be used.
@@ -30,16 +34,33 @@ function z = cumtrapz(S,G,options)
 %
 %     z     node attribute list
 %
-% Example
+% Example 1
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','carve');
+%     FD = FLOWobj(DEM);
 %     S = STREAMobj(FD,'minarea',1000);
 %     A = flowacc(FD);
 %     a = getnal(S,A)*DEM.cellsize^2;
 %     ghat = 1./(a.^0.45);
 %     z = cumtrapz(S,ghat);
 %     plotdz(S,z)
+%
+% Example 2
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD = FLOWobj(DEM);
+%     S = STREAMobj(FD,'minarea',1000);
+%     S = klargestconncomps(S);
+%     A = flowacc(FD);
+%     c = chitransform(S,A);
+%     dc = diff(S,c);
+%     ghat = smooth(S,rand(size(S.x)),'K',20);
+%     ghat = normalize(ghat,'range',[0 1]);
+%     ix = randlocs(S,20);
+%     ghat(ismember(S.IXgrid,ix)) = 20;
+%     z = cumtrapz(S,ghat,'distance',dc);
+%     [~,zb] = zerobaselevel(S,DEM);
+%     plotdz(S,z+zb)
 %
 % See also: STREAMobj, STREAMobj/gradient
 %
@@ -48,19 +69,23 @@ function z = cumtrapz(S,G,options)
 
 arguments
     S   STREAMobj
-    G   {mustBeGRIDobjOrNal(G,S)}
+    G   {mustBeGRIDobjOrNalOrScalar(G,S)}
+    options.distance = distance(S,'node_to_node')
     options.uselibtt (1,1) = (true && haslibtopotoolbox)
 end
 
 % get node attribute list with elevation values
 if isa(G,"GRIDobj")
     g = ezgetnal(S,G,underlyingType(G));
+elseif isscalar(G)
+    g = ezgetnal(S,G,class(G));
 else
     g = G;
 end
 
 % get inter-node distances as edge properties
-d = distance(S,'node_to_node');
+d = options.distance;
+validateattributes(d,{'numeric'},{'size',size(S.x)});
 d = d(S.ix);
 
 ix  = S.ix;

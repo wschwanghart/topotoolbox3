@@ -54,7 +54,7 @@ function [mdl,int,rts,rtssigma,ismx,sigmapred] = fitloglinear(P,c,varargin)
 %          and fit the model.
 % 
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     S = STREAMobj(FD,'minarea',1000);
 %     S = klargestconncomps(S,1);
 %     P = PPS(S,'PP',[],'z',DEM);
@@ -74,7 +74,7 @@ function [mdl,int,rts,rtssigma,ismx,sigmapred] = fitloglinear(P,c,varargin)
 %            loglinear model.
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD  = FLOWobj(DEM,'preprocess','c');
+%     FD  = FLOWobj(DEM);
 %     S = STREAMobj(FD,'minarea',1000);
 %     S = klargestconncomps(S,1);
 %     

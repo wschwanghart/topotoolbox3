@@ -47,7 +47,7 @@ function OUT = streamorder(FD,WW,type)
 % Example:
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     S = streamorder(FD,flowacc(FD)>1000);
 %     imagesc(S)
 % 

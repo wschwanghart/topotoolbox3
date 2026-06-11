@@ -71,7 +71,7 @@ function [newz,varargout] = streamproj(S,DEM,FA,varargin)
 % Examples
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
-%     FD = FLOWobj(DEM,'preprocess','c');
+%     FD = FLOWobj(DEM);
 %     FA = flowacc(FD);
 %     DEMc = imposemin(FD,DEM,0.0001);
 %     S = STREAMobj(FD,'minarea',1000);
