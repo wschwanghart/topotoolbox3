@@ -115,7 +115,11 @@ for r = 1:2
 end
 
 % Convert to table
-GT = struct2table(MS);
+if isscalar(MS)
+    GT = struct2table(MS,'AsArray',true);
+else
+    GT = struct2table(MS);
+end
 
 % Convert geo-variable names to two-element string vector
 varnames = string(varnames);
