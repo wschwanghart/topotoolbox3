@@ -18,7 +18,7 @@ function tthelp(str,page)
 % Note that this function may not work properly if wordpress does changes
 % to its html-code.
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 11. June, 2026
 
 arguments
