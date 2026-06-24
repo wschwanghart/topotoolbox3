@@ -21,10 +21,15 @@ function DEM = diffusion(DEM,options)
 %     D           diffusivity (m^2 /y) (default = 1)
 %     timespan    duration (y) (default = 1000)
 %     numsteps    number of iterations (default = 5)
-%     streamnet   STREAMobj
+%     streamnet   STREAMobj. If provided, then elevation values along the
+%                 stream network remain fixed (see also option fixedbc).
 %     solver      'pcg' (default) or '\'
 %     pcgtol      1e-6 (default)
 %     uplift      GRIDobj or scalar (default = 0) in mm/y
+%     fixedbc     GRIDobj (underlying class logical) with true values
+%                 indicating pixels that should retain their elevation 
+%                 values during the simulation.
+%     
 %
 % Output arguments
 %
@@ -33,11 +38,13 @@ function DEM = diffusion(DEM,options)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD  = FLOWobj(DEM);
+%     S   = STREAMobj(FD,'minarea',200);
 %     DEMd = DEM;
 %     for r = 1:10;
-%     DEMd = diffusion(DEMd); 
-%     imageschs(DEMd); 
-%     drawnow; 
+%        DEMd = diffusion(DEMd,'streamnet',S,'D',10); 
+%        imageschs(DEMd); 
+%        drawnow; 
 %     end
 %     figure
 %     imageschs(DEM,DEMd-DEM)
@@ -50,11 +57,12 @@ function DEM = diffusion(DEM,options)
 arguments
     DEM
     options.timespan (1,1) {mustBeNumeric,mustBePositive} = 1000
-    options.numsteps (1,1) {mustBeInRange,mustBePositive} = 5
+    options.numsteps (1,1) {mustBeInteger,mustBePositive} = 5
     options.D = 1
     options.streamnet = []
-    options.solve {mustBeMember(options.solve,{'\','pcg'})} = 'pcg'
+    options.solver {mustBeMember(options.solver,{'\','pcg'})} = 'pcg'
     options.pcgtol (1,1) {mustBeNumeric,mustBePositive} = 1e-6
+    options.fixedbc = []
     options.uplift = 0
 end
 
@@ -83,11 +91,18 @@ else
 	D = repmat(D,numel(DEM.Z),1);
 end
 
-if isempty(options.streamnet)
+if isempty(options.streamnet) && isempty(options.fixedbc)
 	D  = speye(nrc) + spdiags(D,0,nrc,nrc)*dt/(2*DEM.cellsize^2)*L;
 else
-	S  = +STREAMobj2GRIDobj(options.streamnet);
-	D  = speye(nrc) + spdiags(D,0,nrc,nrc)*dt/(2*DEM.cellsize^2)*spdiags(1-S.Z(:),0,nrc,nrc)*L;
+    if isempty(options.fixedbc)
+    	S  = STREAMobj2GRIDobj(options.streamnet);
+    elseif isempty(options.streamnet)
+        S  = options.fixedbc;
+    else
+        S  = STREAMobj2GRIDobj(options.streamnet) | options.fixedbc;
+    end
+    S = 1-S;
+	D  = speye(nrc) + spdiags(D,0,nrc,nrc)*dt/(2*DEM.cellsize^2)*spdiags(S.Z(:),0,nrc,nrc)*L;
 end
 
 % must work with doubles
