@@ -1,4 +1,4 @@
-function OUT = flowacc(FD,W0,RR)
+function OUT = flowacc(FD,W0,RR,options)
 
 %FLOWACC flow accumulation (upslope area, contributing area)
 %
@@ -51,46 +51,72 @@ function OUT = flowacc(FD,W0,RR)
 % 4/3/2016: the function now makes copies of FD.ix and FD.ixc (see 
 % https://topotoolbox.wordpress.com/2015/10/28/good-and-possibly-bad-news-about-the-latest-matlab-r2015b-release/comment-page-1/#comment-127
 
+arguments
+    FD   FLOWobj
+    W0   = []
+    RR   = []
+    options.uselibtt (1,1) = true
+end
 
-% check input arguments
-narginchk(1,3)
-if nargin >= 2 
-    if ~isempty(W0)
-        validatealignment(FD,W0);
-    end
-    if nargin == 3 && ~isempty(RR)
-        if isa(RR,'GRIDobj')
-            validatealignment(FD,RR);
-        end
+if ~isempty(W0)
+    validatealignment(FD,W0);
+end
+
+if ~isempty(RR)
+    if isa(RR,'GRIDobj')
+        validatealignment(FD,RR);
     end
 end
 
-if ~(exist(['flowacc_mex.' mexext],'file') == 3 && nargin<3 && strcmp(FD.type,'single'))
+if options.uselibtt
+    if isempty(W0)
+        W = ones(FD.size);
+    elseif isa(W0, "GRIDobj")
+        W = double(W0.Z);
+    else
+        W = double(W0);
+    end
+    switch (lower(FD.type))
+        case 'single'
+            R = ones(numel(FD.ix), 1);
+        case {'multi', 'dinf'}
+            R = double(FD.fraction);
+    end
+    if isempty(RR)
+    elseif isscalar(RR)
+        R = R .* exp(-(1-RR).*getdistance(FD.ix,FD.ixc,FD.size,FD.cellsize));
+    elseif isa(RR, "GRIDobj")
+        R = R .* RR.Z(FD.ix);
+    else
+        R = R .* RR(FD.ix);
+    end
+    A = tt_traverse_down_f64_add_mul(W, R, int64(FD.ix - 1), int64(FD.ixc-1));
+else
     if nargin == 1 || (nargin > 1 && isempty(W0))
         A = ones(FD.size);
-    else        
+    else
         if isa(W0,'GRIDobj')
             A = double(W0.Z);
-        else            
+        else
             A = double(W0);
-        end        
-        
+        end
+
     end
-    
+
     if nargin == 3
         if isa(RR,'GRIDobj')
             RR = RR.Z;
-        end   
+        end
     end
-    
+
     % copies of ix and ixc to increase speed with 2015b
     ix = FD.ix;
     ixc = FD.ixc;
-    
+
     switch lower(FD.type)
         case 'single'
             if nargin < 3
-                
+
                 for r = 1:numel(ix)
                     A(ixc(r)) = A(ix(r))+A(ixc(r));
                 end
@@ -98,23 +124,23 @@ if ~(exist(['flowacc_mex.' mexext],'file') == 3 && nargin<3 && strcmp(FD.type,'s
                 if isscalar(RR)
                     % if RR is a scalar, RR is assumed to be the
                     % coefficient of a homogenous differential equation
-                    
+
                     dx = getdistance(ix,ixc,FD.size,FD.cellsize);
                     RR = exp(-(1-RR).*dx);
                     clear dx
-                    
+
                     for r = 1:numel(ix)
-						A(ixc(r)) = A(ix(r))*RR(r)+A(ixc(r));
+                        A(ixc(r)) = A(ix(r))*RR(r)+A(ixc(r));
                     end
                 else
                     for r = 1:numel(ix)
                         A(ixc(r)) = A(ix(r))*RR(ix(r)) + A(ixc(r));
                     end
                 end
-                
-                
+
+
             end
-            
+
         case {'multi','dinf'}
             fraction = FD.fraction;
             if nargin < 3
@@ -126,16 +152,6 @@ if ~(exist(['flowacc_mex.' mexext],'file') == 3 && nargin<3 && strcmp(FD.type,'s
                     A(ixc(r)) = A(ix(r))*fraction(r)*RR(ix(r)) + A(ixc(r));
                 end
             end
-    end
-else
-    if nargin == 2
-        if isa(W0,'GRIDobj')
-            A  = flowacc_mex(FD.ix,FD.ixc,double(W0.Z));
-        else            
-            A  = flowacc_mex(FD.ix,FD.ixc,double(W0));
-        end
-    elseif nargin == 1
-        A  = flowacc_mex(FD.ix,FD.ixc,FD.size);
     end
 end
 
