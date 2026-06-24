@@ -45,7 +45,7 @@ classdef testFlowAlgebra < matlab.perftest.TestCase
             A0 = flowacc(testCase.fd, W, 2.5, uselibtt=false);
             A1 = flowacc(testCase.fd, W, 2.5, uselibtt=true);
 
-            testCase.verifyEqual(A1.Z, A0.Z, RelTol=single(1e-5));
+            testCase.verifyEqual(A1.Z, A0.Z, RelTol=1e-5);
         end
     end
 end
