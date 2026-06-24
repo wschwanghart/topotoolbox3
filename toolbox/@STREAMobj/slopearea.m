@@ -1,4 +1,4 @@
-function OUT = slopearea(S,DEM,A,varargin)
+function OUT = slopearea(S,DEM,A,options)
 
 %SLOPEAREA slope-area relation of a stream network
 %
@@ -108,45 +108,39 @@ function OUT = slopearea(S,DEM,A,varargin)
 %     nlintool(SA.a,SA.g,@(b,x) b(1)*x.^b(2),[SA.ks SA.theta],0.05,...
 %                'area','gradient')
 %
-%     
-%
-%
 % See also: slopearea, chiplot
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 19. June, 2013
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 24. June, 2026
 
+arguments
+    S STREAMobj
+    DEM {mustBeGRIDobjOrNal(DEM,S)}
+    A   {mustBeGRIDobjOrNal(A,S)}
+    
+    options.streamgradient {mustBeMember(options.streamgradient,...
+                            {'forward' 'centered' 'robust'})} = 'forward'
+    options.drop (1,1) {mustBePositive,mustBeNumeric} = 10
+    options.imposemin (1,1) = true
+    options.areabins (1,1) {mustBeInteger,mustBePositive} = 100
+    options.areabinlocs {mustBeMember(options.areabinlocs,...
+                            {'center' 'median' 'mean'})} = 'center'
+    options.gradaggfun {mustBeMember(options.gradaggfun,...
+                            {'median' 'mean'})} = 'mean'
+    options.fitmethod  {mustBeMember(options.fitmethod,...
+                            {'ls','lad','logtrls'})} = 'ls'
+    options.fitlims (1,2) {mustBeNonnegative} = [0 inf]
+    options.theta = []
+    options.hist2 (1,1) = false
+    options.plot (1,1) = true
+    options.mingradient (1,1) {mustBeNonnegative} = 0.0001
+    options.histbins (1,2) {mustBePositive} = [100 100]
+end
 
-narginchk(3,inf)
-
-% Parse Inputs
-p = inputParser;         
-p.FunctionName = 'slopearea';
-
-validstreamgradient = {'forward' 'centered' 'robust'};
-validareabinlocs = {'center' 'median' 'mean'};
-validgradaggfun  = {'mean','median'};
-validfitmethods  = {'ls','lad','logtrls'};
-
-addParameter(p,'streamgradient','forward',@(x) ischar(validatestring(x,validstreamgradient)));
-addParameter(p,'drop',10,@(x) isscalar(x) && x>0);
-addParameter(p,'imposemin',true,@(x) isscalar(x));
-addParameter(p,'areabins',100,@(x) isscalar(x) || isempty(x));
-addParameter(p,'areabinlocs','median',@(x) ischar(validatestring(x,validareabinlocs)));
-addParameter(p,'gradaggfun','mean',@(x) ischar(validatestring(x,validgradaggfun)));
-addParameter(p,'fitmethod','ls',@(x) ischar(validatestring(x,validfitmethods)));
-addParameter(p,'fitlims',[0 inf]);
-addParameter(p,'theta',[],@(x) isscalar(x) && x>0);
-addParameter(p,'hist2',false,@(x) isscalar(x));
-addParameter(p,'plot',true,@(x) isscalar(x));
-addParameter(p,'mingradient',0.0001, @(x) isscalar(x));
-addParameter(p,'histbins',[100 100], @(x) ismember(numel(x),[1 2]) && all(x>0));
-
-parse(p,varargin{:});
-gradmeth    = validatestring(p.Results.streamgradient,validstreamgradient);
-areabinlocs = validatestring(p.Results.areabinlocs,validareabinlocs);
-gradaggfun  = validatestring(p.Results.gradaggfun,validgradaggfun);
-fitmethod   = validatestring(p.Results.fitmethod,validfitmethods);
+gradmeth    = options.streamgradient;
+areabinlocs = options.areabinlocs;
+gradaggfun  = options.gradaggfun;
+fitmethod   = options.fitmethod;
 
 % get node attribute list with elevation values
 if isa(DEM,'GRIDobj')
@@ -170,29 +164,29 @@ end
 a = a*(S.cellsize.^2);
 g = gradient(S,z,'unit','tangent',...
                    'method',gradmeth,...
-                   'drop',p.Results.drop,...
-                   'imposemin',p.Results.imposemin);
+                   'drop',options.drop,...
+                   'imposemin',options.imposemin);
 
 % evaluate               
 mina = min(a);
 maxa = max(a);
 
-if p.Results.hist2
+if options.hist2
     copya = a;
     copyg = g;
 end
 
 % bin area values
-if ~isempty(p.Results.areabins)
+if ~isempty(options.areabins)
     
-    edges = logspace(log10(mina-0.1),log10(maxa+1),p.Results.areabins+1);
+    edges = logspace(log10(mina-0.1),log10(maxa+1),options.areabins+1);
     [~,ix] = histc(a,edges);
     
     switch areabinlocs
         case 'mean'
-            a = accumarray(ix,a,[p.Results.areabins 1],@mean,nan);
+            a = accumarray(ix,a,[options.areabins 1],@mean,nan);
         case 'median'
-            a = accumarray(ix,a,[p.Results.areabins 1],@median,nan);
+            a = accumarray(ix,a,[options.areabins 1],@median,nan);
         case 'center'
             a = edges(1:end-1) + diff(edges)/2;
             if a(end) == maxa
@@ -203,9 +197,9 @@ if ~isempty(p.Results.areabins)
     
     switch gradaggfun
         case 'mean'
-            g = accumarray(ix,g,[p.Results.areabins 1],@(x) mean(x(~isnan(x))),nan);
+            g = accumarray(ix,g,[options.areabins 1],@(x) mean(x(~isnan(x))),nan);
         case 'median'
-            g = accumarray(ix,g,[p.Results.areabins 1],@(x) median(x(~isnan(x))),nan);
+            g = accumarray(ix,g,[options.areabins 1],@(x) median(x(~isnan(x))),nan);
        
     end
     
@@ -217,27 +211,27 @@ if ~isempty(p.Results.areabins)
     
 end
 
-g(g<=0) = p.Results.mingradient;
+g(g<=0) = options.mingradient;
 OUT.a = a;
 OUT.g = g;
 
-if p.Results.plot
+if options.plot
     ax = gca;
 end
 
 % 2d Histogram
-if p.Results.hist2 && p.Results.plot
-    edgesa = logspace(floor(log10(mina)),ceil(log10(maxa)),p.Results.histbins(1));
+if options.hist2 && options.plot
+    edgesa = logspace(floor(log10(mina)),ceil(log10(maxa)),options.histbins(1));
     [~,ixa] = histc(copya,edgesa);
     
     ming = min(copyg);
-    ming = max(ming,p.Results.mingradient);    
+    ming = max(ming,options.mingradient);    
     maxg = max(copyg);
-    edgesg = logspace(floor(log10(ming)),ceil(log10(maxg)),p.Results.histbins(2));
+    edgesg = logspace(floor(log10(ming)),ceil(log10(maxg)),options.histbins(2));
     
     [~,ixg] = histc(copyg,edgesg);
     
-    N   = accumarray([max(ixg(:),1) ixa(:)],1,p.Results.histbins,@sum,0);
+    N   = accumarray([max(ixg(:),1) ixa(:)],1,options.histbins,@sum,0);
     OUT.hHist = pcolor(ax,edgesa,edgesg,N);
     
     colormap(flipud(gray));
@@ -247,7 +241,7 @@ if p.Results.hist2 && p.Results.plot
 end
     
 % Plot dots
-if p.Results.plot
+if options.plot
     OUT.hPoints = plot(ax,a,g,'s');
     xlabel('area');
     ylabel('slope')
@@ -257,10 +251,10 @@ end
 %% Fitting
 
 % gradient 
-g = max(g,p.Results.mingradient);
+g = max(g,options.mingradient);
 
-if ~isequal(p.Results.fitlims,[0 inf])
-    I    = a>=p.Results.fitlims(1) & a<p.Results.fitlims(2);
+if ~isequal(options.fitlims,[0 inf])
+    I    = a>=options.fitlims(1) & a<options.fitlims(2);
     afit = a(I);
     gfit = g(I);
 else
@@ -268,7 +262,7 @@ else
     gfit = g;
 end
 
-if isempty(p.Results.theta) 
+if isempty(options.theta) 
     % Both parameters may vary
     
         
@@ -294,7 +288,7 @@ else
     % theta is fixed
     
     % slope residuals
-    theta = -p.Results.theta;
+    theta = -options.theta;
     gres  = gfit./(afit.^theta);
     
     % find starting values using a least squares fit on log transformed data
@@ -315,7 +309,7 @@ else
 end
 
 %% Plot
-if p.Results.plot
+if options.plot
     hold on
     aeval = logspace(log10(min(afit)),log10(max(afit)),10);
     geval = OUT.ks(1)*aeval.^OUT.theta;
