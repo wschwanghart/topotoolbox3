@@ -5,6 +5,10 @@ classdef testFlowAlgebra < matlab.perftest.TestCase
         s
     end
 
+    properties (TestParameter)
+        uselibtt = {false, true};
+    end
+
     methods (TestClassSetup)
         % Shared setup for the entire test class
         function generate_data(testCase)
@@ -48,7 +52,7 @@ classdef testFlowAlgebra < matlab.perftest.TestCase
             testCase.verifyEqual(A1.Z, A0.Z, RelTol=1e-5);
         end
 
-        function dependencemap(testCase)
+        function dependencemap_inputs(testCase, uselibtt)
             L = GRIDobj(testCase.dem);
             L.Z = false(testCase.dem.size);
 
@@ -57,9 +61,9 @@ classdef testFlowAlgebra < matlab.perftest.TestCase
             ix = find(L.Z);
             [x, y] = ind2coord(testCase.fd, ix);
 
-            I0 = dependencemap(testCase.fd, L);
-            I1 = dependencemap(testCase.fd, ix);
-            I2 = dependencemap(testCase.fd, x, y);
+            I0 = dependencemap(testCase.fd, L, uselibtt=uselibtt);
+            I1 = dependencemap(testCase.fd, ix, uselibtt=uselibtt);
+            I2 = dependencemap(testCase.fd, x, y, uselibtt=uselibtt);
             
             testCase.verifyEqual(I0.Z, I1.Z);
             testCase.verifyEqual(I0.Z, I2.Z);
@@ -72,6 +76,33 @@ classdef testFlowAlgebra < matlab.perftest.TestCase
 
             I0 = dependencemap(testCase.fd, L, uselibtt=false);
             I1 = dependencemap(testCase.fd, L, uselibtt=true);
+            testCase.verifyEqual(I0.Z, I1.Z);
+        end
+
+        function influencemap_inputs(testCase, uselibtt)
+            L = GRIDobj(testCase.dem);
+            L.Z = false(testCase.dem.size);
+
+            [~,i] = max(testCase.dem);
+            L.Z(i) = true;
+            ix = find(L.Z);
+            [x, y] = ind2coord(testCase.fd, ix);
+
+            I0 = influencemap(testCase.fd, L, uselibtt=uselibtt);
+            I1 = influencemap(testCase.fd, ix, uselibtt=uselibtt);
+            I2 = influencemap(testCase.fd, x, y, uselibtt=uselibtt);
+            
+            testCase.verifyEqual(I0.Z, I1.Z);
+            testCase.verifyEqual(I0.Z, I2.Z);
+        end
+
+        function influencemap_libtt(testCase)
+            L = GRIDobj(testCase.dem);
+            L.Z = false(testCase.dem.size);
+            L.Z(10:30, 10:30) = true;
+
+            I0 = influencemap(testCase.fd, L, uselibtt=false);
+            I1 = influencemap(testCase.fd, L, uselibtt=true);
             testCase.verifyEqual(I0.Z, I1.Z);
         end
     end
