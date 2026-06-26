@@ -18,12 +18,15 @@ function tthelp(str,page)
 % Note that this function may not work properly if wordpress does changes
 % to its html-code.
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 22. July, 2022
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 11. June, 2026
 
-if nargin == 1
-    page = 1;
+arguments
+    str
+    page = 1
 end
+
+str = char(str);
 
 % First page URL
 if page == 1

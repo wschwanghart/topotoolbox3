@@ -1,10 +1,11 @@
-function DEM = diffusion(DEM,varargin)
+function DEM = diffusion(DEM,options)
 
 %DIFFUSION Solve the diffusion equation
 %
 % Syntax
 %
 %     DEMd = diffusion(DEM)
+%     DEMd = diffusion(DEM,pn,pv,...)
 %
 % Description
 %
@@ -20,11 +21,15 @@ function DEM = diffusion(DEM,varargin)
 %     D           diffusivity (m^2 /y) (default = 1)
 %     timespan    duration (y) (default = 1000)
 %     numsteps    number of iterations (default = 5)
-%     streamnet   STREAMobj
+%     streamnet   STREAMobj. If provided, then elevation values along the
+%                 stream network remain fixed (see also option fixedbc).
 %     solver      'pcg' (default) or '\'
 %     pcgtol      1e-6 (default)
-%     uplift      GRIDobj or scalar (default = 0)
-%
+%     uplift      GRIDobj or scalar (default = 0) in mm/y
+%     fixedbc     GRIDobj (underlying class logical) with true values
+%                 indicating pixels that should retain their elevation 
+%                 values during the simulation.
+%     
 %
 % Output arguments
 %
@@ -33,37 +38,40 @@ function DEM = diffusion(DEM,varargin)
 % Example
 %
 %     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD  = FLOWobj(DEM);
+%     S   = STREAMobj(FD,'minarea',200);
 %     DEMd = DEM;
 %     for r = 1:10;
-%     DEMd = diffusion(DEMd); 
-%     imageschs(DEMd); 
-%     drawnow; 
+%        DEMd = diffusion(DEMd,'streamnet',S,'D',10); 
+%        imageschs(DEMd); 
+%        drawnow; 
 %     end
 %     figure
 %     imageschs(DEM,DEMd-DEM)
 %
 % See also: GRIDobj/filter, ttlem
 %
-% Author: Wolfgang Schwanghart (w.schwanghart[at]geo.uni-potsdam.de)
-% Date: 20. October, 2020
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 12. June, 2026
 
-p = inputParser;
-addParameter(p,'timespan',1000)
-addParameter(p,'numsteps',5)
-addParameter(p,'D',1)
-addParameter(p,'streamnet',[])
-addParameter(p,'solver','pcg')
-addParameter(p,'pcgtol',1e-6)
-addParameter(p,'uplift',0)
-parse(p,varargin{:});
+arguments
+    DEM
+    options.timespan (1,1) {mustBeNumeric,mustBePositive} = 1000
+    options.numsteps (1,1) {mustBeInteger,mustBePositive} = 5
+    options.D = 1
+    options.streamnet = []
+    options.solver {mustBeMember(options.solver,{'\','pcg'})} = 'pcg'
+    options.pcgtol (1,1) {mustBeNumeric,mustBePositive} = 1e-6
+    options.fixedbc = []
+    options.uplift = 0
+end
 
-D = p.Results.D;
-numsteps = p.Results.numsteps;
-dt = p.Results.timespan / numsteps;
-
-
+D = options.D;
+numsteps = options.numsteps;
+dt = options.timespan / numsteps;
 
 nrc = prod(DEM.size);
+
 % get neighbor indices
 [ic,icd] = ixneighbors(DEM.Z,[],4);
 
@@ -75,6 +83,7 @@ icd(I) = [];
 % calculate laplacian
 L        = sparse(ic,icd,1,nrc,nrc);
 L        = spdiags(sum(L,2),0,nrc,nrc) - L;
+
 % and the diffusion matrix
 if isa(D,'GRIDobj')
 	D = D.Z(:);
@@ -82,12 +91,20 @@ else
 	D = repmat(D,numel(DEM.Z),1);
 end
 
-if isempty(p.Results.streamnet)
+if isempty(options.streamnet) && isempty(options.fixedbc)
 	D  = speye(nrc) + spdiags(D,0,nrc,nrc)*dt/(2*DEM.cellsize^2)*L;
 else
-	S  = +STREAMobj2GRIDobj(p.Results.streamnet);
-	D  = speye(nrc) + spdiags(D,0,nrc,nrc)*dt/(2*DEM.cellsize^2)*spdiags(1-S.Z(:),0,nrc,nrc)*L;
+    if isempty(options.fixedbc)
+    	S  = STREAMobj2GRIDobj(options.streamnet);
+    elseif isempty(options.streamnet)
+        S  = options.fixedbc;
+    else
+        S  = STREAMobj2GRIDobj(options.streamnet) | options.fixedbc;
+    end
+    S = 1-S;
+	D  = speye(nrc) + spdiags(D,0,nrc,nrc)*dt/(2*DEM.cellsize^2)*spdiags(S.Z(:),0,nrc,nrc)*L;
 end
+
 % must work with doubles
 % remember class
 c        = class(DEM.Z);
@@ -101,29 +118,30 @@ DEM.Z(I) = 0;
 % solve
 Z1 = DEM.Z(:);
 
-if isa(p.Results.uplift,'GRIDobj')
-    u = p.Results.uplift.Z;
+if isa(options.uplift,'GRIDobj')
+    u = options.uplift.Z;
 else 
-    u = double(p.Results.uplift);
+    u = double(options.uplift);
     u = repmat(u,DEM.size);
 end
 
-if ~isempty(p.Results.streamnet)
+if ~isempty(options.streamnet)
     u(S.Z>0) = 0;
 end
 u = u(:);
 u = u/1000 * dt;
 
 for r = 1:numsteps
-    switch p.Results.solver
+    switch options.solver
         case '\'
             Z1 = D\(Z1+u);
         case 'pcg'
-            [Z1,~] = pcg(D,double(Z1+u),p.Results.pcgtol,[],[],[],Z1);
+            [Z1,~] = pcg(D,double(Z1+u),options.pcgtol,[],[],[],Z1);
         otherwise
             error('unknown solver')
     end
 end
+
 % reshape
 DEM.Z = reshape(Z1,DEM.size);
 % reset values to nan

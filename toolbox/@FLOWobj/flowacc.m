@@ -22,13 +22,21 @@ function OUT = flowacc(FD,W0,RR,options)
 %     The third input argument is the runoff ratio. By default, the runoff
 %     ratio equals one everywhere. To simulate infiltration or channel
 %     transmission losses, values between 0 and 1 indicate the proportion
-%     of flow transferred from a cell to its downstream neighbor. 
+%     of flow that is transferred along a distance of 1 map unit. The 
+%     amount of water (or other matter) transferred from one cell ix to its
+%     downstream neighbor ixc is then calculated as 
+% 
+%     A(ixc)_1 = A(ixc)_0 + fraction(ix_ixc) * A(ix)*exp(-(1-RR(ix))*dx);
+%
+%     where fraction is one for single flow directions or between 0 and 1
+%     for multiple flow directions, RR is the runoff ratio, and dx is the
+%     distance between the pixel ix and ixc. 
 %
 % Input arguments
 %
 %     FD    Flow direction object (class: FLOWobj)
 %     W0    weight grid (class: GRIDobj) 
-%     RR    runoff ratio grid (class: GRIDobj)
+%     RR    runoff ratio grid (class: GRIDobj) or scalar
 %
 % Output arguments
 %
@@ -45,12 +53,9 @@ function OUT = flowacc(FD,W0,RR,options)
 % See also: FLOWobj, GRIDobj, FLOWobj/drainagebasins
 % 
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
-% Date: 31. August, 2024
+%         William Kearney
+% Date: 25. June, 2026
   
-
-% 4/3/2016: the function now makes copies of FD.ix and FD.ixc (see 
-% https://topotoolbox.wordpress.com/2015/10/28/good-and-possibly-bad-news-about-the-latest-matlab-r2015b-release/comment-page-1/#comment-127
-
 arguments
     FD   FLOWobj
     W0   = []
@@ -82,14 +87,9 @@ if options.uselibtt && haslibtopotoolbox
         case {'multi', 'dinf'}
             R = double(FD.fraction);
     end
-    if isempty(RR)
-    elseif isscalar(RR)
-        R = R .* exp(-(1-RR).*getdistance(FD.ix,FD.ixc,FD.size,FD.cellsize));
-    elseif isa(RR, "GRIDobj")
-        R = R .* RR.Z(FD.ix);
-    else
-        R = R .* RR(FD.ix);
-    end
+
+    R = calcEdgeTransfer(R,RR,FD);
+
     A = tt_traverse_down_f64_add_mul(W, R, int64(FD.ix - 1), int64(FD.ixc-1));
 else
     if nargin == 1 || (nargin > 1 && isempty(W0))
@@ -99,13 +99,6 @@ else
             A = double(W0.Z);
         else
             A = double(W0);
-        end
-
-    end
-
-    if nargin == 3
-        if isa(RR,'GRIDobj')
-            RR = RR.Z;
         end
     end
 
@@ -121,23 +114,12 @@ else
                     A(ixc(r)) = A(ix(r))+A(ixc(r));
                 end
             else
-                if isscalar(RR)
-                    % if RR is a scalar, RR is assumed to be the
-                    % coefficient of a homogenous differential equation
 
-                    dx = getdistance(ix,ixc,FD.size,FD.cellsize);
-                    RR = exp(-(1-RR).*dx);
-                    clear dx
+                R = calcEdgeTransfer(1,RR,FD);
 
-                    for r = 1:numel(ix)
-                        A(ixc(r)) = A(ix(r))*RR(r)+A(ixc(r));
-                    end
-                else
-                    for r = 1:numel(ix)
-                        A(ixc(r)) = A(ix(r))*RR(ix(r)) + A(ixc(r));
-                    end
+                for r = 1:numel(ix)
+                    A(ixc(r)) = A(ixc(r)) + R(r)*A(ix(r));
                 end
-
 
             end
 
@@ -148,8 +130,9 @@ else
                     A(ixc(r)) = A(ix(r))*fraction(r) + A(ixc(r));
                 end
             else
+                R = calcEdgeTransfer(FD.fraction,RR,FD);
                 for r = 1:numel(ix)
-                    A(ixc(r)) = A(ix(r))*fraction(r)*RR(ix(r)) + A(ixc(r));
+                    A(ixc(r)) = R(r).*A(ix(r)) + A(ixc(r));
                 end
             end
     end
@@ -162,5 +145,27 @@ OUT.zunit = 'nr of cells';
 OUT.name  = 'flow accumulation';
 
 
+
+end
+
+function R = calcEdgeTransfer(R,RR,FD)
+
+if isempty(RR)
+    % Do nothing
+elseif isscalar(RR) && isnumeric(RR)
+    R = R .* exp(-(1-RR).*getdistance(FD.ix,FD.ixc,FD.size,FD.cellsize));
+    R = double(R);
+else 
+    if isa(RR, "GRIDobj") 
+        validatealignment(FD,RR)
+        RR = RR.Z;
+    else
+        if ~isequal(FD.size,size(RR))
+            error(['RR must be a matrix with ' FD.size(1) ' rows and ' FD.size(2) ' columns.'])
+        end
+    end
+    R = R .* exp(-(1-RR(FD.ix)).*getdistance(FD.ix,FD.ixc,FD.size,FD.cellsize));
+    R = double(R);
+end
 
 end

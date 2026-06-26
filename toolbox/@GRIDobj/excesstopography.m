@@ -96,10 +96,15 @@ end
 % angles that vary as a function of depth.
 if isa(maxgradient,'lithstack')
     L = maxgradient;
+
+    cl = class(DEM.Z);
+    lstack = single(flipud(permute(L.ElevStack,[3 1 2])));
+    threshold_slopes = single(flipud(L.Values.Sc));
     DEM.Z = tt_excesstopography_fmm3d(single(DEM.Z),...
-                                      single(L.ElevStack),...
-                                      single(L.Values.Sc),...
+                                      lstack,...
+                                      threshold_slopes,...
                                       single(DEM.cellsize));
+    DEM.Z = cast(DEM.Z,cl);
     return
 
 elseif isnumeric(maxgradient)
