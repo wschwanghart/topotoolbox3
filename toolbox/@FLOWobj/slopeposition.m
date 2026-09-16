@@ -72,6 +72,10 @@ function SP = slopeposition(FD,S,DEM)
 %     [x,y] = contour(SP,5);
 %     plot(x,y,'k')
 %
+% Reference: Roering JJ et al. 2026. Shallow Landslides Align With
+%          Atmospheric Rivers in Coastal Steeplands. Geophysical Research 
+%          Letters 53, e2026GL124294. DOI: 10.1029/2026GL124294
+%
 % See also: FLOWobj/meanflowdist, FLOWobj/fHAND, FLOWobj/fHBR
 %           
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)

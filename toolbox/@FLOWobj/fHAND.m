@@ -42,6 +42,10 @@ function V = fHAND(FD,DEM,S,options)
 %     V = fHAND(FD,DEM,S);
 %     imageschs(DEM,V)
 %
+% Reference: Roering JJ et al. 2026. Shallow Landslides Align With
+%          Atmospheric Rivers in Coastal Steeplands. Geophysical Research 
+%          Letters 53, e2026GL124294. DOI: 10.1029/2026GL124294
+%
 % See also: FLOWobj, FLOWobj/meanflowdist, FLOWobj/fHBR,
 %           FLOWobj/slopeposition
 %
