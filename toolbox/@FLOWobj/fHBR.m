@@ -48,6 +48,10 @@ function H = fHBR(FD,DEM,S,options)
 %     BW = createmask(DEM);
 %     plot(D.Z(BW.Z),-H.Z(BW.Z),'.')
 %
+% Reference: Roering JJ et al. 2026. Shallow Landslides Align With
+%          Atmospheric Rivers in Coastal Steeplands. Geophysical Research 
+%          Letters 53, e2026GL124294. DOI: 10.1029/2026GL124294
+%
 % See also: FLOWobj, FLOWobj/meanflowdist, FLOWobj/fHAND,
 %           FLOWobj/slopeposition
 %
