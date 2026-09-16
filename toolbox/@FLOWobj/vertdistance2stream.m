@@ -34,7 +34,8 @@ function DZ = vertdistance2stream(FD,S,DEM)
 % 
 %
 % See also: FLOWobj, FLOWobj/flowdistance, FLOWobj/mapfromnal, GRIDobj, 
-%           STREAMobj, FLOWobj/propagatevaluesupstream
+%           STREAMobj, FLOWobj/propagatevaluesupstream, FLOWobj/fHAND,
+%           FLOWobj/slopeposition
 % 
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
 % Date: 24. June, 2024

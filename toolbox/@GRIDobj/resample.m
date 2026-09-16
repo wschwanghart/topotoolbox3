@@ -108,10 +108,10 @@ else
         case 'cubic'
             method = 'bicubic';
     end
-
-    if ~isEqualGeoreference(DEM,target)
-        error("TopoToolbox:wronginput","Both GRIDobjs must have the same projection.")
-    end
+    
+    % if ~isEqualGeoreference(DEM,target)
+    %     error("TopoToolbox:wronginput","Both GRIDobjs must have the same projection.")
+    % end
 
     if isProjected(DEM) 
         R    = DEM.georef;
@@ -135,7 +135,15 @@ else
         'FillValues',fillval));
         
     else
-        error("Function requires mapping toolbox")
+        R    = DEM.georef;
+        Rnew = target.georef;
+
+        DEMr = target;
+        DEMr.Z = flipud(imtransform(flipud(DEM.Z),T,method,...
+        'Udata',R.XWorldLimits,'Vdata',R.YWorldLimits,...
+        'Xdata',Rnew.XWorldLimits,'Ydata',Rnew.YWorldLimits,...
+        'Size',Rnew.RasterSize,...
+        'FillValues',fillval));
     end
 
 end
