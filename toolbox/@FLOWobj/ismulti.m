@@ -1,5 +1,5 @@
 function tf = ismulti(FD,typetest)
-%ISMULTI Determine whether FD is multi or single flow direction
+%ISMULTI Determine whether FD contains multiple flow directions (incl. Dinf)
 %
 % Syntax
 %
@@ -8,6 +8,7 @@ function tf = ismulti(FD,typetest)
 % Description
 %
 %     ISMULTI returns true if a FLOWobj contains multiple flow directions
+%     (incl. Dinf). 
 %
 % Input arguments
 %
@@ -39,7 +40,7 @@ if nargin == 1
 end
 
 if typetest
-    tf = strcmp(FD.type,'multi');
+    tf = strcmpi(FD.type,'multi') || strcmpi(FD.type,'Dinf');
 else 
     tf = any(histcounts(FD.ix,1:(prod(FD.size)+1))>1);
 end
