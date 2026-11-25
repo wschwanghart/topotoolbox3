@@ -35,6 +35,17 @@ function a = erode(S,a,options)
 %
 %     ae       Eroded logical node-attribute list
 %
+% Example
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD  = FLOWobj(DEM);
+%     S   = STREAMobj(FD,'minarea',1000);
+%     S   = klargestconncomps(S,1);
+%     I   = getnal(S,DEM) > 800 & getnal(S,DEM) < 1200; 
+%     Ie  = erode(S,I,'steps',20);
+%     figure
+%     plotc(S,I+Ie)
+%
 % See also: STREAMobj/dilate, imerode
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)

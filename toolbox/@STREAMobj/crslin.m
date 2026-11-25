@@ -15,6 +15,9 @@ function [zs,exitflag,output] = crslin(S,DEM,options)
 %     regularized smoothing. This function requires the Optimization 
 %     Toolbox. 
 %
+%     crslin with a nonnegative minimum gradient implements a isotonic
+%     regression.
+%
 % Input parameters
 %
 %     S      STREAMobj
@@ -24,10 +27,10 @@ function [zs,exitflag,output] = crslin(S,DEM,options)
 %
 %     'K'             positive scalar that dictates the degree of stiffness
 %                     {1}
-%     'mingradient'   positive scalar {0}. Minimum downward gradient. 
+%     'mingradient'   nonnegative scalar {0}. Minimum downward gradient. 
 %                     Choose carefully, because length profile may dip to
 %                     steeply. Set this parameter to nan if you do not wish
-%                     to have a monotonous dowstream elevation decrease.
+%                     to enforce a monotonous dowstream elevation decrease.
 %     'imposemin'     preprocesses the stream elevations using downstream
 %                     minima imposition. {false} or true. Setting this
 %                     parameter to true avoids that obviously wrong

@@ -33,7 +33,30 @@ function a = reconstruct(S,marker,mask,options)
 %
 %     a       Reconstructed node-attribute list
 %
-% See also: dilate, erode, components, STREAMobj
+% Example: Filling and carving using reconstruction
+%
+%     % Note that this is a demonstration only. It is more efficient
+%     % to use STREAMobj/imposemin and STREAMobj/cummaxupstream
+% 
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD  = FLOWobj(DEM);
+%     S   = STREAMobj(FD,'minarea',1000);
+%     marker = getnal(S,DEM);
+%     mask   = marker;
+%     mask(~streampoi(S,{'channelheads','outlet'},"logical")) = inf;
+%     zf  = reconstruct(S,marker,mask,'direction','upstream');
+%     mask(~streampoi(S,{'channelheads','outlet'},"logical")) = -inf;
+%     zc  = -reconstruct(S,-marker,-mask,'direction','downstream');
+%     plotdz(S,DEM); hold on; 
+%     plotdz(S,zf)
+%     plotdz(S,zc)
+%     legend('Original profile', 'Filled', 'Carved')
+%     hold off
+%
+% See also: STREAMobj/dilate, STREAMobj/erode, imreconstruct
+%
+% Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
+% Date: 19. November, 2026
 
 arguments
     S   STREAMobj

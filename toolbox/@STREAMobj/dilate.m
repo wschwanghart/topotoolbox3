@@ -35,6 +35,25 @@ function a = dilate(S,a,options)
 %
 %     ad      Dilated logical node-attribute list
 %
+% Example
+%
+%     DEM = GRIDobj('srtm_bigtujunga30m_utm11.tif');
+%     FD  = FLOWobj(DEM);
+%     S   = STREAMobj(FD,'minarea',1000);
+%     S   = klargestconncomps(S,1);
+%     
+%     rng(1)
+%     INI = S.IXgrid == randlocs(S,1);
+%     
+%     I   = INI; 
+%     figure
+%     colormap(flipud(parula))
+%     for r = 1:200
+%         I = dilate(S,I,"steps",5,"direction","both");
+%         plotc(S,I);
+%         drawnow;
+%     end
+%
 % See also: STREAMobj/erode, imdilate
 %
 % Author: Wolfgang Schwanghart (schwangh[at]uni-potsdam.de)
